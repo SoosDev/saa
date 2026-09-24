@@ -23,6 +23,9 @@
   --dx:#A3237A;                     /* Direct Connect */
   --tgw:#0A7A99; --tgw-text:#086A85;/* Transit Gateway */
   --pl:#736400;                     /* PrivateLink / VPC endpoints */
+  /* Session 4 (global & edge): two hues, declared in docs/session-04-global.md */
+  --cf:#8A1538; --cf-text:#8A1538;  /* CloudFront (wine) */
+  --ga:#4B2BB0; --ga-text:#4B2BB0;  /* Global Accelerator (indigo) */
   --on-line:#FFFFFF;                /* text on a line-coloured button */
 
   --sel-ink:#15202B; --sel-on:#FFFFFF;
@@ -47,6 +50,7 @@
     --ds:#6C9CEC; --gw:#F0A63C; --gw-text:#F0A63C; --tf:#B48AE6;
     --dtt:#9BA7B3; --dtt-text:#9BA7B3; --dms:#3FC49E; --mgn:#EC7A70; --on-line:#10161C;
     --dx:#E27BBE; --tgw:#4DB6D9; --tgw-text:#4DB6D9; --pl:#C2C25A;
+    --cf:#F04880; --cf-text:#F45C8C; --ga:#8078F8; --ga-text:#8C86FA;
     --sel-ink:#E6EAEE; --sel-on:#10161C;
     --focus:#6C9CEC;
     color-scheme:dark;
@@ -61,6 +65,7 @@
   --ds:#6C9CEC; --gw:#F0A63C; --gw-text:#F0A63C; --tf:#B48AE6;
   --dtt:#9BA7B3; --dtt-text:#9BA7B3; --dms:#3FC49E; --mgn:#EC7A70; --on-line:#10161C;
     --dx:#E27BBE; --tgw:#4DB6D9; --tgw-text:#4DB6D9; --pl:#C2C25A;
+    --cf:#F04880; --cf-text:#F45C8C; --ga:#8078F8; --ga-text:#8C86FA;
   --sel-ink:#E6EAEE; --sel-on:#10161C;
   --focus:#6C9CEC;
   color-scheme:dark;
@@ -78,7 +83,7 @@ h1,h2,h3,h4{font-family:var(--f-display); font-weight:800; margin:0; line-height
 p{margin:0}
 a{color:var(--link)} a:hover{color:var(--link-hover)}
 button{font:inherit; color:inherit}
-code{font-family:var(--f-mono); font-size:.9em; background:var(--muted-fill); padding:1px 5px; border-radius:var(--r-xs)}
+code{font-family:var(--f-mono); font-size:.9em; background:var(--muted-fill); padding:1px 5px; border-radius:var(--r-xs); overflow-wrap:break-word}
 mark{background:var(--hl); color:var(--ink); padding:0 1px}
 :focus-visible{outline:3px solid var(--focus); outline-offset:2px}
 

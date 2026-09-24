@@ -131,6 +131,13 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | Site-to-Site VPN | 2 tunnels in different AZs; **1.25 Gbps per standard tunnel; Large Bandwidth Tunnels up to 5 Gbps** (TGW / Cloud WAN only). Accelerated VPN: TGW only. |
 | Direct Connect | Dedicated **1/10/100/400 Gbps**; hosted 50 Mbps–**25 Gbps**. Not encrypted by default; **MACsec on 10/100/400 Gbps dedicated**; or IPsec VPN over DX. New dedicated: weeks to months; hosted on an existing partner port: hours to days. VPN backup recommended for DX ≤ 1 Gbps. |
 
+| **Session 4 — global & edge** (verified 2026-09-24 via AWS MCP; URLs in `docs/session-04-global.md`) | |
+| CloudFront origin access | **OAI is legacy; OAC recommended** (SSE-KMS, all Regions, all methods). **VPC origins** (Nov 2024) reach a private ALB/NLB/EC2. Origin failover codes now include **429**. Also: gRPC, anycast static IPs (Nov 2024), flat-rate plans (Nov 2025). |
+| Edge compute | CloudFront Functions: JS, viewer events only, sub-ms, 2 MB memory, 10 KB code. **Lambda@Edge: 30 s and 50 MB code for all four triggers** (older material: viewer 5 s / 1 MB); memory 128 MB viewer / 10,240 MB origin; generated response 40 KB viewer / 1 MB origin; created in us-east-1. |
+| S3 static website | Website endpoint is HTTP only; bucket name = domain for a Route 53 alias. For HTTPS the S3 guide now lists **Amplify Hosting first**, CloudFront second. |
+| Global Accelerator | 2 static anycast IPv4 (**4 with dual-stack**); ALB/NLB/EC2/EIP endpoints; **NLB with security groups keeps the client IP**; no caching. |
+| Route 53 | Geoproximity records no longer need Traffic Flow (Jan 2024). Resolver → **VPC Resolver**; **Global Resolver** GA Mar 2026; Profiles (Apr 2024); Accelerated Recovery (Nov 2025). Route 53 ARC is now **Amazon ARC**; readiness checks closed to new customers. |
+
 **Rule for every new session:** before publishing, check every number and every "is it still available" claim against current AWS docs. Add new changes to this table and to the session's callouts. Never print a limit you did not verify.
 
 ## 7. Design
