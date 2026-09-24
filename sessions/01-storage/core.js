@@ -4,29 +4,33 @@ Object.assign(window.SESSION, {
   meta: { id: '01-storage', n: 1, title: 'Storage & Data Movement', brand: 'Storage Transit Map', home: '../../', updated: '2026-09-24' },
 
   lines: [
-    { id: 'datasync', name: 'DataSync', cls: 'ds', verb: 'moves files over the network', from: 'NAS / other cloud → S3 · EFS · FSx',
+    { id: 'datasync', name: 'DataSync', short: 'DataSync', cls: 'ds', alias: ['DataSync'],
+      misses: 'Q8 (picked Gateway), R1 (read one-off as ongoing), Q3 quiz (DataSync “CDC”).', verb: 'moves files over the network', from: 'NAS / other cloud → S3 · EFS · FSx',
       built: 'A **mover**. Copies files and objects over the network, once or on a schedule, verifies every file, then it is done.',
       says: ['migrate files', 'NFS / SMB / HDFS', 'other cloud → S3', 'scheduled sync', 'straight to Deep Archive', 'verify integrity'],
       switch: [{ to: 'gateway', when: 'on-prem apps must keep using the files' }, { to: 'dms', when: 'the source is a database engine' }, { to: 'truck', when: 'weeks at current bandwidth' }] },
-    { id: 'gateway', name: 'Storage Gateway', cls: 'gw', textVar: 'gw-text', verb: 'bridges; cache stays local', from: 'on-prem apps ⇄ S3 · FSx · virtual tapes',
+    { id: 'gateway', name: 'Storage Gateway', short: 'Gateway', cls: 'gw', textVar: 'gw-text', alias: ['Gateway', 'Cached volumes', 'Stored volumes'],
+      misses: 'Q41 (missed the word “tape”).', verb: 'bridges; cache stays local', from: 'on-prem apps ⇄ S3 · FSx · virtual tapes',
       built: 'A **bridge**. On-prem applications keep reading and writing through a local VM/appliance with a cache; the authoritative data lives in AWS.',
       says: ['applications continue to access', 'low-latency local cache', 'hybrid', 'iSCSI', 'tape / VTL', 'running out of on-prem storage'],
       switch: [{ to: 'datasync', when: 'data leaves on-prem for good (migration)' }, { to: 'transfer', when: 'outside partners speak SFTP/FTP/AS2' }],
       update: 'Amazon **FSx File Gateway** is no longer available to new customers; AWS points to FSx for Windows File Server directly. S3 File Gateway, Volume Gateway and Tape Gateway are unaffected. Question banks still use FSx File Gateway as an answer.' },
-    { id: 'transfer', name: 'Transfer Family', cls: 'tf', verb: 'opens a partner door', from: 'SFTP / FTPS / FTP / AS2 → S3 · EFS',
+    { id: 'transfer', name: 'Transfer Family', short: 'Transfer', cls: 'tf', alias: ['Transfer Family'], verb: 'opens a partner door', from: 'SFTP / FTPS / FTP / AS2 → S3 · EFS',
       built: 'A **door** for other parties. Managed SFTP, FTPS, FTP and AS2 endpoints that land files in S3 or EFS; users from Directory Service, an IdP or Lambda.',
       says: ['partners / suppliers / customers upload', 'SFTP', 'FTPS / FTP', 'AS2 / EDI', 'cannot change their tooling', 'decommission the FTP server'],
       switch: [{ to: 'datasync', when: 'you own both ends and just need to copy' }] },
-    { id: 'truck', name: 'DTT / Snow', cls: 'dtt', textVar: 'dtt-text', dash: '14 10', width: 6, verb: 'drives it by road', from: 'portable drives → S3',
+    { id: 'truck', name: 'DTT / Snow', short: 'the truck', cls: 'dtt', textVar: 'dtt-text', alias: ['Data Transfer Terminal', 'DTT', 'Snow'],
+      misses: 'Q12 and Q54 (DataSync / Direct Connect for a truck case), Quiz Q2 (skipped the pipe math).', dash: '14 10', width: 6, verb: 'drives it by road', from: 'portable drives → S3',
       built: 'The **truck**. When the pipe would take weeks, the data travels physically: bring devices to an AWS Data Transfer Terminal (current) — or, in older question banks, ship a Snow Family device.',
       says: ['hundreds of TB / PB', 'would take weeks or months', 'limited / no connectivity', 'one-time import'],
       switch: [{ to: 'datasync', when: 'the transfer is ongoing, or the link is fat enough' }],
       update: 'AWS Snow Family devices are **no longer orderable by new customers**. AWS recommends DataSync for online and **Data Transfer Terminal** (or Marketplace partners) for offline transfer, and Outposts for edge compute. Treat Snow and DTT as the same trigger.' },
-    { id: 'dms', name: 'DMS', cls: 'dms', verb: 'replicates database rows', from: 'DB engine → RDS / Aurora / S3 · full load + CDC',
+    { id: 'dms', name: 'DMS', short: 'DMS', cls: 'dms', alias: ['DMS'],
+      misses: 'Q56 and Quiz Q3 (DataSync picked for a database).', verb: 'replicates database rows', from: 'DB engine → RDS / Aurora / S3 · full load + CDC',
       built: 'A **row replicator**. Copies database tables — full load, then ongoing changes (CDC) — while the source stays online. Can write to S3 as CSV or Parquet. Session 2 goes deep.',
       says: ['database', 'ongoing changes / CDC', 'minimal downtime', 'heterogeneous engines', 'CSV / Parquet in S3'],
       switch: [{ to: 'datasync', when: 'it is files, not a database' }, { to: 'mgn', when: 'the whole server moves as-is' }] },
-    { id: 'mgn', name: 'MGN', cls: 'mgn', verb: 'rehosts whole servers', from: 'VMs / physical / other cloud → EC2',
+    { id: 'mgn', name: 'MGN', short: 'MGN', cls: 'mgn', alias: ['MGN', 'Application Migration Service'], verb: 'rehosts whole servers', from: 'VMs / physical / other cloud → EC2',
       built: 'A **server mover**. Application Migration Service replicates whole disks block-by-block and launches them as EC2 instances (lift-and-shift). Session 2 goes deep.',
       says: ['lift-and-shift', 'rehost', 'minimal changes', 'servers / VMs'],
       switch: [{ to: 'dms', when: 'only the database, into a managed service' }] }
@@ -54,9 +58,9 @@ Object.assign(window.SESSION, {
       { el: 'line', line: 'datasync', paths: ['M250 110 H470 L510 150 H742'], labels: [{ x: 276, y: 96, t: 'DATASYNC — network mover', size: 13 }, { x: 530, y: 138, t: '→ S3 (any class) · EFS · FSx', w: 400, ls: 0 }] },
       /* left stations */
       ...[[110, 'NAS', 'NFS / SMB files to move', ['datasync']], [200, 'Apps that keep running', 'NFS / SMB / iSCSI', ['gateway']], [290, 'Tape backup app', 'Veeam, NetBackup…', ['gateway']], [380, 'External partners', 'SFTP / FTPS / FTP / AS2', ['transfer']], [470, 'Database', 'Oracle, PostgreSQL, MySQL', ['dms']], [560, 'Servers / VMs', 'lift-and-shift', ['mgn']], [650, 'Portable drives', '100s of TB, thin pipe', ['truck']]].flatMap(([y, n, sub, ls]) => [
-        { el: 'circle', lines: ls, a: { cx: 250, cy: y, r: 9 }, style: 'fill:var(--surface);stroke:var(--ink);stroke-width:3' },
-        { el: 'text', lines: ls, a: { x: 232, y: y - 2, 'font-size': 14, 'font-weight': 700, 'text-anchor': 'end', 'font-family': 'Atkinson Hyperlegible, sans-serif' }, style: 'fill:var(--ink)', text: n },
-        { el: 'text', lines: ls, a: { x: 232, y: y + 14, 'font-size': 12, 'text-anchor': 'end', 'font-family': 'Atkinson Hyperlegible, sans-serif' }, style: 'fill:var(--ink2)', text: sub }]),
+        { el: 'circle', pick: ls, a: { cx: 250, cy: y, r: 9 }, style: 'fill:var(--surface);stroke:var(--ink);stroke-width:3' },
+        { el: 'text', pick: ls, a: { x: 232, y: y - 2, 'font-size': 14, 'font-weight': 700, 'text-anchor': 'end', 'font-family': 'Atkinson Hyperlegible, sans-serif' }, style: 'fill:var(--ink)', text: n },
+        { el: 'text', pick: ls, a: { x: 232, y: y + 14, 'font-size': 12, 'text-anchor': 'end', 'font-family': 'Atkinson Hyperlegible, sans-serif' }, style: 'fill:var(--ink2)', text: sub }]),
       /* S3 interchange + lifecycle */
       { el: 'rect', lines: ['datasync', 'gateway', 'transfer'], a: { x: 742, y: 128, width: 28, height: 184, rx: 14 }, style: 'fill:var(--surface);stroke:var(--ink);stroke-width:3' },
       { el: 'path', lines: ['datasync', 'gateway', 'transfer'], a: { d: 'M770 150 H830 V240', fill: 'none' }, style: 'stroke:var(--ink);stroke-width:3' },
@@ -114,7 +118,7 @@ EBS snapshots -> S3 you CANNOT see -> never CRR / Object Lock / "the bucket"
 PIPE: 100 Mbps ~ 1 TB/day · 1 Gbps ~ 10 TB/day`,
 
   tree: {
-    title: 'Where it lives', lead: 'One question at a time. Answer what the **application expects**, not what sounds modern.',
+    title: 'Where it lives', tab: 'Where it lives', lead: 'One question at a time. Answer what the **application expects**, not what sounds modern.',
     start: 'root',
     nodes: {
       root: { q: 'What does the application expect?', opts: [

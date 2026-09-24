@@ -1,6 +1,6 @@
 # SAA Transit Maps — full context handoff
 
-Written 2026-09-24. It replaces everything in the earlier `CLAUDE_CODE_BRIEF.md`; where they disagree, this file wins. Design questions are settled by `design/` (mockups + DESIGN.md), which wins over any wording here.
+Written 2026-09-24. It replaces everything in the earlier `CLAUDE_CODE_BRIEF.md` (kept as `docs/CLAUDE_CODE_BRIEF.superseded.md`); where they disagree, this file wins. Design questions are settled by `design/` (mockups + DESIGN.md), which wins over any wording here.
 
 ## 1. The learner
 
@@ -95,14 +95,16 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 
 | Fact | Status |
 |---|---|
-| AWS Snow Family | **No longer orderable by new customers.** AWS points to DataSync (online), **AWS Data Transfer Terminal** (offline: reserve a slot at a facility and bring your own devices), Marketplace partners, and Outposts for edge compute. Tutorials Dojo banks already use DTT as the answer. |
-| Amazon FSx File Gateway | **No longer available to new customers.** AWS suggests FSx for Windows File Server directly. S3 File Gateway, Volume Gateway and Tape Gateway are unaffected. |
-| EBS gp3 | **80,000 IOPS · 2,000 MiB/s · 64 TiB** max (older material says 16,000 / 1,000 / 16 TiB). gp2: 16,000 / 250 MiB/s / 16 TiB. io2 Block Express: 256,000 IOPS · 4,000 MiB/s · 64 TiB · 99.999% durability. io1: 64,000. st1: 500 MiB/s. sc1: 250 MiB/s. st1 and sc1 cannot be boot volumes. |
-| EBS Multi-Attach | io1 and io2 only, same AZ, up to 16 Nitro instances, needs a cluster-aware file system. |
-| S3 classes | IA 30 d min; Glacier IR 90 d (ms); Glacier Flexible 90 d (Expedited 1–5 min, Standard 3–5 h, Bulk 5–12 h); Deep Archive 180 d (Standard ≤12 h, Bulk ≤48 h); One Zone-IA 1 AZ; Express One Zone 1 AZ, 1 h min, single-digit ms. |
+| AWS Snow Family | **No longer orderable by new customers** (since 7 Nov 2025; existing customers unaffected). AWS points to DataSync (online), **AWS Data Transfer Terminal** (offline: reserve a slot at a facility and bring your own devices), Marketplace partners, and Outposts for edge compute. Tutorials Dojo banks already use DTT as the answer. |
+| Amazon FSx File Gateway | **No longer available to new customers** (since 28 Oct 2024). AWS suggests FSx for Windows File Server directly. S3 File Gateway, Volume Gateway and Tape Gateway are unaffected. |
+| EBS gp3 | **80,000 IOPS · 2,000 MiB/s · 64 TiB** max (older material says 16,000 / 1,000 / 16 TiB). gp2: 16,000 / 250 MiB/s / 16 TiB. io2 Block Express: 256,000 IOPS · 4,000 MiB/s · 64 TiB · 99.999% durability. io1: 64,000 · 1,000 MiB/s · 16 TiB. st1: 500 MiB/s, 500 IOPS; sc1: 250 MiB/s, 250 IOPS; both 125 GiB–16 TiB and cannot be boot volumes. On Outposts gp3 stays at 16 TiB / 16,000 / 1,000. |
+| EBS Multi-Attach | io1 and io2 only, same AZ, up to 16 Nitro instances, needs a cluster-aware file system. Windows: io2 only; io1 Multi-Attach only in a few Regions. |
+| EFS | Throughput: Elastic (default, recommended), Provisioned, Bursting. Max I/O performance mode is previous generation. |
+| S3 classes | IA 30 d min; Glacier IR 90 d (ms); Glacier Flexible 90 d (Expedited 1–5 min, Standard 3–5 h, Bulk 5–12 h); Deep Archive 180 d (Standard ≤12 h, Bulk ≤48 h); One Zone-IA 1 AZ; Express One Zone 1 AZ, single-digit ms, **no minimum storage duration** (AWS class table; the earlier "1 h min" was wrong — corrected 2026-09-24). |
+| S3 lifecycle waterfall | Standard → any; Standard-IA → IT, One Zone-IA, Glacier IR/FR/DA; IT → One Zone-IA, Glacier IR/FR/DA; **One Zone-IA → only Glacier Flexible or Deep Archive**; Glacier IR → FR/DA; FR → DA. ≥30 days before any IA transition. |
 | DataSync | Sources: NFS, SMB, HDFS, self-managed object storage, other clouds (Azure Blob/Files, GCS, …), AWS storage. One task can saturate a 10 Gbps link. Writes directly to any S3 class, including Deep Archive. |
 | AWS Migration Hub & Application Discovery Service | **Closed to new customers since 7 Nov 2025.** Replaced by **AWS Transform**. MGN docs now say "AWS Transform MGN". |
-| Route 53 Resolver | Now called **Route 53 VPC Resolver** in AWS docs. Inbound and outbound endpoints are unchanged. |
+| Route 53 Resolver | Now called **Route 53 VPC Resolver** in AWS docs (renamed when Route 53 Global Resolver was introduced). Inbound and outbound endpoints are unchanged. |
 | DMS | DMS Schema Conversion (in console) and AWS SCT (desktop, recommended for large data warehouses) both exist. DMS Serverless exists. The source stays operational during migration. |
 | AD Connector | Proxy only. **Not compatible with RDS for SQL Server or FSx for Windows** (AWS whitepaper). |
 
