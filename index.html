@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAA Transit Maps</title>
+<meta name="description" content="A study site for the AWS Certified Solutions Architect – Associate exam (SAA-C03), drawn as transit maps.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%2315202B%27/%3E%3Cpath d=%27M6 22h8l6-8h6%27 fill=%27none%27 stroke=%27%231D5FD1%27 stroke-width=%274%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3Ccircle cx=%276%27 cy=%2722%27 r=%273.4%27 fill=%27%23fff%27 stroke=%27%2315202B%27 stroke-width=%272%27/%3E%3Ccircle cx=%2726%27 cy=%2714%27 r=%273.4%27 fill=%27%23fff%27 stroke=%27%2315202B%27 stroke-width=%272%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&family=Overpass+Mono:wght@400;600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/css/transit.css">
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-in">
+    <div class="brand"><b>SAA Transit Maps</b><span>SAA-C03 · study sessions</span></div>
+    <div class="hdr-sp"></div>
+    <div id="theme"></div>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <div class="hub-hd">
+      <h1>Every way data moves, drawn as a line.</h1>
+      <p>Thirteen sessions for the AWS Certified Solutions Architect – Associate exam. Each one is a map, a decision tree,
+         trigger cards on spaced repetition, and a drill bank that makes you commit before it shows you the answer.</p>
+    </div>
+    <p class="seclabel">Sessions</p>
+    <div class="slist" id="list"></div>
+    <p class="small muted" style="margin-top:22px">Progress is stored in this browser only. Nothing is sent anywhere.</p>
+  </div>
+</main>
+<script src="assets/js/engine.js"></script>
+<script src="sessions/manifest.js"></script>
+<script>
+(function () {
+  document.getElementById('theme').appendChild(SAA.initTheme());
+  var h = SAA.h;
+  var list = document.getElementById('list');
+  (window.SAA_SESSIONS || []).forEach(function (s) {
+    var n = h('span', { cls: 'n', text: 'Session ' + s.n + (s.domains ? ' · ' + s.domains.join(' ') : '') });
+    if (s.soon || !s.path) {
+      list.appendChild(h('div', { cls: 'scard soon' }, [n, h('h3', { text: s.title }), h('span', { cls: 'small muted', text: 'Coming' })]));
+      return;
+    }
+    var p = SAA.readProgress(s.id);
+    list.appendChild(h('a', { cls: 'scard', href: s.path }, [
+      n,
+      h('h3', { text: s.title }),
+      h('span', { cls: 'small muted mono', text: p.cardsKnown + ' cards known · ' + p.drillsCorrect + ' / ' + p.drillsSeen + ' drills correct' }),
+      h('span', { cls: 'small', style: { color: 'var(--ds)' }, text: 'Open →' })
+    ]));
+  });
+})();
+</script>
+</body>
+</html>
