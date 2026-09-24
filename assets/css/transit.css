@@ -1,22 +1,21 @@
-/* SAA Transit Maps — all styles, tokens, both themes. */
+/* SAA Transit Maps — all styles, tokens, both themes.
+   The approved design is design/mockups/. Radii, borders, header, tab bar and
+   type roles below are taken from those files; see design/DESIGN.md. */
 
 /* ---------- tokens: light (bare :root) ---------- */
 :root{
   --ground:#F2F4F6; --surface:#FFFFFF; --ink:#15202B; --ink2:#56626E;
-  --rule:#D5DBE1; --chip-border:#B9C2CB;
+  --rule:#D5DBE1; --chip-border:#B9C2CB; --track:#E1E6EB;
   --zone-onprem:#E9EDF1; --zone-aws:#E4ECF6; --muted-fill:#EEF1F4; --hl:#FFF3DC;
   --ok:#13744A; --ok-bg:#E2F2E9; --bad:#B3261E; --bad-bg:#FBE6E4;
 
-  /* transit lines */
-  --ds:#1D5FD1;                 /* DataSync */
+  /* transit lines — the only hues in the system */
+  --ds:#1D5FD1;                     /* DataSync */
   --gw:#D98200; --gw-text:#A35F00;  /* Storage Gateway */
-  --tf:#7A3FC4;                 /* Transfer Family */
-  --dtt:#66707B;                /* DTT / Snow */
-  --dms:#0E8466;                /* DMS */
-  --mgn:#C4302A;                /* MGN */
-
-  /* topic accents (not transit lines) */
-  --t-backup:#1F6E8C; --t-where:#5A4B8C; --t-classes:#8A5A1E; --t-edge:#A8324E;
+  --tf:#7A3FC4;                     /* Transfer Family */
+  --dtt:#66707B;                    /* DTT / Snow */
+  --dms:#0E8466;                    /* DMS */
+  --mgn:#C4302A;                    /* MGN */
 
   --sel-ink:#15202B; --sel-on:#FFFFFF;
   --focus:#1D5FD1;
@@ -25,31 +24,30 @@
   --f-body:'Atkinson Hyperlegible',system-ui,-apple-system,sans-serif;
   --f-mono:'Overpass Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
 
-  --r:8px;
+  /* 6px small panels / option rows / chips in cards, 8px cards, 10px trigger card */
+  --r-sm:6px; --r:8px; --r-lg:10px;
 }
 
 /* ---------- tokens: dark ---------- */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --ground:#10161C; --surface:#182029; --ink:#E6EAEE; --ink2:#9AA8B4;
-    --rule:#2A3540; --chip-border:#3B4956;
-    --hl:#3B2F16;
+    --rule:#2A3540; --chip-border:#3B4956; --track:#2A3540;
+    --zone-onprem:#1A232C; --zone-aws:#16243A; --muted-fill:#1E2731; --hl:#3B2F16;
     --ok:#4FC98D; --ok-bg:#14291F; --bad:#F48A82; --bad-bg:#2E1715;
     --ds:#6C9CEC; --gw:#F0A63C; --gw-text:#F0A63C; --tf:#B48AE6;
     --dtt:#9BA7B3; --dms:#3FC49E; --mgn:#EC7A70;
-    --t-backup:#63B6D4; --t-where:#A594E0; --t-classes:#D9A354; --t-edge:#EE7C97;
     --sel-ink:#E6EAEE; --sel-on:#10161C;
     --focus:#6C9CEC;
   }
 }
 :root[data-theme="dark"]{
   --ground:#10161C; --surface:#182029; --ink:#E6EAEE; --ink2:#9AA8B4;
-  --rule:#2A3540; --chip-border:#3B4956;
+  --rule:#2A3540; --chip-border:#3B4956; --track:#2A3540;
   --zone-onprem:#1A232C; --zone-aws:#16243A; --muted-fill:#1E2731; --hl:#3B2F16;
   --ok:#4FC98D; --ok-bg:#14291F; --bad:#F48A82; --bad-bg:#2E1715;
   --ds:#6C9CEC; --gw:#F0A63C; --gw-text:#F0A63C; --tf:#B48AE6;
   --dtt:#9BA7B3; --dms:#3FC49E; --mgn:#EC7A70;
-  --t-backup:#63B6D4; --t-where:#A594E0; --t-classes:#D9A354; --t-edge:#EE7C97;
   --sel-ink:#E6EAEE; --sel-on:#10161C;
   --focus:#6C9CEC;
 }
@@ -68,57 +66,70 @@ button{font:inherit; color:inherit}
 :focus-visible{outline:3px solid var(--focus); outline-offset:2px; border-radius:4px}
 [tabindex="0"]:focus-visible{outline:3px solid var(--focus); outline-offset:2px}
 
+/* Google Fonts with display=swap are fetched lazily: a family is only downloaded
+   once the page renders a glyph in it, so document.fonts.check() returns false for
+   any family a given page happens not to use. These three zero-size probes make all
+   three families load on every page regardless of its content, which is what
+   design/DESIGN.md requires. Keep them if you add a page. */
+html::before,html::after,body::before{
+  content:"A"; position:fixed; top:0; left:0; width:0; height:0;
+  overflow:hidden; opacity:0; pointer-events:none; font-size:1px; line-height:0;
+}
+html::before{font-family:var(--f-display); font-weight:800}
+html::after{font-family:var(--f-body); font-weight:700}
+body::before{font-family:var(--f-mono)}
+
 @media (prefers-reduced-motion: reduce){
   *{transition:none !important; animation:none !important; scroll-behavior:auto !important}
 }
 
-.wrap{max-width:1440px; margin:0 auto; padding:0 16px}
+.wrap{max-width:1440px; margin:0 auto; padding:0 32px}
 .sr{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
 .eyebrow,.seclabel{
-  font-family:var(--f-display); font-weight:600; font-size:11px; text-transform:uppercase;
+  font-family:var(--f-display); font-weight:600; font-size:12px; text-transform:uppercase;
   letter-spacing:.1em; color:var(--ink2); margin:0 0 6px;
 }
 .mono{font-family:var(--f-mono)}
 .muted{color:var(--ink2)}
 .small{font-size:13px}
+.hd{font-family:var(--f-display); font-weight:800; font-size:18px; margin:0 0 10px}
 
-/* ---------- header ---------- */
+/* ---------- header (desktop 64px, phone 56px) ---------- */
 .hdr{background:var(--surface); border-bottom:1px solid var(--rule); position:sticky; top:0; z-index:30}
-.hdr-in{display:flex; align-items:center; gap:16px; padding:10px 16px; max-width:1440px; margin:0 auto}
-.brand{display:flex; flex-direction:column; min-width:0}
-.brand b{font-family:var(--f-display); font-weight:800; font-size:19px; letter-spacing:-.01em}
-.brand span{font-family:var(--f-display); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink2)}
+.hdr-in{height:64px; display:flex; align-items:center; gap:24px; padding:0 32px; max-width:1440px; margin:0 auto}
+.brand{display:flex; align-items:baseline; gap:12px; min-width:0}
+.brand b{font-family:var(--f-display); font-weight:800; font-size:22px; letter-spacing:-.01em; white-space:nowrap}
+.brand span{font-family:var(--f-display); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink2); white-space:nowrap}
 .hdr-sp{flex:1}
-.mastery{display:flex; flex-direction:column; gap:4px; min-width:150px}
-.mastery span{font-family:var(--f-mono); font-size:12px; color:var(--ink2)}
-.bar{height:8px; background:var(--muted-fill); border:1px solid var(--rule); border-radius:999px; overflow:hidden}
-.bar i{display:block; height:100%; background:var(--ok); border-radius:999px}
+.mastery{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--ink2); min-width:0}
+.mastery .mnum{font-family:var(--f-mono); color:var(--ink); white-space:nowrap}
+.bar{width:140px; height:8px; border-radius:4px; background:var(--track); overflow:hidden; flex:0 0 auto}
+.bar i{display:block; height:100%; background:var(--ink)}
 .tbtn{
-  min-height:44px; min-width:44px; padding:0 12px; background:var(--surface);
-  border:1px solid var(--chip-border); border-radius:var(--r); cursor:pointer;
-  font-family:var(--f-display); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.08em;
+  height:40px; padding:0 14px; background:var(--surface);
+  border:1px solid var(--chip-border); border-radius:var(--r-sm); cursor:pointer;
+  font-family:var(--f-display); font-weight:600; font-size:14px; white-space:nowrap;
 }
 .tbtn:hover{background:var(--muted-fill)}
 
-/* ---------- tabs ---------- */
-.tabs{background:var(--surface); border-bottom:1px solid var(--rule); position:sticky; top:65px; z-index:20}
-.tabs-in{display:flex; gap:2px; max-width:1440px; margin:0 auto; padding:0 12px; overflow-x:auto; scrollbar-width:thin}
+/* ---------- tabs (desktop 52px, 3px ink underline) ---------- */
+.tabs{background:var(--surface); border-bottom:1px solid var(--rule); position:sticky; top:64px; z-index:20}
+.tabs-in{height:52px; display:flex; align-items:stretch; gap:4px; max-width:1440px; margin:0 auto; padding:0 32px; overflow-x:auto; scrollbar-width:thin}
 .tab{
   appearance:none; background:none; border:0; border-bottom:3px solid transparent;
-  padding:12px 12px; min-height:48px; cursor:pointer; white-space:nowrap;
-  font-family:var(--f-display); font-weight:600; font-size:13px; color:var(--ink2);
+  display:flex; align-items:center; padding:0 14px; cursor:pointer; white-space:nowrap;
+  font-family:var(--f-display); font-weight:600; font-size:15px; color:var(--ink2);
 }
 .tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--ink)}
 .tab:hover{color:var(--ink)}
 
-main{padding:20px 0 40px}
-.panel{max-width:1440px; margin:0 auto; padding:0 16px}
-.ptitle{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:14px}
-.ptitle h2{font-size:22px}
-.ptitle p{margin:0; color:var(--ink2); font-size:14px}
+main{padding:16px 0 24px}
+.panel{max-width:1440px; margin:0 auto; padding:0 32px}
+/* prose and single-column question flows stay readable on a wide screen */
+.reading{max-width:840px}
 
 /* ---------- cards ---------- */
-.card{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:14px}
+.card{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:16px}
 .card + .card{margin-top:12px}
 .grid{display:grid; gap:12px}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -126,6 +137,7 @@ main{padding:20px 0 40px}
 @media (max-width:900px){ .g2,.g3{grid-template-columns:1fr} }
 
 /* ---------- chips / pills ---------- */
+/* .chip = stub chip: mono, 44px. .chip.sm = filter / picker chip: body, 40px. */
 .chip{
   display:inline-flex; align-items:center; justify-content:center; gap:6px;
   min-height:44px; padding:0 14px; border-radius:999px;
@@ -134,176 +146,264 @@ main{padding:20px 0 40px}
 }
 .chip:hover{background:var(--muted-fill)}
 .chip[aria-pressed="true"],.chip.on{background:var(--sel-ink); color:var(--sel-on); border-color:var(--sel-ink)}
-.chip.sm{min-height:36px; font-size:12.5px; padding:0 10px}
+.chip.sm{min-height:44px; font-family:var(--f-body); font-size:14px; padding:0 14px}
 .chiprow{display:flex; flex-wrap:wrap; gap:8px}
+/* neutral tag chip — non-line topics never get a hue of their own */
 .tag{
-  display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:999px;
-  border:1px solid var(--chip-border); font-family:var(--f-mono); font-size:12px; color:var(--ink2);
+  display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px;
+  border:1px solid var(--chip-border); background:var(--surface);
+  font-family:var(--f-body); font-size:14px; color:var(--ink);
 }
-.dot{width:9px; height:9px; border-radius:50%; flex:0 0 auto}
+/* tinted only when it belongs to a transit line; --c is set inline */
+.tag.line{
+  border-color:transparent; color:var(--c);
+  background:var(--muted-fill);
+  background:color-mix(in srgb, var(--c) 12%, var(--surface));
+}
+.dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto}
 
-/* ---------- map ---------- */
-.maplay{display:grid; grid-template-columns:minmax(0,1fr) 352px; gap:16px; align-items:start}
-@media (max-width:1100px){ .maplay{grid-template-columns:1fr} }
-.mapbox{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:8px; overflow:hidden}
-.mapbox svg{display:block; width:100%; height:auto}
-.mline{fill:none; stroke-linecap:round; stroke-linejoin:round; cursor:pointer}
-.mhit{fill:none; stroke:transparent; stroke-width:24; cursor:pointer}
-.mlabel{font-family:var(--f-display); font-weight:800; font-size:13px; letter-spacing:.04em; cursor:pointer}
-.msub{font-family:var(--f-body); font-size:12px}
-.mstat{font-family:var(--f-display); font-weight:700; font-size:14px; fill:var(--ink)}
-.mstat2{font-family:var(--f-body); font-size:12px; fill:var(--ink2)}
-.mzone{font-family:var(--f-display); font-weight:800; font-size:14px; letter-spacing:.14em; fill:var(--ink2)}
-.mfoot{font-family:var(--f-mono); font-size:12px; fill:var(--ink2)}
-.mg{transition:opacity .15s linear}
-.linecard{display:flex; flex-direction:column; gap:6px; cursor:pointer; text-align:left; width:100%; background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:12px}
-.linecard b{font-family:var(--f-display); font-weight:800; font-size:16px}
-.linecard svg{display:block}
-.side{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:14px; position:sticky; top:130px}
-.side h3{font-size:19px}
-.side .verb{font-family:var(--f-body); font-size:15px; margin:6px 0 0}
-.swrow{display:flex; gap:8px; align-items:flex-start; padding:8px 0; border-top:1px solid var(--rule); width:100%; background:none; border-left:0; border-right:0; border-bottom:0; text-align:left; cursor:pointer; font-size:14px}
-.swrow .dot{margin-top:6px}
+/* ---------- buttons ---------- */
 .btn{
-  min-height:44px; padding:0 16px; border-radius:var(--r); cursor:pointer;
+  min-height:48px; padding:0 16px; border-radius:var(--r-sm); cursor:pointer;
   background:var(--sel-ink); color:var(--sel-on); border:1px solid var(--sel-ink);
-  font-family:var(--f-display); font-weight:600; font-size:14px;
+  font-family:var(--f-display); font-weight:800; font-size:16px;
 }
-.btn.ghost{background:var(--surface); color:var(--ink); border-color:var(--chip-border)}
+.btn.ghost{background:var(--surface); color:var(--ink); border:1px solid var(--chip-border); font-size:15px}
 .btn.ghost:hover{background:var(--muted-fill)}
+.btn.sm{min-height:44px; font-size:15px}
 .btn:disabled{opacity:.45; cursor:not-allowed}
 .btn.wide{width:100%}
 
+/* ---------- map ---------- */
+.maplay{display:grid; grid-template-columns:minmax(0,1fr) 352px; gap:24px; align-items:start}
+@media (max-width:1100px){ .maplay{grid-template-columns:1fr} }
+.mapbox{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); overflow:hidden}
+.mapbox svg{display:block; width:100%; height:auto}
+.mline{fill:none; stroke-linecap:round; stroke-linejoin:round; cursor:pointer}
+.mhit{fill:none; stroke:transparent; stroke-width:24; cursor:pointer}
+.mlabel{font-family:var(--f-display); font-weight:800; font-size:12px; letter-spacing:1px; cursor:pointer}
+.mlabel.sel{font-size:13px}
+.msub{font-family:var(--f-body); font-size:12px}
+.mstat{font-family:var(--f-body); font-weight:700; font-size:14px; fill:var(--ink)}
+.mstat2{font-family:var(--f-body); font-size:12px; fill:var(--ink2)}
+.mzone{font-family:var(--f-display); font-weight:800; font-size:13px; letter-spacing:1.5px; fill:var(--ink2)}
+.mbig{font-family:var(--f-display); font-weight:700; font-size:22px; fill:var(--ink)}
+.mfoot{font-family:var(--f-mono); font-size:12px; fill:var(--ink2)}
+.mg{transition:opacity .15s linear}
+
+/* phone line list (mockup 02) */
+.linecard{display:flex; flex-direction:column; gap:6px; cursor:pointer; text-align:left; width:100%; background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:12px 14px}
+.linecard b{font-family:var(--f-display); font-weight:800; font-size:18px}
+.linecard svg{display:block}
+.lcname{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+
+.side{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:20px; position:sticky; top:132px; display:flex; flex-direction:column; gap:14px}
+.side h3{font-size:30px; line-height:1; margin:0}
+.side p{margin:0}
+.side .verb{font-family:var(--f-body); font-size:16px; line-height:1.5}
+.sidesel{display:flex; align-items:center; gap:10px}
+.sidesel i{width:36px; height:8px; border-radius:4px; display:block}
+.sidenote{font-size:13px; color:var(--ink2); line-height:1.5}
+.swrow{display:flex; gap:10px; align-items:center; min-height:44px; padding:6px 0; width:100%; background:none; border:0; text-align:left; cursor:pointer; font-size:15px; color:inherit; font-family:inherit; line-height:1.4}
+.swlist{display:flex; flex-direction:column; gap:2px}
+.misses{padding:10px 12px; background:var(--bad-bg); border-radius:var(--r-sm); font-size:14px; line-height:1.45}
+.misses b{color:var(--bad)}
+
 /* ---------- stepper (tree) ---------- */
 .crumbs{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:12px; font-size:13px; color:var(--ink2)}
-.crumbs button{background:none; border:0; padding:4px 0; cursor:pointer; color:var(--ink2); text-decoration:underline; font-size:13px}
+.crumbs button{display:inline-flex; align-items:center; min-height:44px; background:none; border:0; padding:0; cursor:pointer; color:var(--ink2); text-decoration:underline; font-size:13px; font-family:inherit}
 .bigopt{
-  display:block; width:100%; text-align:left; min-height:56px; padding:14px 16px; margin-bottom:8px;
-  background:var(--surface); border:1px solid var(--chip-border); border-radius:var(--r); cursor:pointer; font-size:15px;
+  display:block; width:100%; text-align:left; min-height:48px; padding:12px 14px; margin-bottom:8px;
+  background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-sm); cursor:pointer; font-size:15px;
+  font-family:inherit; color:inherit;
 }
 .bigopt:hover{background:var(--muted-fill)}
-.result h3{font-size:21px}
+.bigopt b{font-family:var(--f-display); font-weight:800}
 
 /* ---------- tables ---------- */
 .tblwrap{overflow-x:auto; border:1px solid var(--rule); border-radius:var(--r); background:var(--surface)}
-table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:640px}
-th,td{text-align:left; padding:9px 11px; border-bottom:1px solid var(--rule); vertical-align:top}
-th{font-family:var(--f-display); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink2); white-space:nowrap}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:640px}
+th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--rule); vertical-align:top}
+th{font-family:var(--f-display); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink2); white-space:nowrap}
 tbody tr:last-child td{border-bottom:0}
 tr.win{background:var(--ok-bg)}
 tr.win td:first-child{font-weight:700}
-td.lose{color:var(--ink2); font-size:12.5px}
+td.lose{color:var(--ink2); font-size:13px}
 
-/* ---------- compare ---------- */
-.pair{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
-@media (max-width:760px){ .pair{grid-template-columns:1fr} }
-.pcard{background:var(--surface); border:1px solid var(--rule); border-top:4px solid var(--ink2); border-radius:var(--r); padding:14px}
-.pcard h4{font-size:17px; margin-bottom:8px}
-.pcard svg{display:block; width:100%; max-width:300px; height:auto; margin:0 auto 12px}
-.prow{border-top:1px solid var(--rule); padding:8px 0}
-.prow:first-of-type{border-top:0}
-.prow .seclabel{margin-bottom:2px}
+/* ---------- compare (mockup 04) ---------- */
+.pair{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+.pcard{background:var(--surface); border:1px solid var(--rule); border-top:6px solid var(--ink2); border-radius:var(--r); padding:14px 12px; display:flex; flex-direction:column; gap:10px}
+.pcard b.pname{font-family:var(--f-display); font-weight:800; font-size:18px}
+.pcard svg{display:block; width:100%; height:auto; max-width:240px; margin:0 auto}
+.pcard .pjob{font-size:14px; line-height:1.4}
+/* spec grid: label + one column per side */
+.spec{display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); font-size:14px; line-height:1.45}
+.specrow{display:grid; grid-template-columns:110px minmax(0,1fr) minmax(0,1fr); gap:10px; padding:10px 12px; border-bottom:1px solid var(--rule)}
+.specrow:last-child{border-bottom:0}
+.specrow > span:first-child{color:var(--ink2)}
+.specrow .span2{grid-column:span 2}
+.qcgrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+.qcbtn{
+  min-height:48px; padding:0 10px; border-radius:var(--r-sm); cursor:pointer;
+  background:var(--surface); border:2px solid var(--c, var(--chip-border)); color:var(--c, var(--ink));
+  font-family:var(--f-display); font-weight:800; font-size:15px;
+}
 
-/* ---------- flashcards ---------- */
-.fc{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:22px; min-height:200px; display:flex; flex-direction:column; gap:10px}
-.fc .front{font-family:var(--f-display); font-weight:600; font-size:20px; line-height:1.3}
-.fc .svc{font-family:var(--f-display); font-weight:800; font-size:22px}
-.boxes{display:flex; gap:6px; flex-wrap:wrap}
-.boxes .tag b{color:var(--ink)}
-.temp{background:var(--bad-bg); border:1px solid var(--bad); border-radius:var(--r); padding:10px; font-size:14px}
-.temp b{color:var(--bad)}
+/* ---------- trigger cards (mockup 05) ---------- */
+.boxes{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px}
+.boxn{display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0; background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-sm)}
+.boxn.on{border:2px solid var(--ink)}
+.boxn b{font-family:var(--f-mono); font-weight:600; font-size:18px}
+.boxn span{font-size:11px; color:var(--ink2)}
+.fc{display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg); overflow:hidden}
+.fc .fcfront{padding:24px 20px; display:flex; flex-direction:column; gap:10px}
+.fc .front{font-family:var(--f-display); font-weight:800; font-size:26px; line-height:1.2; margin:0}
+.fc .fcbar{height:8px; flex:0 0 auto}
+.fc .fcback{
+  padding:20px; display:flex; flex-direction:column; gap:12px;
+  background:var(--muted-fill);
+  background:color-mix(in srgb, var(--c) 8%, var(--surface));
+}
+.fc .svc{font-family:var(--f-display); font-weight:800; font-size:28px; line-height:1.1}
+.fc .fcback p{margin:0; font-size:15px; line-height:1.5}
+.fc .temp{margin:0; font-size:14px; line-height:1.5; color:var(--bad)}
+.fc .ref{font-family:var(--f-mono); font-size:12px; color:var(--ink2)}
+.rate{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+.rate button{
+  min-height:56px; border-radius:var(--r); cursor:pointer; background:var(--surface);
+  border:2px solid var(--chip-border); color:var(--ink);
+  font-family:var(--f-display); font-weight:800; font-size:15px; line-height:1.15;
+}
+.rate button span{display:block; font-weight:400; font-size:12px}
+.rate .rmiss{border-color:var(--bad); color:var(--bad)}
+.rate .rknew{border:0; background:var(--sel-ink); color:var(--sel-on)}
 
-/* ---------- drill ---------- */
-.scen{font-size:16.5px; line-height:1.6}
-mark{background:var(--hl); color:var(--ink); padding:0 2px; border-radius:3px}
-.stub{display:grid; gap:10px}
-.stubrow{display:grid; grid-template-columns:130px minmax(0,1fr); gap:10px; align-items:start}
-@media (max-width:620px){ .stubrow{grid-template-columns:1fr} }
-.opt{border:1px solid var(--rule); background:var(--surface); border-radius:var(--r); padding:12px}
-.opt .otop{display:flex; gap:10px; align-items:flex-start}
-.opt .okey{font-family:var(--f-mono); font-weight:600; flex:0 0 auto}
-.opt .otxt{flex:1; font-size:15px}
+/* ---------- drill (mockup 03) ---------- */
+.scen{font-size:16px; line-height:1.55}
+mark{background:var(--hl); color:var(--ink)}
+.step{font-family:var(--f-display); font-weight:800; font-size:18px; margin:0}
+.stephd{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:10px}
+.stub{display:grid; gap:12px}
+.stubrow{display:flex; flex-direction:column; gap:6px}
+.stublab{font-family:var(--f-mono); font-size:12px; color:var(--ink2)}
+.opt{border:1px solid var(--rule); background:var(--surface); border-radius:var(--r-sm); padding:12px 14px}
+.opt .otop{display:flex; gap:10px; align-items:flex-start; font-size:15px}
+.opt .okey{font-family:var(--f-display); font-weight:800; flex:0 0 auto}
+.opt .otxt{flex:1}
 .opt .oacts{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
-.opt.crossed{background:var(--muted-fill); border-style:dashed}
-.opt.crossed .otxt{text-decoration:line-through; color:var(--ink2)}
-.opt.picked{border-width:2px; border-color:var(--sel-ink)}
-.opt.correct{background:var(--ok-bg); border-width:2px; border-color:var(--ok)}
-.opt.wrong{background:var(--bad-bg); border-width:2px; border-color:var(--bad)}
-.opt .why{margin-top:8px; font-size:13.5px; color:var(--ink2)}
+.opt.crossed{background:var(--muted-fill); border-style:dashed; border-color:var(--chip-border); color:var(--ink2)}
+.opt.crossed .otxt{text-decoration:line-through}
+.opt.picked{border-width:2px; border-color:var(--sel-ink); padding:11px 13px}
+.opt.correct{background:var(--ok-bg); border-width:2px; border-color:var(--ok); border-style:solid; padding:11px 13px}
+.opt.correct .okey{color:var(--ok)}
+.opt.wrong{background:var(--bad-bg); border-width:2px; border-color:var(--bad); border-style:solid; padding:11px 13px}
+.opt.wrong .okey{color:var(--bad)}
+.opt .why{margin-top:6px; font-size:13px; padding-left:22px}
+.opt.correct .why{color:var(--ok)}
+.opt.wrong .why{color:var(--bad)}
 .mark{font-family:var(--f-mono); font-weight:600}
 .mark.y{color:var(--ok)} .mark.n{color:var(--bad)}
 .locked{opacity:.5; pointer-events:none}
+/* "where it broke" stub verdict chips */
+.slots{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-family:var(--f-mono); font-size:13px}
+.slots span{padding:4px 8px; border-radius:4px}
+.slots .y{background:var(--ok-bg); color:var(--ok)}
+.slots .n{background:var(--bad-bg); color:var(--bad)}
 .stats{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.stat{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:10px}
+.stat{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-sm); padding:10px 12px}
 .stat b{font-family:var(--f-mono); font-size:22px; display:block}
 .last20{display:flex; gap:3px; flex-wrap:wrap}
 .last20 i{width:12px; height:12px; border-radius:3px; display:block; border:1px solid var(--rule)}
 .last20 i.y{background:var(--ok)} .last20 i.n{background:var(--bad)}
-details.method{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:10px 14px; margin-bottom:14px}
+.dprog{flex:1; height:6px; border-radius:3px; background:var(--track); overflow:hidden; min-width:40px}
+.dprog i{display:block; height:100%; background:var(--ink)}
+details.method{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:12px 16px; margin-bottom:12px}
 details.method summary{cursor:pointer; font-family:var(--f-display); font-weight:600; font-size:14px; min-height:28px}
 details.method ol{margin:10px 0 2px; padding-left:22px; font-size:14px}
 
 /* ---------- traps ---------- */
-.trap{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:14px}
-.trap .eyebrow{color:var(--bad)}
-.trap h4{font-size:16px; margin-bottom:4px}
+.trap{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:16px}
+.trap h4{font-size:16px; margin-bottom:6px}
 
 /* ---------- cheat ---------- */
-.cheat{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:14px; overflow-x:auto}
+.cheat{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:16px; overflow-x:auto}
 .cheat pre{margin:0; font-family:var(--f-mono); font-size:12.5px; line-height:1.55; color:var(--ink)}
 
 /* ---------- hub ---------- */
-.hub-hd{padding:34px 0 18px}
-.hub-hd h1{font-size:30px; letter-spacing:-.02em}
-.hub-hd p{color:var(--ink2); margin:8px 0 0; max-width:62ch}
+.hub-hd{padding:40px 0 24px; display:flex; flex-direction:column; gap:10px}
+.hub-hd h1{font-size:60px; line-height:1; letter-spacing:-.02em}
+.hub-hd p{color:var(--ink2); margin:0; max-width:640px; font-size:18px; line-height:1.5}
 .slist{display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
-.scard{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:14px; display:flex; flex-direction:column; gap:8px; text-decoration:none; color:inherit}
+.scard{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r); padding:14px; display:flex; flex-direction:column; gap:6px; text-decoration:none; color:inherit}
 .scard:hover{border-color:var(--chip-border)}
 .scard.soon{opacity:.62; cursor:default}
-.scard h3{font-size:17px}
-.scard .n{font-family:var(--f-mono); font-size:12px; color:var(--ink2)}
+.scard h3{font-size:18px}
+.scard .n{font-family:var(--f-display); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink2)}
 
-/* ---------- bottom tab bar (phone) ---------- */
+/* ---------- phone: 56px header, 72px bottom tab bar, 16px gutters ---------- */
 .bbar{display:none}
 .sheet{display:none}
 @media (max-width:760px){
   .tabs{display:none}
-  .hdr-in{padding:8px 14px; gap:10px}
-  .brand b{font-size:16px}
-  .mastery{min-width:0; flex:0 1 auto}
-  .mastery span{font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  main{padding:14px 0 84px}
-  .panel{padding:0 12px}
+  .hdr-in{height:56px; padding:0 16px; gap:10px}
+  .brand{flex-direction:row; align-items:baseline; gap:8px; overflow:hidden}
+  .brand b{font-size:18px; overflow:hidden; text-overflow:ellipsis}
+  .brand span{display:none}
+  .mastery{gap:8px}
+  .mastery .mlab{display:none}
+  .mastery .bar{display:none}
+  .mastery .mnum{font-size:13px}
+  /* the drill's own progress bar stays — it is in mockup 03 */
+  .mastery .dprog{display:block; width:70px}
+  .tbtn{height:40px; padding:0 10px; font-size:13px}
+  main{padding:16px 0 88px}
+  .panel,.wrap{padding:0 16px}
   .side{position:static}
+  .side h3{font-size:24px}
+  .maplay{grid-template-columns:1fr}
+  .pair{grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+  .specrow{grid-template-columns:84px minmax(0,1fr) minmax(0,1fr); gap:8px}
+  .hub-hd{padding:24px 0 16px}
+  .hub-hd h1{font-size:32px}
+  .hub-hd p{font-size:16px}
+  .fc .front{font-size:22px}
+  .fc .svc{font-size:24px}
   .bbar{
-    display:flex; position:fixed; left:0; right:0; bottom:0; z-index:40;
-    background:var(--surface); border-top:1px solid var(--rule);
+    display:grid; grid-template-columns:repeat(5,minmax(0,1fr));
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    height:calc(72px + env(safe-area-inset-bottom));
     padding-bottom:env(safe-area-inset-bottom);
+    background:var(--surface); border-top:1px solid var(--rule);
   }
   .bbar button{
-    flex:1; min-height:56px; background:none; border:0; cursor:pointer; padding:6px 2px;
+    background:none; border:0; cursor:pointer; padding:6px 2px;
     font-family:var(--f-display); font-weight:600; font-size:11px; color:var(--ink2);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
   }
   .bbar button[aria-selected="true"]{color:var(--ink)}
-  .bbar button i{width:20px; height:3px; border-radius:2px; background:currentColor; display:block}
+  .bbar svg{width:24px; height:24px; display:block}
   .sheet.open{
-    display:block; position:fixed; left:0; right:0; bottom:0; z-index:50;
-    background:var(--surface); border-top:1px solid var(--rule); border-radius:12px 12px 0 0; padding:14px 14px 24px;
+    display:flex; flex-direction:column; gap:8px;
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    background:var(--surface); border-top:1px solid var(--rule);
+    border-radius:var(--r-lg) var(--r-lg) 0 0; padding:16px 16px 24px;
   }
   .sheet-bd{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:45}
-  .ptitle h2{font-size:19px}
+}
+/* the label column is what tells the two values apart — keep all three columns
+   down to the narrowest phone, as mockup 04 does at 390px */
+@media (max-width:400px){
+  .specrow{grid-template-columns:72px minmax(0,1fr) minmax(0,1fr); gap:6px}
 }
 
 /* ---------- print: cheat sheet only ---------- */
 @media print{
-  .hdr,.tabs,.bbar,.sheet,.sheet-bd,.ptitle p,.noprint{display:none !important}
+  .hdr,.tabs,.bbar,.sheet,.sheet-bd,.noprint{display:none !important}
   body{background:#fff; color:#000; font-size:9pt}
   .panel,.wrap{padding:0; max-width:none}
   .cheat{border:0; padding:0; background:#fff; overflow:visible}
   /* 84 columns must fit 132mm without wrapping, or the alignment that makes
      this sheet readable is lost. pre-wrap stays as a safety net only. */
   .cheat pre{font-size:7pt; line-height:1.38; color:#000; white-space:pre-wrap}
-  .ptitle h2{font-size:12pt; margin-bottom:4pt}
   @page{margin:8mm; size:A5}
 }

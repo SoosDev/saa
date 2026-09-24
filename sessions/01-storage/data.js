@@ -96,10 +96,10 @@ window.SESSION = {
 
   /* topics that are not transit lines but are used for drill filters and badges */
   topics: {
-    backup:  { name: 'Backups & copies',  color: 't-backup' },
-    where:   { name: 'Where it lives',    color: 't-where' },
-    classes: { name: 'S3 classes',        color: 't-classes' },
-    edge:    { name: 'Upload & download', color: 't-edge' }
+    backup:  { name: 'Backups & copies' },
+    where:   { name: 'Where it lives' },
+    classes: { name: 'S3 classes' },
+    edge:    { name: 'Upload & download' }
   },
 
   /* ---------------- map ---------------- */
@@ -122,9 +122,9 @@ window.SESSION = {
       /* ---- Storage Gateway ---- */
       { type: 'path', line: 'gateway', d: 'M250 200 H285 L318 236' },
       { type: 'path', line: 'gateway', d: 'M250 290 H285 L318 254' },
-      { type: 'box',  line: 'gateway', x: 318, y: 228, w: 60, h: 34, rx: 8, text: 'GW', tcolor: 'gw-text', lines: ['gateway'] },
+      { type: 'box',  line: 'gateway', x: 318, y: 228, w: 60, h: 34, rx: 6, text: 'GW', lines: ['gateway'] },
       { type: 'path', line: 'gateway', d: 'M378 245 H742' },
-      { type: 'label', line: 'gateway', x: 420, y: 233, color: 'gw-text', text: 'STORAGE GATEWAY — bridge, cache stays local' },
+      { type: 'label', line: 'gateway', x: 420, y: 233, color: 'gw-text', text: 'STORAGE GATEWAY — bridge + cache' },
 
       /* ---- Transfer Family ---- */
       { type: 'path', line: 'transfer', d: 'M250 380 H560 L640 300 H742' },
@@ -141,8 +141,8 @@ window.SESSION = {
 
       /* ---- DTT / Snow ---- */
       { type: 'path', line: 'truck', d: 'M250 650 H440 L480 690 H742', dash: '14 10' },
-      { type: 'station', line: 'truck', shape: 'square', x: 567, y: 677, w: 26, h: 26, stroke: 'dtt' },
-      { type: 'text', x: 567, y: 654, cls: 'msub', anchor: 'middle', fill: 'ink2', text: 'DTT facility / Snow device' },
+      { type: 'station', line: 'truck', shape: 'square', x: 580, y: 690, w: 26, h: 26 },
+      { type: 'text', x: 580, y: 668, cls: 'msub', anchor: 'middle', fill: 'ink2', text: 'DTT facility / Snow device' },
       { type: 'label', line: 'truck', x: 300, y: 638, text: 'DTT / SNOW — data by road' },
 
       /* ---- source stations ---- */
@@ -156,25 +156,25 @@ window.SESSION = {
 
       /* ---- AWS side ---- */
       { type: 'pill', x: 742, y: 128, w: 28, h: 184, rx: 14, fill: 'surface' },
-      { type: 'path', d: 'M770 150 H830 V240', w: 4 },
+      { type: 'path', d: 'M770 150 H830 V240', w: 3, stroke: 'ink' },
       { type: 'station', x: 830, y: 150, r: 6 },
       { type: 'station', x: 830, y: 195, r: 6 },
       { type: 'station', x: 830, y: 240, r: 6 },
-      { type: 'text', x: 844, y: 154, cls: 'mstat2', text: 'Standard-IA · 30 d' },
-      { type: 'text', x: 844, y: 199, cls: 'mstat2', text: 'Glacier · 90 d' },
-      { type: 'text', x: 844, y: 244, cls: 'mstat2', text: 'Deep Archive · 180 d' },
-      { type: 'text', x: 784, y: 286, cls: 'mzone', fill: 'ink', text: 'S3' },
+      { type: 'text', x: 844, y: 155, cls: 'mstat2', text: 'Standard-IA · 30 d' },
+      { type: 'text', x: 844, y: 200, cls: 'mstat2', text: 'Glacier · 90 d' },
+      { type: 'text', x: 844, y: 245, cls: 'mstat2', text: 'Deep Archive · 180 d' },
+      { type: 'text', x: 784, y: 286, cls: 'mbig', fill: 'ink', text: 'S3' },
       { type: 'text', x: 784, y: 304, cls: 'msub', fill: 'ink2', text: 'lifecycle →' },
 
-      { type: 'station', x: 742, y: 340, lines: ['datasync', 'transfer'] },
-      { type: 'text', x: 756, y: 344, cls: 'mstat', text: 'EFS · Linux NFS' },
-      { type: 'station', x: 742, y: 520, lines: ['dms'] },
-      { type: 'text', x: 756, y: 518, cls: 'mstat', text: 'RDS / Aurora' },
-      { type: 'text', x: 756, y: 536, cls: 'mstat2', text: 'or S3 as CSV / Parquet' },
-      { type: 'station', x: 742, y: 610, lines: ['mgn'] },
-      { type: 'text', x: 756, y: 614, cls: 'mstat', text: 'EC2 · rehosted' },
-      { type: 'station', x: 742, y: 690, lines: ['truck'] },
-      { type: 'text', x: 756, y: 694, cls: 'mstat', text: 'S3 · bulk import' }
+      { type: 'station', x: 756, y: 340, lines: ['datasync', 'transfer'] },
+      { type: 'text', x: 776, y: 345, cls: 'mstat', text: 'EFS · Linux NFS' },
+      { type: 'station', x: 756, y: 520, lines: ['dms'] },
+      { type: 'text', x: 776, y: 518, cls: 'mstat', text: 'RDS / Aurora' },
+      { type: 'text', x: 776, y: 534, cls: 'mstat2', text: 'or S3 as CSV / Parquet' },
+      { type: 'station', x: 756, y: 610, lines: ['mgn'] },
+      { type: 'text', x: 776, y: 615, cls: 'mstat', text: 'EC2 · rehosted' },
+      { type: 'station', x: 756, y: 690, lines: ['truck'] },
+      { type: 'text', x: 776, y: 695, cls: 'mstat', text: 'S3 · bulk import' }
     ]
   },
 
@@ -537,7 +537,7 @@ window.SESSION = {
         words: 'tape · tape library · Veeam / NetBackup · VTL · replace the tape infrastructure',
         lands: 'Virtual tapes in S3, archived to S3 Glacier Flexible Retrieval or S3 Glacier Deep Archive.',
         tempting: 'S3 with a lifecycle rule — but the backup software cannot write to a bucket.' },
-      b: { name: 'S3 + lifecycle', color: 't-classes',
+      b: { name: 'S3 + lifecycle',
         mini: { left: 'Any S3 client', right: 'S3 → Glacier', dir: 'one', note: 'needs software that speaks S3' },
         job: 'Whatever is writing already speaks the S3 API; lifecycle rules then move objects to colder classes.',
         words: 'objects · our application uploads · data lake · lifecycle',
@@ -604,13 +604,13 @@ window.SESSION = {
     },
     {
       id: 'p7', short: 'Upload vs download', title: 'Transfer Acceleration vs CloudFront vs DataSync',
-      a: { name: 'S3 Transfer Acceleration', color: 't-edge',
+      a: { name: 'S3 Transfer Acceleration',
         mini: { left: 'Clients far away', right: 'One bucket', dir: 'one', note: 'UPLOAD in over the edge' },
         job: 'Many clients far from the Region uploading into one bucket. Traffic enters at an edge location and rides the AWS backbone.',
         words: 'upload · large files · users worldwide · slow from Asia · minimal changes',
         lands: 'The same bucket, through its accelerated endpoint.',
         tempting: 'CloudFront — which is built for the opposite direction.' },
-      b: { name: 'Amazon CloudFront', color: 't-edge',
+      b: { name: 'Amazon CloudFront',
         mini: { left: 'Origin bucket', right: 'Viewers worldwide', dir: 'one', cache: true, note: 'DOWNLOAD, cached at the edge' },
         job: 'Many clients downloading the same objects. The edge caches them, so the second request never reaches the Region.',
         words: 'download · repeatedly · the same files · cache · signed URLs · worldwide',
@@ -635,7 +635,7 @@ window.SESSION = {
         words: 'EBS volumes · snapshots · as soon as possible · simplest · automate',
         lands: 'EBS snapshots and AMIs, in the same account.',
         tempting: 'AWS Backup — correct but heavier when the scope really is only EBS.' },
-      b: { name: 'AWS Backup', color: 't-backup',
+      b: { name: 'AWS Backup',
         mini: { left: 'Many services', right: 'Vaults (x-acct, x-Region)', dir: 'one', note: 'one policy, one place' },
         job: 'One policy across EC2/EBS, RDS, Aurora, DynamoDB, EFS, all four FSx, Storage Gateway volumes, S3, DocumentDB, Neptune, Redshift, Timestream, EKS, SAP HANA, CloudFormation and VMware Cloud on AWS. Vault Lock gives WORM; copies go cross-Region and cross-account; Backup Audit Manager reports.',
         words: 'one place · another account · central policy · auditors · cannot be deleted even by admins',

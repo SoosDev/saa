@@ -39,7 +39,14 @@
       if (k === 'text') { el.textContent = String(v); return; }
       if (k === 'cls') { if (isSvg) el.setAttribute('class', v); else el.className = v; return; }
       if (k === 'on') { Object.keys(v).forEach(function (ev) { el.addEventListener(ev, v[ev]); }); return; }
-      if (k === 'style' && typeof v === 'object') { Object.keys(v).forEach(function (p) { el.style[p] = v[p]; }); return; }
+      if (k === 'style' && typeof v === 'object') {
+        Object.keys(v).forEach(function (p) {
+          /* custom properties need setProperty; el.style['--c'] is a no-op */
+          if (p.indexOf('--') === 0) el.style.setProperty(p, v[p]);
+          else el.style[p] = v[p];
+        });
+        return;
+      }
       if (k === 'data') { Object.keys(v).forEach(function (p) { el.setAttribute('data-' + p, v[p]); }); return; }
       if (!isSvg && (k === 'disabled' || k === 'checked' || k === 'hidden')) { el[k] = !!v; return; }
       el.setAttribute(k, v === true ? '' : String(v));
@@ -119,15 +126,32 @@
   /* ================================================================
      MOUNT
      ================================================================ */
+  /* 24px / 2px stroke icons, taken from the phone mockups' bottom tab bar. */
+  var ICONS = {
+    map:     [['circle', { cx: 5, cy: 6, r: 2 }], ['circle', { cx: 19, cy: 18, r: 2 }], ['path', { d: 'M7 6h5l4 4v6' }]],
+    tree:    [['path', { d: 'M12 3v6' }], ['path', { d: 'M12 9l-6 6' }], ['path', { d: 'M12 9l6 6' }],
+              ['circle', { cx: 6, cy: 18, r: 2 }], ['circle', { cx: 18, cy: 18, r: 2 }]],
+    compare: [['rect', { x: 3, y: 4, width: 7, height: 16, rx: 1 }], ['rect', { x: 14, y: 4, width: 7, height: 16, rx: 1 }]],
+    cards:   [['rect', { x: 4, y: 7, width: 14, height: 13, rx: 2 }], ['path', { d: 'M8 4h11a1 1 0 0 1 1 1v11' }]],
+    drill:   [['circle', { cx: 12, cy: 12, r: 8 }], ['circle', { cx: 12, cy: 12, r: 3 }]]
+  };
+  function icon(key) {
+    var parts = ICONS[key];
+    if (!parts) return null;
+    return s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2,
+      'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' },
+      parts.map(function (p) { return s(p[0], p[1]); }));
+  }
+
   var TABS = [
     { key: 'map',     label: 'Map',            phone: 'Lines',   need: 'map',     primary: true },
     { key: 'tree',    label: 'Where it lives', phone: 'Tree',    need: 'tree',    primary: true },
-    { key: 'classes', label: 'S3 classes',     phone: 'Classes', need: 'classes' },
+    { key: 'classes', label: 'S3 classes',     phone: 'S3 classes', need: 'classes' },
     { key: 'compare', label: 'Compare',        phone: 'Compare', need: 'pairs',   primary: true },
     { key: 'cards',   label: 'Trigger cards',  phone: 'Cards',   need: 'cards',   primary: true },
     { key: 'drill',   label: 'Drill',          phone: 'Drill',   need: 'drills',  primary: true },
     { key: 'traps',   label: 'Traps',          phone: 'Traps',   need: 'traps' },
-    { key: 'cheat',   label: 'Cheat sheet',    phone: 'Cheat',   need: 'cheat' }
+    { key: 'cheat',   label: 'Cheat sheet',    phone: 'Cheat sheet', need: 'cheat' }
   ];
 
   SAA.mount = function (session) {
@@ -141,12 +165,17 @@
     if (!tabs.length) return;
 
     /* topic lookup: transit lines + non-line topics, both usable as filters/badges */
+    /* Only transit lines carry a colour. Everything else is a neutral chip —
+       see design/DESIGN.md, "Colour carries meaning, nothing else does". */
     var topics = {};
     (D.lines || []).forEach(function (l) { topics[l.id] = { id: l.id, name: l.name, color: l.color, line: true }; });
     Object.keys(D.topics || {}).forEach(function (k) {
-      if (!topics[k]) topics[k] = { id: k, name: D.topics[k].name, color: D.topics[k].color, line: false };
+      if (!topics[k]) topics[k] = { id: k, name: D.topics[k].name, color: null, line: false };
     });
     function topic(id) { return topics[id] || { id: id, name: id, color: null, line: false }; }
+    /* a dot only exists where a line colour exists */
+    function topicDot(t) { return t.line ? h('span', { cls: 'dot', style: { background: cvar(t.color) } }) : null; }
+    function topicInk(t) { return t.line ? cvar(t.color) : 'var(--ink)'; }
 
     var state = {
       tab: null,
@@ -173,24 +202,68 @@
     var root = document.getElementById('app') || document.body;
     clear(root);
 
-    var masteryTxt = h('span', { text: '' });
+    /* Header — desktop 64px: brand, eyebrow, mastery (label · 140px bar · count), theme.
+       Phone 56px: section title, section meta, More, theme.  (mockups 01 / 02) */
+    var brandName = h('b', { text: meta.brand || meta.title || 'SAA Transit Maps' });
+    var masteryTxt = h('span', { cls: 'mnum', text: '' });
     var masteryBar = h('i');
+    var masteryBox = h('div', { cls: 'mastery' }, [
+      h('span', { cls: 'mlab', text: 'Mastery' }),
+      h('div', { cls: 'bar' }, masteryBar),
+      masteryTxt
+    ]);
+    var hdrMeta = h('div', { cls: 'hdr-meta' }, masteryBox);
+    var moreBtn = h('button', { cls: 'tbtn', type: 'button', text: 'More', 'aria-haspopup': 'true',
+      style: { display: 'none' }, on: { click: openSheet } });
+    var themeBtn = SAA.initTheme();
+    var themeSlot = h('div', { cls: 'theme-slot' }, themeBtn);
     var hdr = h('header', { cls: 'hdr' }, [
       h('div', { cls: 'hdr-in' }, [
-        h('div', { cls: 'brand' }, [
-          h('b', { text: meta.brand || meta.title || 'SAA Transit Maps' }),
-          h('span', { text: meta.subtitle || '' })
-        ]),
+        h('div', { cls: 'brand' }, [brandName, h('span', { text: meta.subtitle || '' })]),
         h('div', { cls: 'hdr-sp' }),
-        h('div', { cls: 'mastery' }, [masteryTxt, h('div', { cls: 'bar' }, masteryBar)]),
-        SAA.initTheme()
+        hdrMeta,
+        moreBtn,
+        themeSlot
       ])
     ]);
     function paintMastery() {
       var total = (D.cards || []).length, known = 0;
       (D.cards || []).forEach(function (c) { if (cardBox(state.cards, c.id) >= 5) known++; });
-      masteryTxt.textContent = known + ' / ' + total + ' cards known';
+      /* the phone header has room for a bare counter only (mockup 02) */
+      masteryTxt.textContent = phone() ? (known + '/' + total) : (known + ' / ' + total + ' cards');
       masteryBar.style.width = total ? Math.round((known / total) * 100) + '%' : '0%';
+    }
+    /* On phone the header carries the section name; the tab row is hidden there. */
+    function paintHdr(key) {
+      var onPhone = phone();
+      moreBtn.style.display = (onPhone && more.length) ? '' : 'none';
+      /* mockups put no theme control in the 56px phone header; it lives in the sheet */
+      if (onPhone) { if (themeBtn.parentNode === themeSlot) themeSlot.removeChild(themeBtn); }
+      else if (themeBtn.parentNode !== themeSlot) themeSlot.appendChild(themeBtn);
+      paintMastery();
+      if (!onPhone || key === tabs[0].key) {
+        brandName.textContent = meta.brand || meta.title || 'SAA Transit Maps';
+      } else {
+        var t = tabs.filter(function (x) { return x.key === key; })[0];
+        brandName.textContent = t ? t.label : (meta.brand || '');
+      }
+      clear(hdrMeta);
+      hdrMeta.appendChild(sectionMeta(key) || masteryBox);
+    }
+    /* per-section right-hand meta; drill shows its own progress (mockup 03) */
+    function sectionMeta(key) {
+      if (key === 'drill' && state.drillOrder && state.drillOrder.length) {
+        var n = state.drillOrder.length, i = Math.min(state.drillIdx + 1, n);
+        return h('div', { cls: 'mastery' }, [
+          h('div', { cls: 'dprog' }, h('i', { style: { width: Math.round((i / n) * 100) + '%' } })),
+          h('span', { cls: 'mnum', text: i + ' / ' + n })
+        ]);
+      }
+      if (key === 'cards') {
+        var due = (D.cards || []).filter(function (c) { return cardDue(state.cards, c.id); }).length;
+        return h('div', { cls: 'mastery' }, h('span', { cls: 'mnum', text: due + ' due today' }));
+      }
+      return null;
     }
 
     var tabRow = h('div', { cls: 'tabs-in', role: 'tablist' });
@@ -204,17 +277,18 @@
     });
     var panel = h('div', { cls: 'panel', role: 'tabpanel' });
 
-    /* phone bottom bar */
+    /* Phone bottom bar — exactly five items with 24px stroke icons (mockups 02–05).
+       Overflow sections open from the header's More button, so the grid stays at five. */
     var primary = tabs.filter(function (t) { return t.primary; }).slice(0, 5);
     var more = tabs.filter(function (t) { return primary.indexOf(t) < 0; });
     var bbtns = {};
     var bbar = h('nav', { cls: 'bbar', 'aria-label': 'Sections' });
     primary.forEach(function (t) {
       var b = h('button', { type: 'button', 'aria-selected': 'false', on: { click: function () { go(t.key); } } },
-        [h('i'), h('span', { text: t.phone })]);
+        [icon(t.key), h('span', { text: t.phone })]);
       bbtns[t.key] = b; bbar.appendChild(b);
     });
-    var sheet = h('div', { cls: 'sheet' });
+    var sheet = h('div', { cls: 'sheet', role: 'dialog', 'aria-label': 'More sections' });
     var sheetBd = h('div', { cls: 'sheet-bd', style: { display: 'none' }, on: { click: closeSheet } });
     function openSheet() {
       clear(sheet);
@@ -222,14 +296,11 @@
       more.forEach(function (t) {
         sheet.appendChild(h('button', { cls: 'bigopt', type: 'button', text: t.label, on: { click: function () { closeSheet(); go(t.key); } } }));
       });
+      sheet.appendChild(h('div', { cls: 'chiprow' }, themeBtn));
       sheet.appendChild(h('button', { cls: 'btn ghost wide', type: 'button', text: 'Close', on: { click: closeSheet } }));
       sheet.classList.add('open'); sheetBd.style.display = 'block';
     }
     function closeSheet() { sheet.classList.remove('open'); sheetBd.style.display = 'none'; }
-    if (more.length) {
-      bbar.appendChild(h('button', { type: 'button', 'aria-selected': 'false', on: { click: openSheet } },
-        [h('i'), h('span', { text: 'More' })]));
-    }
 
     root.appendChild(hdr);
     root.appendChild(h('div', { cls: 'tabs' }, tabRow));
@@ -260,25 +331,24 @@
       clear(panel);
       var fn = VIEWS[key];
       if (fn) fn(panel);
+      paintHdr(key);
       window.scrollTo(0, 0);
     }
     window.addEventListener('hashchange', function () { render(keyFromHash()); });
-
-    function ptitle(t, sub) {
-      return h('div', { cls: 'ptitle' }, [h('h2', { text: t }), sub ? h('p', { text: sub }) : null]);
-    }
 
     /* ================================================================
        1. MAP
        ================================================================ */
     function phone() { return window.matchMedia('(max-width:760px)').matches; }
 
-    function miniLine(l, w) {
-      var dash = (l.pattern === 'dashed') ? '14 10' : null;
-      return s('svg', { viewBox: '0 0 ' + (w || 120) + ' 12', width: w || 120, height: 12, 'aria-hidden': 'true' }, [
-        s('path', {
-          d: 'M2 6 H' + ((w || 120) - 2), cls: 'mline',
-          stroke: cvar(l.color), 'stroke-width': 8, 'stroke-dasharray': dash
+    /* the full-width rule above a phone line card (mockup 02) */
+    function miniLine(l) {
+      var dashed = l.pattern === 'dashed';
+      return s('svg', { viewBox: '0 0 330 12', width: '100%', height: 12, preserveAspectRatio: 'none', 'aria-hidden': 'true' }, [
+        s('line', {
+          x1: 6, y1: 6, x2: 324, y2: 6, stroke: cvar(l.color),
+          'stroke-width': dashed ? 5 : 6, 'stroke-linecap': 'round',
+          'stroke-dasharray': dashed ? '12 8' : null
         })
       ]);
     }
@@ -289,6 +359,8 @@
       var groups = {};   /* line id -> [nodes] */
       var stationNodes = [];
       var neutral = [];
+      var strokes = {};  /* line id -> [{el, base}] so selection can thicken the route */
+      var labels = {};   /* line id -> [text nodes] */
 
       function reg(node, item) {
         if (item.line) { (groups[item.line] = groups[item.line] || []).push(node); }
@@ -304,8 +376,12 @@
           g.appendChild(s('text', { x: it.x, y: it.y, cls: it.cls || 'msub', fill: it.fill ? cvar(it.fill) : 'var(--ink2)', 'text-anchor': it.anchor || 'start', text: it.text }));
         } else if (it.type === 'path') {
           var dash = it.dash || ((it.line && lineById(it.line) && lineById(it.line).pattern === 'dashed') ? '14 10' : null);
-          g.appendChild(s('path', { d: it.d, cls: 'mline', stroke: cvar(colorOf(it.line)), 'stroke-width': it.w || 8, 'stroke-dasharray': dash }));
+          var base = it.w || 8;
+          var stroke = it.line ? cvar(colorOf(it.line)) : cvar(it.stroke || 'ink');
+          var pel = s('path', { d: it.d, cls: 'mline', stroke: stroke, 'stroke-width': base, 'stroke-dasharray': dash });
+          g.appendChild(pel);
           if (it.line) {
+            (strokes[it.line] = strokes[it.line] || []).push({ el: pel, base: base });
             var hit = s('path', { d: it.d, cls: 'mhit' });
             hit.addEventListener('click', function () { selectLine(it.line); });
             g.appendChild(hit);
@@ -314,22 +390,26 @@
           var shape = it.shape || 'circle';
           if (shape === 'circle') g.appendChild(s('circle', { cx: it.x, cy: it.y, r: it.r || 9, fill: 'var(--surface)', stroke: 'var(--ink)', 'stroke-width': 3 }));
           else g.appendChild(s('rect', { x: it.x - (it.w || 26) / 2, y: it.y - (it.h || 26) / 2, width: it.w || 26, height: it.h || 26, fill: 'var(--surface)', stroke: it.stroke ? cvar(it.stroke) : 'var(--ink)', 'stroke-width': 3 }));
-          if (it.name) g.appendChild(s('text', { x: it.tx !== undefined ? it.tx : it.x, y: it.y + 4, cls: 'mstat', 'text-anchor': it.anchor || 'start', text: it.name }));
-          if (it.sub) g.appendChild(s('text', { x: it.tx !== undefined ? it.tx : it.x, y: it.y + 20, cls: 'mstat2', 'text-anchor': it.anchor || 'start', text: it.sub }));
+          /* mockup baselines: name sits 2px above the station centre when a sub
+             follows it, 5px below when it stands alone. */
+          if (it.name) g.appendChild(s('text', { x: it.tx !== undefined ? it.tx : it.x, y: it.y + (it.sub ? -2 : 5), cls: 'mstat', 'text-anchor': it.anchor || 'start', text: it.name }));
+          if (it.sub) g.appendChild(s('text', { x: it.tx !== undefined ? it.tx : it.x, y: it.y + 14, cls: 'mstat2', 'text-anchor': it.anchor || 'start', text: it.sub }));
         } else if (it.type === 'box') {
-          g.appendChild(s('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: it.rx === undefined ? 6 : it.rx, fill: 'var(--surface)', stroke: cvar(colorOf(it.line) || it.stroke), 'stroke-width': 3 }));
-          if (it.text) g.appendChild(s('text', { x: it.x + it.w / 2, y: it.y + it.h / 2 + 5, cls: 'mlabel', 'text-anchor': 'middle', fill: cvar(it.tcolor || colorOf(it.line)), text: it.text }));
+          g.appendChild(s('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: it.rx === undefined ? 6 : it.rx, fill: 'var(--surface)', stroke: cvar(it.stroke || 'ink'), 'stroke-width': 3 }));
+          if (it.text) g.appendChild(s('text', { x: it.x + it.w / 2, y: it.y + it.h / 2 + 5, cls: 'mlabel', 'text-anchor': 'middle', fill: cvar(it.tcolor || 'ink'), text: it.text }));
         } else if (it.type === 'pill') {
-          g.appendChild(s('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: it.rx, fill: cvar(it.fill || 'ink2'), stroke: 'var(--ink)', 'stroke-width': 2 }));
+          g.appendChild(s('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: it.rx, fill: cvar(it.fill || 'ink2'), stroke: 'var(--ink)', 'stroke-width': 3 }));
         } else if (it.type === 'label') {
           var t = s('text', { x: it.x, y: it.y, cls: 'mlabel', fill: cvar(colorOf(it.line) || it.color), text: it.text });
           t.addEventListener('click', function () { selectLine(it.line); });
           g.appendChild(t);
+          if (it.line) (labels[it.line] = labels[it.line] || []).push(t);
           if (it.sub) g.appendChild(s('text', { x: it.sub.x, y: it.sub.y, cls: 'msub', fill: cvar(colorOf(it.line) || it.color), text: it.sub.text }));
           if (it.line) {
             g.setAttribute('tabindex', '0');
             g.setAttribute('role', 'button');
             g.setAttribute('aria-label', it.text);
+            g.addEventListener('mousedown', function (e) { e.preventDefault(); });
             g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectLine(it.line); } });
           }
         }
@@ -337,10 +417,18 @@
         svg.appendChild(g);
       });
 
+      /* Selection fades the other lines to 0.22 and never recolours them; the
+         chosen route thickens to 10px and its label steps up to 13px (mockup 01). */
       function paint() {
         var sel = state.line;
         Object.keys(groups).forEach(function (id) {
           groups[id].forEach(function (n) { n.style.opacity = !sel ? '1' : (id === sel ? '1' : '0.22'); });
+        });
+        Object.keys(strokes).forEach(function (id) {
+          strokes[id].forEach(function (o) { o.el.setAttribute('stroke-width', id === sel ? o.base + 2 : o.base); });
+        });
+        Object.keys(labels).forEach(function (id) {
+          labels[id].forEach(function (n) { n.setAttribute('class', id === sel ? 'mlabel sel' : 'mlabel'); });
         });
         stationNodes.forEach(function (o) {
           o.node.style.opacity = !sel ? '1' : (o.lines.indexOf(sel) >= 0 ? '1' : '0.4');
@@ -355,7 +443,10 @@
 
     var mapSvgEl = null, sidePanelEl = null;
     function selectLine(id) {
+      var had = !!state.line;
       state.line = (state.line === id) ? null : id;
+      /* on phone the detail panel is only mounted while a line is selected */
+      if (phone() && state.tab === 'map' && had !== !!state.line) { render('map'); return; }
       if (mapSvgEl && mapSvgEl._paint) mapSvgEl._paint();
       if (sidePanelEl) paintSide(sidePanelEl);
     }
@@ -364,93 +455,116 @@
       return (D.drills || []).filter(function (d) { return d.line === lineId && d.mine; });
     }
 
+    /* Side panel — mockup 01: swatch + eyebrow, 30px name in the line colour,
+       the verb as a sentence, tinted exam-says pills, switch rows with dots,
+       the misses box, and a line-coloured primary button. */
     function paintSide(box) {
       clear(box);
       var l = lineById(state.line);
       if (!l) {
         box.appendChild(label('Lines'));
-        box.appendChild(h('p', { cls: 'muted', style: { margin: '0 0 10px' }, text: 'Pick a line on the map — or a card below — to see what it is for and when to switch.' }));
-        (D.lines || []).forEach(function (ln) {
-          box.appendChild(h('button', {
-            cls: 'swrow', type: 'button', on: { click: function () { selectLine(ln.id); } }
-          }, [
+        box.appendChild(h('div', { cls: 'swlist' }, (D.lines || []).map(function (ln) {
+          return h('button', { cls: 'swrow', type: 'button', on: { click: function () { selectLine(ln.id); } } }, [
             h('span', { cls: 'dot', style: { background: cvar(ln.color) } }),
             h('span', null, [h('b', { text: ln.name }), ' — ', h('span', { cls: 'muted', text: ln.verbShort || ln.verb })])
-          ]));
-        });
+          ]);
+        })));
         return;
       }
-      box.appendChild(h('p', { cls: 'seclabel', text: 'Line' }));
-      box.appendChild(h('h3', { style: { color: cvar(l.color) }, text: l.name }));
-      box.appendChild(h('p', { cls: 'verb', text: l.verb }));
-      box.appendChild(h('div', { style: { marginTop: '12px' } }, [
-        label('Built for'), h('p', { style: { margin: '0 0 10px' }, text: l.builtFor })
+      var col = cvar(l.color);
+      box.appendChild(h('div', { cls: 'sidesel' }, [
+        h('i', { style: { background: col } }),
+        h('span', { cls: 'seclabel', style: { margin: 0 }, text: 'Line selected' })
       ]));
+      box.appendChild(h('h3', { style: { color: col }, text: l.name }));
+      box.appendChild(h('p', { cls: 'verb', text: l.verb }));
+      box.appendChild(h('p', { cls: 'verb', text: l.builtFor }));
       if (l.examSays && l.examSays.length) {
-        box.appendChild(label('Exam says'));
-        box.appendChild(h('div', { cls: 'chiprow', style: { marginBottom: '12px' } },
-          l.examSays.map(function (x) { return h('span', { cls: 'tag', text: x }); })));
+        box.appendChild(h('div', null, [
+          label('Exam says'),
+          h('div', { cls: 'chiprow' }, l.examSays.map(function (x) {
+            return h('span', { cls: 'tag line', style: { '--c': col }, text: x });
+          }))
+        ]));
       }
-      box.appendChild(h('div', null, [label('From → to'), h('p', { cls: 'small muted', style: { margin: '0 0 10px' }, text: l.from + ' → ' + l.to })]));
+      box.appendChild(h('div', null, [
+        label('From → to'),
+        h('p', { cls: 'sidenote', text: l.from + ' → ' + l.to })
+      ]));
       if (l.switchWhen && l.switchWhen.length) {
-        box.appendChild(label('Switch lines when'));
-        l.switchWhen.forEach(function (sw) {
-          var t = topic(sw.to);
-          box.appendChild(h('button', { cls: 'swrow', type: 'button', on: { click: function () { if (lineById(sw.to)) { state.line = sw.to; if (mapSvgEl && mapSvgEl._paint) mapSvgEl._paint(); paintSide(box); } } } }, [
-            h('span', { cls: 'dot', style: { background: cvar(t.color) } }),
-            h('span', null, [sw.cond, ' → ', h('b', { style: { color: cvar(t.color) }, text: t.name })])
-          ]));
-        });
+        box.appendChild(h('div', null, [
+          label('Switch lines when'),
+          h('div', { cls: 'swlist' }, l.switchWhen.map(function (sw) {
+            var t = topic(sw.to);
+            return h('button', { cls: 'swrow', type: 'button', on: { click: function () { if (lineById(sw.to)) { state.line = sw.to; if (mapSvgEl && mapSvgEl._paint) mapSvgEl._paint(); paintSide(box); } } } }, [
+              topicDot(t) || h('span', { cls: 'dot', style: { background: 'var(--ink2)' } }),
+              h('span', null, [sw.cond, ' → ', h('b', { style: { color: topicInk(t) }, text: t.name })])
+            ]);
+          }))
+        ]));
       }
       var misses = myMissesOn(l.id);
-      box.appendChild(h('div', { style: { marginTop: '14px' } }, [
-        label('Your misses on this line'),
-        misses.length
-          ? h('ul', { style: { margin: '0 0 10px', paddingLeft: '18px', fontSize: '13.5px' } },
-              misses.map(function (d) { return h('li', { text: d.ref ? d.ref + ' — ' + shortText(d.text) : shortText(d.text) }); }))
-          : h('p', { cls: 'small muted', style: { margin: '0 0 10px' }, text: 'None recorded on this line.' })
-      ]));
+      if (misses.length) {
+        box.appendChild(h('div', { cls: 'misses' }, [
+          h('b', { text: 'Your misses on this line: ' }),
+          misses.map(function (d) { return d.ref ? d.ref + ' — ' + shortText(d.text) : shortText(d.text); }).join(' · ')
+        ]));
+      }
       var n = (D.drills || []).filter(function (d) { return d.line === l.id; }).length;
       box.appendChild(h('button', {
         cls: 'btn wide', type: 'button', text: 'Drill ' + l.name + ' · ' + n + (n === 1 ? ' scenario' : ' scenarios'),
-        disabled: !n,
+        disabled: !n, style: n ? { background: col, borderColor: col, color: '#FFFFFF' } : null,
         on: { click: function () { state.drillFilter = { mode: 'line', line: l.id }; state.drillOrder = null; go('drill'); } }
       }));
-      box.appendChild(h('button', { cls: 'btn ghost wide', type: 'button', style: { marginTop: '8px' }, text: 'Clear selection', on: { click: function () { selectLine(l.id); } } }));
+      box.appendChild(h('button', { cls: 'btn ghost wide', type: 'button', text: 'Clear selection', on: { click: function () { selectLine(l.id); } } }));
     }
     function shortText(t) { return t.length > 84 ? t.slice(0, 82) + '…' : t; }
 
     var VIEWS_map = function (p) {
-      p.appendChild(ptitle(phone() ? 'Lines' : 'Map', 'Each way data moves is a line with one verb. Tap a line to isolate it.'));
       var side = h('aside', { cls: 'side' });
       sidePanelEl = side;
 
       if (phone()) {
-        var cardsWrap = h('div', { cls: 'grid' }, (D.lines || []).map(function (l) {
-          return h('button', { cls: 'linecard', type: 'button', on: { click: function () { selectLine(l.id); side.scrollIntoView({ block: 'nearest' }); } } }, [
-            miniLine(l, 260),
-            h('b', { style: { color: cvar(l.color) }, text: l.name }),
-            h('span', { cls: 'small', text: l.verb }),
-            h('span', { cls: 'small muted mono', text: l.from + ' → ' + l.to })
-          ]);
-        }));
-        p.appendChild(cardsWrap);
+        /* mockup 02: "Pick a line" + a full-map link, then one card per line */
         var full = h('div', { style: { marginTop: '12px' } });
         var toggled = false;
-        p.appendChild(h('button', {
-          cls: 'btn ghost wide', type: 'button', text: 'Full map', on: {
-            click: function (e) {
+        var fullLink = h('button', {
+          type: 'button', cls: 'linklike',
+          style: { background: 'none', border: 0, padding: '12px 0', minHeight: '44px', cursor: 'pointer', color: 'var(--ds)', fontSize: '14px' },
+          text: 'Full map',
+          on: {
+            click: function () {
               toggled = !toggled; clear(full);
-              e.target.textContent = toggled ? 'Hide map' : 'Full map';
+              fullLink.textContent = toggled ? 'Hide map' : 'Full map';
               if (toggled) { mapSvgEl = lineSvg(); full.appendChild(h('div', { cls: 'mapbox' }, mapSvgEl)); }
             }
           }
-        }));
+        });
+        p.appendChild(h('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '10px' } }, [
+          h('h1', { style: { fontSize: '24px' }, text: 'Pick a line' }), fullLink
+        ]));
+        p.appendChild(h('div', { cls: 'grid', style: { gap: '10px' } }, (D.lines || []).map(function (l) {
+          return h('button', { cls: 'linecard', type: 'button', on: { click: function () { selectLine(l.id); side.scrollIntoView({ block: 'nearest' }); } } }, [
+            miniLine(l),
+            h('span', { cls: 'lcname' }, [
+              h('b', { style: { color: cvar(l.color) }, text: l.name }),
+              h('span', { cls: 'small muted', style: { fontSize: '14px' }, text: l.verbShort || l.verb })
+            ]),
+            h('span', { cls: 'small muted', text: l.from + ' → ' + l.to })
+          ]);
+        })));
         p.appendChild(full);
-        p.appendChild(h('div', { style: { marginTop: '12px' } }, side));
+        /* the panel is the line's detail view — only show it once a line is picked */
+        if (state.line) p.appendChild(h('div', { style: { marginTop: '12px' } }, side));
       } else {
         mapSvgEl = lineSvg();
-        p.appendChild(h('div', { cls: 'maplay' }, [h('div', { cls: 'mapbox' }, mapSvgEl), side]));
+        p.appendChild(h('div', { cls: 'maplay' }, [
+          h('div', { cls: 'mapbox' }, mapSvgEl),
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '16px' } }, [
+            side,
+            h('p', { cls: 'sidenote', style: { margin: 0 }, text: 'Tap any line or station. Other lines fade so one route reads at a time.' })
+          ])
+        ]));
       }
       paintSide(side);
     };
@@ -470,10 +584,9 @@
 
     var VIEWS_tree = function (p) {
       var T = D.tree || {};
-      p.appendChild(ptitle('Where it lives', 'One question at a time. The answer is the service; the neighbours tell you why not.'));
       var crumbs = h('div', { cls: 'crumbs' });
       var body = h('div');
-      p.appendChild(crumbs); p.appendChild(body);
+      p.appendChild(h('div', { cls: 'reading' }, [crumbs, body]));
 
       function paint() {
         clear(crumbs); clear(body);
@@ -555,7 +668,6 @@
 
     var VIEWS_classes = function (p) {
       var C = D.classes || {};
-      p.appendChild(ptitle('S3 classes', 'Answer the four questions the exam always asks. The winner is highlighted; every loser says why it lost.'));
 
       var out = h('div');
       var ctrls = h('div', { cls: 'card' });
@@ -666,33 +778,36 @@
     /* ================================================================
        4. COMPARE
        ================================================================ */
+    /* Mockup 04: two tinted zones, the line between them, a cache box when the
+       service keeps a local copy. 150x74 so it scales inside a compare card. */
     function miniDiagram(mini) {
-      var svg = s('svg', { viewBox: '0 0 300 110', 'aria-hidden': 'true' });
-      function box(x, y, w, hh, t, sub) {
-        svg.appendChild(s('rect', { x: x, y: y, width: w, height: hh, rx: 6, fill: 'var(--surface)', stroke: 'var(--rule)', 'stroke-width': 2 }));
-        svg.appendChild(s('text', { x: x + w / 2, y: y + (sub ? hh / 2 - 2 : hh / 2 + 5), cls: 'mstat', 'text-anchor': 'middle', text: t }));
-        if (sub) svg.appendChild(s('text', { x: x + w / 2, y: y + hh / 2 + 15, cls: 'mstat2', 'text-anchor': 'middle', text: sub }));
-      }
       var col = cvar(mini.color);
-      box(4, 30, 104, 50, mini.left || 'On-prem', mini.leftSub);
-      box(192, 30, 104, 50, mini.right || 'AWS', mini.rightSub);
+      /* width/height attributes are required for CSS height:auto to scale from the viewBox */
+      var svg = s('svg', { viewBox: '0 0 150 74', width: 150, height: 74, 'aria-hidden': 'true' });
+      svg.appendChild(s('rect', { x: 0, y: 12, width: 40, height: 50, rx: 4, fill: 'var(--zone-onprem)' }));
+      svg.appendChild(s('rect', { x: 110, y: 12, width: 40, height: 50, rx: 4, fill: 'var(--zone-aws)' }));
+      svg.appendChild(s('text', { x: 20, y: 8, cls: 'mzone', style: 'font-size:9px;letter-spacing:0', 'text-anchor': 'middle', text: 'ON-PREM' }));
+      svg.appendChild(s('text', { x: 130, y: 8, cls: 'mzone', style: 'font-size:9px;letter-spacing:0', 'text-anchor': 'middle', text: 'AWS' }));
+
+      var both = mini.dir === 'both';
+      svg.appendChild(s('line', { x1: both ? 46 : 40, y1: 37, x2: 104, y2: 37, stroke: col, 'stroke-width': 5,
+        'stroke-linecap': 'round', 'stroke-dasharray': mini.dashed ? '8 6' : null }));
+      svg.appendChild(s('path', { d: 'M98 30 L108 37 L98 44', fill: 'none', stroke: col, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+      if (both) svg.appendChild(s('path', { d: 'M52 30 L42 37 L52 44', fill: 'none', stroke: col, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+
       if (mini.cache) {
-        svg.appendChild(s('rect', { x: 118, y: 4, width: 64, height: 26, rx: 6, fill: 'var(--muted-fill)', stroke: col, 'stroke-width': 2 }));
-        svg.appendChild(s('text', { x: 150, y: 22, cls: 'msub', 'text-anchor': 'middle', fill: 'var(--ink2)', text: 'cache' }));
-        svg.appendChild(s('path', { d: 'M150 30 V44', cls: 'mline', stroke: col, 'stroke-width': 3 }));
+        svg.appendChild(s('rect', { x: 8, y: 26, width: 24, height: 22, rx: 3, fill: 'var(--surface)', stroke: 'var(--ink)', 'stroke-width': 2 }));
+        svg.appendChild(s('text', { x: 20, y: 41, cls: 'mlabel', style: 'font-size:8px;letter-spacing:0', 'text-anchor': 'middle', fill: 'var(--ink)', text: 'cache' }));
+      } else {
+        svg.appendChild(s('rect', { x: 12, y: 28, width: 16, height: 18, fill: 'none', stroke: 'var(--ink2)', 'stroke-width': 2, 'stroke-dasharray': '3 3' }));
       }
-      var dashed = mini.dashed ? '10 7' : null;
-      svg.appendChild(s('path', { d: 'M110 55 H190', cls: 'mline', stroke: col, 'stroke-width': 6, 'stroke-dasharray': dashed }));
-      svg.appendChild(s('path', { d: 'M182 48 L192 55 L182 62 Z', fill: col }));
-      if (mini.dir === 'both') svg.appendChild(s('path', { d: 'M118 48 L108 55 L118 62 Z', fill: col }));
-      svg.appendChild(s('text', { x: 150, y: 92, cls: 'msub', 'text-anchor': 'middle', fill: 'var(--ink2)', text: mini.note || '' }));
+      svg.appendChild(s('rect', { x: 122, y: 28, width: 16, height: 18, fill: 'var(--surface)', stroke: 'var(--ink)', 'stroke-width': 2 }));
       return svg;
     }
 
     var VIEWS_compare = function (p) {
-      p.appendChild(ptitle('Compare', 'Eight pairs that the exam keeps swapping. Read the deciding words, then take the quick check.'));
       var picker = h('div', { cls: 'chiprow', style: { marginBottom: '14px' } });
-      var body = h('div');
+      var body = h('div', { style: { display: 'flex', flexDirection: 'column', gap: '16px' } });
       p.appendChild(picker); p.appendChild(body);
 
       function paint() {
@@ -706,43 +821,69 @@
         });
         var pr = (D.pairs || []).filter(function (x) { return x.id === state.pair; })[0];
         if (!pr) return;
+        var sides = [pr.a, pr.b];
 
-        body.appendChild(h('h3', { style: { fontSize: '19px', marginBottom: '10px' }, text: pr.title }));
-        body.appendChild(h('div', { cls: 'pair' }, [pr.a, pr.b].map(function (side) {
-          return h('div', { cls: 'pcard', style: { borderTopColor: cvar(side.color) } }, [
-            miniDiagram(Object.assign({ color: side.color }, side.mini || {})),
-            h('h4', { style: { color: cvar(side.color) }, text: side.name }),
-            h('div', { cls: 'prow' }, [label('Job'), h('div', { text: side.job })]),
-            h('div', { cls: 'prow' }, [label('Deciding words'), h('div', { cls: 'mono small', text: side.words })]),
-            h('div', { cls: 'prow' }, [label('Lands in'), h('div', { text: side.lands })]),
-            h('div', { cls: 'prow' }, [label('Tempting wrong answer'), h('div', { cls: 'small', text: side.tempting })])
+        body.appendChild(h('h2', { style: { fontSize: '19px' }, text: pr.title }));
+
+        /* the two cards: name, diagram, one line on the job */
+        body.appendChild(h('div', { cls: 'pair' }, sides.map(function (side) {
+          var col = side.color ? cvar(side.color) : 'var(--ink)';
+          return h('div', { cls: 'pcard', style: { borderTopColor: side.color ? col : 'var(--ink2)' } }, [
+            h('b', { cls: 'pname', style: { color: col }, text: side.name }),
+            miniDiagram(Object.assign({ color: side.color || 'ink2' }, side.mini || {})),
+            h('span', { cls: 'pjob', text: side.job })
           ]);
         })));
-        body.appendChild(h('div', { cls: 'card' }, [label('Can both be right?'), h('div', { text: pr.both })]));
-        body.appendChild(quickCheck(pr));
+
+        /* one shared spec grid instead of repeating labels in both cards */
+        var spec = h('div', { cls: 'spec' });
+        function specRow(lab, get) {
+          spec.appendChild(h('div', { cls: 'specrow' }, [h('span', { text: lab })].concat(
+            sides.map(function (side) { return h('span', { text: get(side) }); }))));
+        }
+        specRow('Deciding words', function (x) { return x.words; });
+        specRow('Lands in', function (x) { return x.lands; });
+        specRow('Tempting', function (x) { return x.tempting; });
+        spec.appendChild(h('div', { cls: 'specrow' }, [
+          h('span', { text: 'Both?' }), h('span', { cls: 'span2', text: pr.both })
+        ]));
+        body.appendChild(spec);
+
+        body.appendChild(quickCheck(pr, sides));
       }
 
-      function quickCheck(pr) {
-        var box = h('div', { cls: 'card' });
+      function quickCheck(pr, sides) {
+        var box = h('div', { cls: 'card', style: { display: 'flex', flexDirection: 'column', gap: '10px' } });
+        function colFor(o, i) {
+          var side = sides[i];
+          return (side && side.color) ? cvar(side.color) : 'var(--ink)';
+        }
         function paintQ(chosen) {
           clear(box);
           box.appendChild(label('Quick check'));
-          box.appendChild(h('p', { style: { margin: '0 0 10px', fontSize: '15.5px' }, text: pr.check.q }));
-          pr.check.options.forEach(function (o) {
-            var btn = h('button', { cls: 'bigopt', type: 'button', on: { click: function () { if (!chosen) paintQ(o); } } }, [
-              h('b', { text: o.label }),
-              chosen && chosen === o ? h('div', { cls: 'small', style: { marginTop: '4px' }, text: o.why } ) : null
-            ]);
+          box.appendChild(h('p', { style: { margin: 0, fontSize: '15px', lineHeight: '1.5' }, text: pr.check.q }));
+          box.appendChild(h('div', { cls: 'qcgrid' }, pr.check.options.map(function (o, i) {
+            var col = colFor(o, i);
+            var btn = h('button', { cls: 'qcbtn', type: 'button', style: { '--c': col }, text: o.label,
+              on: { click: function () { if (!chosen) paintQ(o); } } });
             if (chosen) {
-              btn.style.background = o.ok ? 'var(--ok-bg)' : (o === chosen ? 'var(--bad-bg)' : 'var(--surface)');
-              btn.style.borderColor = o.ok ? 'var(--ok)' : (o === chosen ? 'var(--bad)' : 'var(--chip-border)');
-              btn.style.borderWidth = (o.ok || o === chosen) ? '2px' : '1px';
+              var good = o.ok, mine = o === chosen;
+              if (good || mine) {
+                btn.style.setProperty('--c', good ? 'var(--ok)' : 'var(--bad)');
+                btn.style.background = good ? 'var(--ok-bg)' : 'var(--bad-bg)';
+              } else {
+                btn.style.setProperty('--c', 'var(--chip-border)');
+                btn.style.color = 'var(--ink2)';
+              }
             }
-            box.appendChild(btn);
-          });
+            return btn;
+          })));
           if (chosen) {
-            box.appendChild(h('p', { style: { margin: '8px 0 0' }, text: (chosen.ok ? '✓ ' : '✕ ') + (chosen.ok ? 'Right. ' : '') + (pr.check.explain || '') }));
-            box.appendChild(h('button', { cls: 'btn ghost', type: 'button', style: { marginTop: '8px' }, text: 'Try again', on: { click: function () { paintQ(null); } } }));
+            box.appendChild(h('p', { style: { margin: 0, fontSize: '15px', lineHeight: '1.5' } }, [
+              h('b', { style: { color: chosen.ok ? 'var(--ok)' : 'var(--bad)' }, text: chosen.ok ? '\u2713 Right. ' : '\u2715 ' }),
+              (chosen.why ? chosen.why + ' ' : '') + (pr.check.explain || '')
+            ]));
+            box.appendChild(h('button', { cls: 'btn ghost', type: 'button', text: 'Try again', on: { click: function () { paintQ(null); } } }));
           }
         }
         paintQ(null);
@@ -761,68 +902,73 @@
       return all.filter(function (c) { return cardDue(state.cards, c.id); });
     }
 
+    /* Mockup 05: the five Leitner boxes as a row of small panels, then one card
+       that is front / 8px line-colour bar / tinted back, then the three ratings. */
     var VIEWS_cards = function (p) {
-      var head = h('div');
-      var body = h('div');
-      p.appendChild(ptitle('Trigger cards', 'Front is the exam phrase. Commit to an answer before you reveal.'));
+      var head = h('div', { style: { marginBottom: '16px' } });
+      var body = h('div', { style: { display: 'flex', flexDirection: 'column', gap: '16px' } });
       p.appendChild(head); p.appendChild(body);
 
       function paint() {
         clear(head); clear(body);
-        var due = (D.cards || []).filter(function (c) { return cardDue(state.cards, c.id); }).length;
         var counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
         (D.cards || []).forEach(function (c) { counts[cardBox(state.cards, c.id)]++; });
-
-        head.appendChild(h('div', { cls: 'card', style: { marginBottom: '12px' } }, [
-          h('div', { style: { display: 'flex', gap: '12px', alignItems: 'baseline', flexWrap: 'wrap' } }, [
-            h('b', { style: { fontFamily: 'var(--f-display)', fontSize: '17px' }, text: due + ' due today' }),
-            h('div', { cls: 'boxes' }, [1, 2, 3, 4, 5].map(function (b) {
-              return h('span', { cls: 'tag' }, [h('b', { text: 'box ' + b }), ' ' + counts[b]]);
-            }))
-          ]),
-          h('div', { cls: 'chiprow', style: { marginTop: '10px' } }, [
-            mode('due', 'Due'), mode('all', 'All shuffled'), mode('mine', 'Only my misses'),
-            resetBtn()
-          ])
+        head.appendChild(h('div', { cls: 'boxes' }, [1, 2, 3, 4, 5].map(function (b) {
+          return h('div', { cls: 'boxn' + (b === 1 ? ' on' : '') }, [
+            h('b', { text: String(counts[b]) }),
+            h('span', { text: b === 5 ? 'known' : 'box ' + b })
+          ]);
+        })));
+        head.appendChild(h('div', { cls: 'chiprow', style: { marginTop: '12px' } }, [
+          mode('due', 'Due'), mode('all', 'All shuffled'), mode('mine', 'Only my misses'), resetBtn()
         ]));
 
-        var pool = state.cardOrder && state.cardOrderMode === state.cardMode ? state.cardOrder : (state.cardOrder = cardPool(), state.cardOrderMode = state.cardMode, state.cardIdx = 0, state.cardOrder);
+        var pool = state.cardOrder && state.cardOrderMode === state.cardMode
+          ? state.cardOrder
+          : (state.cardOrder = cardPool(), state.cardOrderMode = state.cardMode, state.cardIdx = 0, state.cardOrder);
         if (!pool.length) {
-          body.appendChild(h('div', { cls: 'card' }, [h('p', { cls: 'muted', text: state.cardMode === 'due' ? 'Nothing due — switch to “All shuffled” to keep going.' : 'No cards in this mode.' })]));
+          body.appendChild(h('div', { cls: 'card' }, h('p', { cls: 'muted', style: { margin: 0 }, text: state.cardMode === 'due' ? 'Nothing due \u2014 switch to \u201cAll shuffled\u201d to keep going.' : 'No cards in this mode.' })));
           return;
         }
         if (state.cardIdx >= pool.length) state.cardIdx = 0;
         var c = pool[state.cardIdx];
         var t = topic(c.line);
+        var col = t.line ? cvar(t.color) : 'var(--ink2)';
 
-        var fc = h('div', { cls: 'fc' }, [
+        var fc = h('div', { cls: 'fc' });
+        fc.appendChild(h('div', { cls: 'fcfront' }, [
           h('div', { style: { display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' } }, [
-            h('p', { cls: 'seclabel', style: { margin: 0, color: cvar(t.color) }, text: t.name }),
-            h('span', { cls: 'tag mono', text: (state.cardIdx + 1) + ' / ' + pool.length + ' · box ' + cardBox(state.cards, c.id) })
+            h('span', { cls: 'seclabel', style: { margin: 0 }, text: 'The exam says' }),
+            h('span', { cls: 'mono small muted', text: (state.cardIdx + 1) + ' / ' + pool.length + ' \u00b7 box ' + cardBox(state.cards, c.id) })
           ]),
-          h('div', { cls: 'front', text: c.front })
-        ]);
+          h('p', { cls: 'front', text: c.front })
+        ]));
 
         if (!state.cardShown) {
-          fc.appendChild(h('div', { cls: 'hdr-sp' }));
-          fc.appendChild(h('button', { cls: 'btn wide', type: 'button', text: 'Reveal', on: { click: function () { state.cardShown = true; paint(); } } }));
+          fc.appendChild(h('div', { style: { padding: '0 20px 20px' } },
+            h('button', { cls: 'btn wide', type: 'button', text: 'Reveal', on: { click: function () { state.cardShown = true; paint(); } } })));
         } else {
-          if (c.mine) fc.appendChild(h('p', { cls: 'seclabel', style: { color: 'var(--bad)', margin: '4px 0 0' }, text: 'You missed this before' }));
-          fc.appendChild(h('div', { cls: 'svc', style: { color: cvar(t.color) }, text: c.service }));
-          fc.appendChild(h('p', { style: { margin: 0 }, text: c.why }));
-          if (c.tempting) {
-            fc.appendChild(h('div', { cls: 'temp' }, [h('b', { text: 'Tempting: ' }), c.tempting.answer + ' — ' + c.tempting.why]));
-          }
-          fc.appendChild(h('div', { cls: 'chiprow', style: { marginTop: 'auto', paddingTop: '10px' } }, [
-            h('button', { cls: 'btn ghost', type: 'button', style: { borderColor: 'var(--bad)', color: 'var(--bad)' }, text: 'Missed', on: { click: function () { rate(c, 'missed'); } } }),
-            h('button', { cls: 'btn ghost', type: 'button', text: 'Hesitated', on: { click: function () { rate(c, 'hesitated'); } } }),
-            h('button', { cls: 'btn ghost', type: 'button', style: { borderColor: 'var(--ok)', color: 'var(--ok)' }, text: 'Knew it', on: { click: function () { rate(c, 'knew'); } } })
-          ]));
+          fc.appendChild(h('div', { cls: 'fcbar', style: { background: col } }));
+          var back = h('div', { cls: 'fcback', style: { '--c': col } });
+          back.appendChild(h('span', { cls: 'seclabel', style: { margin: 0, color: t.line ? col : 'var(--ink2)' }, text: t.name }));
+          back.appendChild(h('div', { cls: 'svc', style: { color: t.line ? col : 'var(--ink)' }, text: c.service }));
+          back.appendChild(h('p', { text: c.why }));
+          if (c.tempting) back.appendChild(h('p', { cls: 'temp' }, [h('b', { text: 'Tempting: ' }), c.tempting.answer + ' \u2014 ' + c.tempting.why]));
+          if (c.mine) back.appendChild(h('span', { cls: 'ref', text: 'from your exam' + (c.ref ? ' \u00b7 ' + c.ref : '') }));
+          fc.appendChild(back);
         }
         body.appendChild(fc);
-        body.appendChild(h('div', { cls: 'chiprow', style: { marginTop: '10px' } }, [
-          h('button', { cls: 'btn ghost', type: 'button', text: '‹ Previous', on: { click: function () { state.cardIdx = (state.cardIdx - 1 + pool.length) % pool.length; state.cardShown = false; paint(); } } }),
-          h('button', { cls: 'btn ghost', type: 'button', text: 'Skip ›', on: { click: function () { state.cardIdx = (state.cardIdx + 1) % pool.length; state.cardShown = false; paint(); } } })
+
+        if (state.cardShown) {
+          body.appendChild(h('div', { cls: 'rate' }, [
+            h('button', { cls: 'rmiss', type: 'button', on: { click: function () { rate(c, 'missed'); } } }, ['Missed', h('span', { text: '\u2192 box 1' })]),
+            h('button', { type: 'button', on: { click: function () { rate(c, 'hesitated'); } } }, ['Hesitated', h('span', { text: 'stay' })]),
+            h('button', { cls: 'rknew', type: 'button', on: { click: function () { rate(c, 'knew'); } } }, ['Knew it', h('span', { text: '\u2192 box ' + Math.min(5, cardBox(state.cards, c.id) + 1) })])
+          ]));
+        }
+        body.appendChild(h('div', { cls: 'chiprow' }, [
+          h('button', { cls: 'btn ghost', type: 'button', text: '\u2039 Previous', on: { click: function () { state.cardIdx = (state.cardIdx - 1 + pool.length) % pool.length; state.cardShown = false; paint(); } } }),
+          h('button', { cls: 'btn ghost', type: 'button', text: 'Skip \u203a', on: { click: function () { state.cardIdx = (state.cardIdx + 1) % pool.length; state.cardShown = false; paint(); } } })
         ]));
 
         function rate(card, how) {
@@ -831,6 +977,7 @@
           else if (how === 'knew') box = Math.min(5, box + 1);
           state.cards[card.id] = { box: box, due: Date.now() + BOX_DAYS[box] * DAY };
           saveCards();
+          paintHdr(state.tab);
           state.cardShown = false;
           if (state.cardMode === 'due') { state.cardOrder = null; }
           else { state.cardIdx = (state.cardIdx + 1) % pool.length; }
@@ -841,14 +988,13 @@
         return h('button', { cls: 'chip sm', type: 'button', text: t, 'aria-pressed': String(state.cardMode === v), on: { click: function () { state.cardMode = v; state.cardOrder = null; state.cardShown = false; paint(); } } });
       }
       function resetBtn() {
-        var wrap = h('span');
+        var wrap = h('span', { cls: 'chiprow' });
         function ask() {
           clear(wrap);
-          wrap.appendChild(h('span', { cls: 'small', style: { marginRight: '6px' }, text: 'Reset all boxes?' }));
           wrap.appendChild(h('button', { cls: 'chip sm', type: 'button', text: 'Yes, reset', on: { click: function () { state.cards = {}; saveCards(); state.cardOrder = null; state.cardShown = false; paint(); } } }));
           wrap.appendChild(h('button', { cls: 'chip sm', type: 'button', text: 'Cancel', on: { click: idle } }));
         }
-        function idle() { clear(wrap); wrap.appendChild(h('button', { cls: 'chip sm', type: 'button', text: 'Reset', on: { click: ask } })); }
+        function idle() { clear(wrap); wrap.appendChild(h('button', { cls: 'chip sm', type: 'button', text: 'Reset boxes', on: { click: ask } })); }
         idle();
         return wrap;
       }
@@ -879,6 +1025,8 @@
     ];
     var KEY = ['A', 'B', 'C', 'D', 'E'];
 
+    function filledNow(V) { return STUB_SLOTS.every(function (sl) { return V.stub[sl.k]; }); }
+
     function drillPool() {
       var all = D.drills || [];
       var f = state.drillFilter;
@@ -889,7 +1037,6 @@
     }
 
     var VIEWS_drill = function (p) {
-      p.appendChild(ptitle('Drill', 'Stub before options. Cross out with a reason. Then choose.'));
       if (D.method && D.method.length) {
         p.appendChild(h('details', { cls: 'method' }, [
           h('summary', { text: 'The reduction method' }),
@@ -918,7 +1065,7 @@
             cls: 'chip sm', type: 'button',
             'aria-pressed': String(state.drillFilter.mode === 'line' && state.drillFilter.line === id),
             on: { click: function () { state.drillFilter = { mode: 'line', line: id }; state.drillOrder = null; paintAll(); } }
-          }, [h('span', { cls: 'dot', style: { background: cvar(t.color) } }), t.name]));
+          }, [topicDot(t), t.name]));
         });
       }
 
@@ -949,14 +1096,17 @@
         if (d.multi) card.appendChild(h('p', { cls: 'seclabel', style: { color: 'var(--bad)', marginTop: '8px' }, text: 'Select TWO' }));
 
         /* stub */
-        card.appendChild(h('div', { style: { marginTop: '14px' } }, label('Fill the stub first')));
+        card.appendChild(h('div', { cls: 'stephd', style: { marginTop: '18px' } }, [
+          h('h3', { cls: 'step', text: '1 \u00b7 Fill the stub' }),
+          h('span', { cls: 'small', style: { color: filledNow(V) ? 'var(--ok)' : 'var(--ink2)' }, text: filledNow(V) ? 'done' : 'in progress' })
+        ]));
         var stub = h('div', { cls: 'stub' });
         STUB_SLOTS.forEach(function (sl) {
           var row = h('div', { cls: 'stubrow' }, [
-            h('span', { cls: 'seclabel', style: { margin: 0, paddingTop: '12px' }, text: sl.label }),
+            h('span', { cls: 'stublab', text: sl.label }),
             h('div', { cls: 'chiprow' }, ((D.stubChoices || {})[sl.k] || []).map(function (ch) {
               return h('button', {
-                cls: 'chip sm', type: 'button', text: ch, 'aria-pressed': String(V.stub[sl.k] === ch),
+                cls: 'chip', type: 'button', text: ch, 'aria-pressed': String(V.stub[sl.k] === ch),
                 disabled: V.submitted,
                 on: { click: function () { V.stub[sl.k] = ch; paintCard(); } }
               });
@@ -965,7 +1115,7 @@
           if (V.submitted) {
             var truth = (d.stub || {})[sl.k];
             var okSlot = truth === 'any' || truth === V.stub[sl.k];
-            row.appendChild(h('div', { style: { gridColumn: '1 / -1', fontSize: '13.5px' } }, [
+            row.appendChild(h('div', { style: { fontSize: '13px' } }, [
               h('span', { cls: 'mark ' + (okSlot ? 'y' : 'n'), text: okSlot ? '✓ ' : '✕ ' }),
               okSlot ? (truth === 'any' ? 'any value accepted' : 'right') : ('truth: ' + truth)
             ]));
@@ -979,8 +1129,9 @@
         /* options */
         var opts = h('div', { cls: 'grid', style: { marginTop: '16px' } });
         if (!filled) opts.classList.add('locked');
-        card.appendChild(h('div', { style: { marginTop: '16px' } }, [
-          label(filled ? 'Options' : 'Options — locked until the stub is full'),
+        card.appendChild(h('div', { cls: 'stephd', style: { marginTop: '18px' } }, [
+          h('h3', { cls: 'step', text: '2 · Cross out, then pick' }),
+          filled ? null : h('span', { cls: 'small muted', text: 'locked until the stub is full' })
         ]));
         d.options.forEach(function (o, i) {
           var picked = V.pick.indexOf(o.id) >= 0;
@@ -996,7 +1147,7 @@
           }
           var row = h('div', { cls: cls, tabindex: V.submitted ? null : '0', data: { key: KEY[i] } });
           row.appendChild(h('div', { cls: 'otop' }, [
-            h('span', { cls: 'okey', text: KEY[i] + '.' }),
+            h('span', { cls: 'okey', text: KEY[i] }),
             h('span', { cls: 'otxt', text: o.label }),
             V.submitted ? h('span', { cls: 'mark ' + (o.ok ? 'y' : (picked ? 'n' : '')), text: o.ok ? '✓' : (picked ? '✕' : '') }) : null
           ]));
@@ -1051,8 +1202,9 @@
 
         body.appendChild(h('div', { cls: 'chiprow', style: { marginTop: '10px' } }, [
           h('button', { cls: 'btn ghost', type: 'button', text: '‹ Previous', on: { click: function () { state.drillIdx = (state.drillIdx - 1 + pool.length) % pool.length; state.drillView = null; paintCard(); } } }),
-          h('button', { cls: 'btn', type: 'button', text: 'Next ›', on: { click: function () { state.drillIdx = (state.drillIdx + 1) % pool.length; state.drillView = null; paintCard(); } } })
+          h('button', { cls: 'btn', type: 'button', text: 'Next scenario ›', on: { click: function () { state.drillIdx = (state.drillIdx + 1) % pool.length; state.drillView = null; paintCard(); } } })
         ]));
+        paintHdr(state.tab);
 
         function submit() {
           V.submitted = true;
@@ -1073,29 +1225,35 @@
 
         function rlabel(k) { var r = REASONS.filter(function (x) { return x.k === k; })[0]; return r ? r.label : k; }
 
+        /* Mockup 03 step 3: which stub slot broke, the explanation, the tag. */
         function feedback(d, V) {
-          var wrap = h('div', { style: { marginTop: '14px' } });
+          var wrap = h('div', { cls: 'card', style: { marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '10px' } });
           var correctIds = d.options.filter(function (o) { return o.ok; }).map(function (o) { return o.id; });
           var ok = V.pick.length === correctIds.length && correctIds.every(function (id) { return V.pick.indexOf(id) >= 0; });
-          wrap.appendChild(h('div', {
-            cls: 'card',
-            style: { background: ok ? 'var(--ok-bg)' : 'var(--bad-bg)', borderColor: ok ? 'var(--ok)' : 'var(--bad)', borderWidth: '2px' }
-          }, [
-            label(ok ? 'Correct' : 'Not right'),
-            h('p', { style: { margin: '0 0 6px' } }, [h('b', { text: 'Answer: ' }), correctIds.map(function (id) { return KEY[indexOfOpt(d, id)]; }).join(', ')]),
-            h('p', { style: { margin: 0 }, text: d.explain })
+
+          wrap.appendChild(h('h3', { cls: 'step', text: '3 \u00b7 Where it broke' }));
+          wrap.appendChild(h('div', { cls: 'slots' }, STUB_SLOTS.map(function (sl) {
+            var truth = (d.stub || {})[sl.k];
+            var good = truth === 'any' || truth === V.stub[sl.k];
+            var short = sl.label.split(' ')[0].replace('/', '');
+            return h('span', { cls: good ? 'y' : 'n', text: short + (good ? ' \u2713' : ' \u2715') });
+          })));
+          wrap.appendChild(h('p', { style: { margin: 0, fontSize: '15px', lineHeight: '1.55' } }, [
+            h('b', { style: { color: ok ? 'var(--ok)' : 'var(--bad)' }, text: (ok ? '\u2713 Correct. ' : '\u2715 Not right. ') }),
+            'Answer: ' + correctIds.map(function (id) { return KEY[indexOfOpt(d, id)]; }).join(', ') + '. ' + (d.explain || '')
           ]));
           if (d.deciding && d.deciding.length) {
-            wrap.appendChild(h('div', { cls: 'card' }, [
+            wrap.appendChild(h('div', null, [
               label('Deciding words'),
-              h('div', { cls: 'chiprow' }, d.deciding.map(function (w) { return h('span', { cls: 'tag mono', style: { background: 'var(--hl)' }, text: w }); }))
+              h('div', { cls: 'chiprow' }, d.deciding.map(function (w) {
+                return h('span', { cls: 'tag', style: { background: 'var(--hl)', borderColor: 'transparent' }, text: w });
+              }))
             ]));
           }
-          var tagBox = h('div', { cls: 'card' });
+          var tagBox = h('div');
           function paintTag() {
             clear(tagBox);
-            tagBox.appendChild(label('Error tag' + (d.tag ? ' — suggested: ' + d.tag : '')));
-            tagBox.appendChild(h('p', { cls: 'small muted', style: { margin: '0 0 8px' }, text: 'Confirm what went wrong so the stats know what to drill.' }));
+            tagBox.appendChild(label('Error tag' + (d.tag ? ' \u2014 suggested: ' + d.tag : '')));
             tagBox.appendChild(h('div', { cls: 'chiprow' }, TAGS.map(function (tg) {
               return h('button', {
                 cls: 'chip sm', type: 'button', text: tg.label, 'aria-pressed': String(V.tag === tg.k),
@@ -1174,7 +1332,7 @@
             h('div', null, lines.map(function (id) {
               var t = topic(id), b = perLine[id];
               return h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', padding: '5px 0', fontSize: '14px' } }, [
-                h('span', { cls: 'dot', style: { background: cvar(t.color) } }),
+                topicDot(t) || h('span', { cls: 'dot', style: { background: 'var(--ink2)' } }),
                 h('span', { style: { flex: '1' }, text: t.name }),
                 h('span', { cls: 'mono', text: b.ok + ' / ' + b.n })
               ]);
@@ -1201,7 +1359,6 @@
        7. TRAPS
        ================================================================ */
     var VIEWS_traps = function (p) {
-      p.appendChild(ptitle('Traps', 'The wrong answers that keep working on people. Each links to the drills that test it.'));
       p.appendChild(h('div', { cls: 'grid g2' }, (D.traps || []).map(function (t) {
         return h('div', { cls: 'trap' }, [
           h('p', { cls: 'eyebrow', text: 'Trap' }),
@@ -1231,11 +1388,10 @@
        8. CHEAT SHEET
        ================================================================ */
     var VIEWS_cheat = function (p) {
-      p.appendChild(ptitle('Cheat sheet', 'Print it: one half-page, black on white.'));
       p.appendChild(h('div', { cls: 'noprint', style: { marginBottom: '12px' } },
         h('button', { cls: 'btn ghost', type: 'button', text: 'Print', on: { click: function () { window.print(); } } })));
       if (phone()) p.appendChild(h('p', { cls: 'small muted noprint', style: { margin: '0 0 8px' }, text: 'Scroll the block sideways to read the full lines \u2014 or print it.' }));
-      p.appendChild(h('div', { cls: 'cheat' }, h('pre', { text: D.cheat || '' })));
+      p.appendChild(h('div', { cls: 'cheat reading' }, h('pre', { text: D.cheat || '' })));
     };
 
     var VIEWS = {
