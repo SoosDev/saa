@@ -120,6 +120,17 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | AD Connector | Confirmed from Directory Service and FSx docs: RDS is compatible with Managed Microsoft AD only; FSx for Windows supports neither AD Connector nor Simple AD. Managed Microsoft AD: 2 DCs in 2 AZs, trusts. **Simple AD closed to new customers since 30 Jul 2026** (existing customers unaffected; AWS points to Managed Microsoft AD or AD Connector). re-verified 2026-09-24 (AWS MCP) |
 | ADS Discovery Connector | Full shutdown 17 Nov 2025 (the old agentless connector). AWS Transform discovery tool is agentless (OVA for vCenter, VHD for Hyper-V, CSV import) and collects network connections over SSH/WinRM. re-verified 2026-09-24 (AWS MCP) |
 
+| **Session 3 — networking** (verified 2026-09-24 via AWS MCP; URLs in `docs/session-03-networking.md`) | |
+| VPC / subnets | IPv4 CIDR /16–/28; **5 reserved addresses per subnet**; IPv6 VPC /56, subnet /64. |
+| NAT gateway | Zonal: one AZ, one per AZ for resiliency, 5 → 100 Gbps, no security group. **Regional NAT gateway (Nov 2025)**: expands across AZs, **no public subnet needed**. NAT AMI past end of maintenance; NAT instance needs source/dest check off. |
+| SG vs NACL | SG: allow-only, stateful. NACL: numbered, lowest first, first match, allow + deny, stateless (open ephemeral 1024–65535). |
+| Admin access | Bastion goes in a **public** subnet (bank answer). AWS now prefers **Session Manager** or **EC2 Instance Connect Endpoint** (no public IP, no inbound SSH). |
+| VPC peering | **Not transitive**, **no edge-to-edge** (IGW, NAT, VPN, DX, gateway endpoint), no overlapping CIDRs, cross-account and inter-Region. |
+| Transit Gateway | Hub with attachments (VPC, VPN, DX gateway, Connect, peering incl. inter-Region); route tables for segmentation; billed per attachment-hour + per GB. |
+| Endpoints | Gateway endpoints: **S3 and DynamoDB only**, free, route-table based, not usable from on-prem / other-Region peers / through TGW. Interface endpoints: ENI, per hour per AZ + per GB. PrivateLink endpoint services behind NLB. **Cross-Region PrivateLink** for select services (Nov 2025). |
+| Site-to-Site VPN | 2 tunnels in different AZs; **1.25 Gbps per standard tunnel; Large Bandwidth Tunnels up to 5 Gbps** (TGW / Cloud WAN only). Accelerated VPN: TGW only. |
+| Direct Connect | Dedicated **1/10/100/400 Gbps**; hosted 50 Mbps–**25 Gbps**. Not encrypted by default; **MACsec on 10/100/400 Gbps dedicated**; or IPsec VPN over DX. New dedicated: weeks to months; hosted on an existing partner port: hours to days. VPN backup recommended for DX ≤ 1 Gbps. |
+
 **Rule for every new session:** before publishing, check every number and every "is it still available" claim against current AWS docs. Add new changes to this table and to the session's callouts. Never print a limit you did not verify.
 
 ## 7. Design

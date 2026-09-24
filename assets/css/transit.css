@@ -19,6 +19,10 @@
   --dtt:#66707B; --dtt-text:#56626E;/* DTT / Snow (always dashed + labelled) */
   --dms:#0E8466;                    /* DMS */
   --mgn:#C4302A;                    /* MGN (and DRS, dashed) */
+  /* Session 3 (networking): three hues, declared in docs/session-03-networking.md */
+  --dx:#A3237A;                     /* Direct Connect */
+  --tgw:#0A7A99; --tgw-text:#086A85;/* Transit Gateway */
+  --pl:#736400;                     /* PrivateLink / VPC endpoints */
   --on-line:#FFFFFF;                /* text on a line-coloured button */
 
   --sel-ink:#15202B; --sel-on:#FFFFFF;
@@ -42,6 +46,7 @@
     --link:#6C9CEC; --link-hover:#9DBDF2;
     --ds:#6C9CEC; --gw:#F0A63C; --gw-text:#F0A63C; --tf:#B48AE6;
     --dtt:#9BA7B3; --dtt-text:#9BA7B3; --dms:#3FC49E; --mgn:#EC7A70; --on-line:#10161C;
+    --dx:#E27BBE; --tgw:#4DB6D9; --tgw-text:#4DB6D9; --pl:#C2C25A;
     --sel-ink:#E6EAEE; --sel-on:#10161C;
     --focus:#6C9CEC;
     color-scheme:dark;
@@ -55,6 +60,7 @@
   --link:#6C9CEC; --link-hover:#9DBDF2;
   --ds:#6C9CEC; --gw:#F0A63C; --gw-text:#F0A63C; --tf:#B48AE6;
   --dtt:#9BA7B3; --dtt-text:#9BA7B3; --dms:#3FC49E; --mgn:#EC7A70; --on-line:#10161C;
+    --dx:#E27BBE; --tgw:#4DB6D9; --tgw-text:#4DB6D9; --pl:#C2C25A;
   --sel-ink:#E6EAEE; --sel-on:#10161C;
   --focus:#6C9CEC;
   color-scheme:dark;

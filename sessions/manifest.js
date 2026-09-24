@@ -3,7 +3,7 @@
 window.SAA_SESSIONS = [
   { id: '01-storage', n: 1, title: 'Storage & data movement', domains: 'D1 D2 D3 D4', path: 'sessions/01-storage/', totals: { chapters: 12, drills: 42, cards: 52 } },
   { id: '02-migration', n: 2, title: 'Migration & hybrid', domains: 'D1 D2 D3 D4', path: 'sessions/02-migration/', totals: { chapters: 10, drills: 30, cards: 40 } },
-  { id: '03-networking', n: 3, title: 'Networking & connectivity', soon: true, start: 'weak' },
+  { id: '03-networking', n: 3, title: 'Networking & connectivity', domains: 'D1 D2 D3 D4', path: 'sessions/03-networking/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '04-global', n: 4, title: 'Global architecture & edge', soon: true, start: 'weak' },
   { id: '05-security', n: 5, title: 'Security services & identity', soon: true, start: 'mixed' },
   { id: '06-governance', n: 6, title: 'Multi-account & governance', soon: true, start: 'weak' },
