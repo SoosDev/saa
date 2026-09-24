@@ -24,7 +24,7 @@ Object.assign(window.SESSION, {
       built: 'The **truck**. When the pipe would take weeks, the data travels physically: bring devices to an AWS Data Transfer Terminal (current) — or, in older question banks, ship a Snow Family device.',
       says: ['hundreds of TB / PB', 'would take weeks or months', 'limited / no connectivity', 'one-time import'],
       switch: [{ to: 'datasync', when: 'the transfer is ongoing, or the link is fat enough' }],
-      update: 'AWS Snow Family devices are **no longer orderable by new customers**. AWS recommends DataSync for online and **Data Transfer Terminal** (or Marketplace partners) for offline transfer, and Outposts for edge compute. Treat Snow and DTT as the same trigger.' },
+      update: 'AWS Snow Family devices are **no longer orderable by new customers**. AWS recommends DataSync for online and **Data Transfer Terminal** (or Marketplace partners) for offline transfer, and Outposts for edge compute. Treat Snow and DTT as the same trigger. Data Transfer Terminal is currently available only to **Enterprise Support** customers (others ask AWS Support).' },
     { id: 'dms', name: 'DMS', short: 'DMS', cls: 'dms', alias: ['DMS'],
       misses: 'Q56 and Quiz Q3 (DataSync picked for a database).', verb: 'replicates database rows', from: 'DB engine → RDS / Aurora / S3 · full load + CDC',
       built: 'A **row replicator**. Copies database tables — full load, then ongoing changes (CDC) — while the source stays online. Can write to S3 as CSV or Parquet. Session 2 goes deep.',

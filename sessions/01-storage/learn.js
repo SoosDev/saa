@@ -304,7 +304,7 @@
       { pair: 'ds-tf' },
       { h: '{truck|DTT / Snow}: the truck' },
       'When the pipe would take weeks, the data travels physically.',
-      { callout: 'Since **7 Nov 2025** AWS no longer offers Snow Family devices to new customers (existing customers are unaffected). For offline transfer AWS now points to **AWS Data Transfer Terminal**: reserve a slot at an AWS facility, bring your own storage devices and upload over a high-bandwidth connection. Marketplace partners are the other option, and Outposts covers edge compute. Question banks still say Snowball.', kind: 'update' },
+      { callout: 'Since **7 Nov 2025** AWS no longer offers Snow Family devices to new customers (existing customers are unaffected). For offline transfer AWS now points to **AWS Data Transfer Terminal**: reserve a slot at an AWS facility, bring your own storage devices and upload over a high-bandwidth connection. Marketplace partners are the other option, and Outposts covers edge compute. Question banks still say Snowball. Data Transfer Terminal is currently available only to **Enterprise Support** customers (others ask AWS Support).', kind: 'update' },
       'The trigger is the same whatever the option calls it: hundreds of TB or PB, a thin link or none, a one-time import, “would take weeks or months”.',
       { pair: 'truck' },
       { h: 'Upload vs download at the edge' },

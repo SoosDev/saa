@@ -24,7 +24,7 @@
         says: ['discover servers', 'utilisation before migrating', 'dependency mapping', 'which servers talk to each other', 'one dashboard for progress', 'migration waves'],
         switch: [{ to: 'mgn', when: 'the servers are planned and ready to move' }],
         traps: ['Agentless discovery when the question needs dependencies.', 'Old names: Migration Hub / ADS now mean AWS Transform.'],
-        update: '**Migration Hub** and **Application Discovery Service** closed to new customers on 7 Nov 2025 (existing customers continue). AWS points to **AWS Transform**: agent-based and agentless discovery, dependency mapping, wave planning, strategy and EC2 recommendations. Banks still use the old names; the trigger is the same.' },
+        update: '**Migration Hub** and **Application Discovery Service** closed to new customers on 7 Nov 2025 (existing customers continue). AWS points to **AWS Transform**: an agentless discovery tool (OVA for vCenter, VHD for Hyper-V, or a CSV server import) that also collects utilisation and server-to-server connections over SSH/WinRM, then dependency mapping, wave planning, a business case and EC2 recommendations. Banks still use the old names and still tie dependencies to the agent; the trigger is the same.' },
       { id: 'mgn', name: 'MGN', short: 'MGN', cls: 'mgn', alias: ['MGN', 'Application Migration Service'],
         verb: 'rehosts whole servers', from: 'physical · VMware · Hyper-V · other cloud → EC2',
         built: 'A **server mover**. Continuous block-level replication of whole disks into a staging area, test launches, then cutover in minutes. **The target is always EC2.** AWS docs now call it “AWS Transform MGN”; banks may say SMS or CloudEndure Migration.',
@@ -53,7 +53,7 @@
         built: 'The **truck** for the initial load when the pipe is thin. Seed offline, then DMS CDC or DataSync catches up online, so downtime stays minimal even for a huge database.',
         says: ['many TB, thin pipe', 'minimal downtime anyway', 'seed, then sync'],
         switch: [{ to: 'dms', when: 'after the seed, to stream the changes' }],
-        update: 'Snow Family devices are not offered to new customers (since 7 Nov 2025). Offline transfer today: **AWS Data Transfer Terminal** or Marketplace partners.' },
+        update: 'Snow Family devices are not offered to new customers (since 7 Nov 2025). Offline transfer today: **AWS Data Transfer Terminal** or Marketplace partners. Data Transfer Terminal is currently available only to **Enterprise Support** customers (others ask AWS Support).' },
       { id: 'gateway', name: 'Storage Gateway', short: 'Gateway', cls: 'gw', textVar: 'gw-text', alias: ['Gateway'],
         verb: 'bridges; cache stays local', from: 'on-prem apps ⇄ S3',
         built: 'The **bridge** from Session 1: on-prem applications keep a file share at LAN speed while the data lives in S3.',
@@ -61,7 +61,7 @@
         switch: [{ to: 'datasync', when: 'the files leave on-prem for good' }] },
       { id: 'placement', name: 'Outposts · Local Zones · Wavelength', short: 'Placement', cls: 'ink', width: 4, alias: ['Outposts', 'Local Zone', 'Wavelength', 'Anywhere'],
         verb: 'puts AWS compute where it must run', from: 'your building · a city · a 5G network',
-        built: 'The **whose building?** line. **Outposts**: AWS-managed racks in your data center or factory. **Local Zones**: AWS sites in a metro area, near users. **Wavelength**: AWS inside a telco 5G network. **ECS Anywhere / EKS Anywhere**: your own servers, AWS control plane.',
+        built: 'The **whose building?** line. **Outposts**: AWS-managed racks in your data center or factory. **Local Zones**: AWS sites in a metro area, near users. **Wavelength**: AWS inside a telco 5G network. **ECS Anywhere**: your own servers, the ECS control plane in AWS (**EKS Anywhere** runs the whole Kubernetes cluster, control plane too, on your servers).',
         says: ['data must stay in our facility', 'single-digit ms for users in one city', '5G / mobile edge', 'AWS APIs on-premises', 'containers on our own servers'],
         switch: [{ to: 'ops', when: 'you only need to manage existing on-prem servers' }],
         traps: ['Local Zones for “data must stay in our facility”: that is Outposts.'],
@@ -69,6 +69,7 @@
       { id: 'identity', name: 'Directory Service', short: 'Identity', cls: 'ink', width: 4, alias: ['AD Connector', 'Managed Microsoft AD', 'Managed AD', 'Simple AD'],
         verb: 'connects AWS to your Active Directory', from: 'on-prem AD ⇄ AWS',
         built: '**Proxy or real AD?** **AD Connector** forwards every request to on-prem AD and stores nothing. **AWS Managed Microsoft AD** is a real domain (two DCs in two AZs) with trusts. **Simple AD** is small Samba, no trusts.',
+        update: '**Simple AD** closed to new customers on 30 Jul 2026 (existing customers keep it and can still create directories). AWS points to Managed Microsoft AD or AD Connector. Banks still use Simple AD as the “small and cheap” answer.',
         says: ['sign in with existing AD credentials', 'RDS SQL Server Windows auth', 'FSx for Windows domain', 'trust with on-prem forest', 'survive a link outage'],
         switch: [{ to: 'dns', when: 'the problem is resolving names, not signing in' }],
         traps: ['AD Connector for RDS SQL Server or FSx for Windows.', 'AD Connector when authentication must survive a link outage.'] },
@@ -177,8 +178,8 @@ DB        -> DMS   rows · source stays online · full load + CDC = minimal down
    huge + thin pipe -> truck initial load + DMS CDC
 BYTES     VPN now, DX later (weeks) · seed offline + sync online
 HYBRID    your building -> Outposts · city -> Local Zones · 5G -> Wavelength
-   own servers + AWS control -> ECS/EKS Anywhere · patch on-prem -> SSM hybrid
-   AD: proxy only -> AD Connector (no RDS SQL/FSx, dies with link) · real AD -> Managed AD · tiny -> Simple AD
+   containers on own servers -> ECS Anywhere / EKS Anywhere · patch on-prem -> SSM hybrid
+   AD: proxy only -> AD Connector (no RDS SQL/FSx, dies with link) · real AD -> Managed AD · tiny -> Simple AD (closed to new 30 Jul 2026)
    DNS: on-prem asks AWS -> INBOUND · AWS asks on-prem -> OUTBOUND + rule
 RELOCATE  vSphere as-is -> VMware Cloud on AWS (banks) · today Amazon EVS + HCX
 NEVER: MGN->RDS · DMS converts schema · full-load-only for "minimal downtime" ·
@@ -210,7 +211,7 @@ NEVER: MGN->RDS · DMS converts schema · full-load-only for "minimal downtime" 
         rows: [['Deciding words', 'our facility, factory, data must stay on-site', 'users in one city, single-digit ms', '5G, mobile, AR/VR on phones'], ['Who runs the building', 'you', 'AWS', 'the telco']],
         check: { q: '“Data must never leave our plant, and we want AWS APIs on-site.”', opts: ['Outposts', 'Local Zones', 'Wavelength'], a: 0, why: 'Only Outposts puts AWS in your own building.' } },
       { id: 'ad', short: 'AD Connector · Managed AD', title: 'AD Connector vs Managed Microsoft AD vs Simple AD',
-        sides: [{ name: 'AD Connector', line: 'identity', fig: { dir: 'both', left: 'AWS', right: 'ON-PREM' }, gist: 'A **proxy**. Stores nothing; every request goes to on-prem AD.' }, { name: 'Managed Microsoft AD', line: 'identity', fig: { dir: 'both', cache: true, cacheLabel: 'AD', left: 'ON-PREM', right: 'AWS' }, gist: 'A **real AD** in AWS (2 DCs, 2 AZs) with a trust to on-prem.' }, { name: 'Simple AD', line: 'identity', fig: { dir: 'none', left: 'AWS', right: 'AWS' }, gist: '**Tiny**, Samba-based, no trusts.' }],
+        sides: [{ name: 'AD Connector', line: 'identity', fig: { dir: 'both', left: 'AWS', right: 'ON-PREM' }, gist: 'A **proxy**. Stores nothing; every request goes to on-prem AD.' }, { name: 'Managed Microsoft AD', line: 'identity', fig: { dir: 'both', cache: true, cacheLabel: 'AD', left: 'ON-PREM', right: 'AWS' }, gist: 'A **real AD** in AWS (2 DCs, 2 AZs) with a trust to on-prem.' }, { name: 'Simple AD', line: 'identity', fig: { dir: 'none', left: 'AWS', right: 'AWS' }, gist: '**Tiny**, Samba-based, no trusts. Closed to new customers since 30 Jul 2026.' }],
         rows: [['RDS SQL Server / FSx for Windows', 'not compatible', 'yes', 'no'], ['Link to on-prem down', 'sign-in fails', 'keeps working', 'n/a'], ['Deciding words', 'console sign-in with AD, store nothing, cheapest', 'Windows auth, domain join, trust, resilient', 'small, basic, no on-prem AD']],
         check: { q: '“FSx for Windows must join the domain; staff keep their on-prem credentials.”', opts: ['AD Connector', 'Managed AD + trust', 'Simple AD'], a: 1, why: 'FSx for Windows does not support AD Connector. A real AD with a trust keeps the on-prem credentials.' } },
       { id: 'resolver', short: 'Inbound · Outbound', title: 'Resolver inbound vs outbound — which way does the query go?',
@@ -232,7 +233,7 @@ NEVER: MGN->RDS · DMS converts schema · full-load-only for "minimal downtime" 
       { title: 'Direct Connect with a 2-week deadline', x: 'DX takes weeks to provision. Use a Site-to-Site VPN or the internet now; order DX for later.', drills: ['N22', 'N5'] },
       { title: 'Old names as distractors or as answers', x: 'SMS and CloudEndure Migration mean MGN. Migration Hub and Application Discovery Service mean AWS Transform. Answer the trigger.', drills: ['M2', 'N2', 'N8'] },
       { title: '“Refactor” when the scenario says quickly with minimal changes', x: 'Quick + minimal change = rehost. Refactoring is the slowest R.', drills: ['M1', 'N18'] },
-      { title: 'Agentless discovery when the question needs dependencies', x: 'The agentless collector sees VM inventory and utilisation. Dependencies (network connections, processes) need the agent.', drills: ['M2', 'N1'] }
+      { title: 'Agentless discovery when the question needs dependencies', x: 'In exam banks the agentless collector sees VM inventory and utilisation, and dependencies (network connections, processes) need the agent. Today AWS Transform’s agentless tool also collects connections, but the banks’ rule still decides the answer.', drills: ['M2', 'N1'] }
     ],
 
     log: [

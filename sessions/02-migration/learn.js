@@ -32,10 +32,10 @@
         { label: 'Patch, run commands, inventory', next: 'ssm' }] }
     },
     results: {
-      outposts: { title: 'AWS Outposts', line: 'placement', text: 'AWS-managed racks installed in your building, running AWS services with the same APIs, linked to a parent Region.', facts: ['Triggers: data residency, local processing, very low latency to on-prem systems', 'Needs a link back to its parent Region'], update: 'The 1U and 2U Outposts servers are no longer sold to new customers; racks remain (second generation since 2025).', whyNot: [['Local Zones', 'an AWS site in a city, not your building'], ['Wavelength', 'inside a telco 5G network']] },
+      outposts: { title: 'AWS Outposts', line: 'placement', text: 'AWS-managed racks installed in your building, running AWS services with the same APIs, linked to a parent Region.', facts: ['Triggers: data residency, local processing, very low latency to on-prem systems', 'Needs a link back to its parent Region'], update: 'The 1U and 2U Outposts servers are no longer sold to new customers; racks remain (second generation since 2025, single-rack option since Sept 2026).', whyNot: [['Local Zones', 'an AWS site in a city, not your building'], ['Wavelength', 'inside a telco 5G network']] },
       lz: { title: 'AWS Local Zones', line: 'placement', text: 'AWS infrastructure placed in a metro area, close to end users, run by AWS. Single-digit-millisecond latency for users in that city.', whyNot: [['Outposts', 'you would buy and house hardware'], ['CloudFront', 'caches content; it runs no application servers']] },
       wl: { title: 'AWS Wavelength', line: 'placement', text: 'AWS compute and storage inside telecom providers’ 5G networks, so traffic from phones never leaves the carrier network.', whyNot: [['Local Zones', 'near a city, but outside the carrier network']] },
-      anywhere: { title: 'ECS Anywhere / EKS Anywhere', line: 'placement', text: 'Your own servers run the containers; AWS runs the control plane. No new hardware.', update: 'ECS Anywhere narrowed its supported operating systems in 2026 (Amazon Linux 2023, Ubuntu 20/22/24, RHEL 9; Windows deprecated).', whyNot: [['Outposts', 'that is buying AWS hardware']] },
+      anywhere: { title: 'ECS Anywhere / EKS Anywhere', line: 'placement', text: 'Your own servers run the containers; no new hardware. ECS Anywhere registers them with the ECS control plane in AWS. EKS Anywhere runs the whole Kubernetes cluster, control plane included, on your servers (EKS Hybrid Nodes is the variant with the control plane in AWS).', update: 'ECS Anywhere narrowed its supported operating systems in 2026 (Amazon Linux 2023, Ubuntu 20/22/24, RHEL 9; Windows deprecated).', whyNot: [['Outposts', 'that is buying AWS hardware']] },
       ssm: { title: 'Systems Manager with hybrid activations', line: 'ops', text: 'Register on-prem and other-cloud servers as managed nodes (`mi-` IDs). Patch Manager, Run Command, Inventory and Session Manager then work on them alongside EC2.', whyNot: [['OpsWorks', 'Chef/Puppet service, end of life'], ['AWS Config', 'records state; does not patch']] }
     }
   };
@@ -52,7 +52,7 @@
       conn: { title: 'AD Connector', line: 'identity', text: 'A proxy: every authentication request goes to your on-prem domain controllers. Nothing is stored in AWS, and it is the cheapest option.', facts: ['Fails when the link to on-prem is down', '**Not compatible with RDS for SQL Server or FSx for Windows**'], whyNot: [['Managed Microsoft AD', 'a whole directory you do not need']] },
       mad: { title: 'AWS Managed Microsoft AD + trust', line: 'identity', text: 'A real AD in AWS (two domain controllers in two AZs). A trust with the on-prem forest keeps existing credentials; RDS for SQL Server and FSx for Windows join it; sign-in keeps working if the link drops.', whyNot: [['AD Connector', 'not supported by RDS SQL Server / FSx; dies with the link'], ['Simple AD', 'no trusts']] },
       madnew: { title: 'AWS Managed Microsoft AD', line: 'identity', text: 'A real, managed AD: the services that need a Windows domain can join it, and you can add trusts later.', whyNot: [['Simple AD', 'no trusts, not for RDS SQL Server or FSx for Windows']] },
-      simple: { title: 'Simple AD', line: 'identity', text: 'Samba-based, small and cheap: basic domain features, no trusts.', whyNot: [['Managed Microsoft AD', 'more than a small basic domain needs']] },
+      simple: { title: 'Simple AD', line: 'identity', text: 'Samba-based, small and cheap: basic domain features, no trusts.', update: 'Closed to new customers since 30 Jul 2026; a new account today would use Managed Microsoft AD. Banks still expect Simple AD here.', whyNot: [['Managed Microsoft AD', 'more than a small basic domain needs']] },
       self: { title: 'Self-managed AD on EC2', line: 'identity', text: 'Full control of the domain controllers, and all of the operations: patching, backups, replication, scaling.', whyNot: [['Managed Microsoft AD', 'unless you truly need control of the DCs, managed is less work']] }
     }
   };
@@ -126,7 +126,7 @@
         '“which servers talk to each other” / “dependencies” → the **agent**',
         '“no agents allowed”, “VMware” → **agentless**',
         '“one dashboard for migration progress across tools” → **Migration Hub** (today AWS Transform)'] },
-      { callout: '**Migration Hub** and **Application Discovery Service** closed to new customers on **7 Nov 2025**; existing customers continue. The replacement is **AWS Transform** (launched May 2025): agent-based and agentless discovery (a discovery-tool OVA for vCenter and Hyper-V, CSV import), dependency mapping, wave planning, strategy and EC2 recommendations. MGN’s docs now say “AWS Transform MGN”. Banks keep the old names; answer the trigger.', kind: 'update' },
+      { callout: '**Migration Hub** and **Application Discovery Service** closed to new customers on **7 Nov 2025**; existing customers continue. The replacement is **AWS Transform** (generally available since May 2025). Its discovery tool is agentless (an OVA for vCenter, a VHD for Hyper-V, or a CSV server import) but logs in to servers over SSH or WinRM, so it collects utilisation **and** server-to-server connections; then dependency mapping, wave planning, a business case and EC2 recommendations. So today “agentless” no longer means “no dependencies”, but banks still draw the line at the agent. MGN’s docs now say “AWS Transform MGN”. Banks keep the old names; answer the trigger.', kind: 'update' },
       { h: 'The journey map' },
       'The whole session on one map. The ink trunk is the journey (discover → plan → move → test → cut over). Four coloured lines carry the payload, in Session 1’s colours. Below the dashed line: what runs in both places. Tap a line or station to see its services, triggers and traps.',
       { map: true },
@@ -143,7 +143,7 @@
         { title: 'Launch test instances', text: 'Launch test EC2 instances from the replicated data, check the application, then mark the servers ready for cutover. Replication keeps running.' },
         { title: 'Cutover', text: 'Stop the source application, let the final blocks replicate, launch the cutover instances and repoint DNS. Downtime is **minutes**.' },
         { title: 'Finalise and decommission', text: 'Finalise the cutover: MGN stops replicating and cleans up the staging resources. Decommission the source servers.' }] } },
-      { callout: 'Old names in question banks: **AWS Server Migration Service (SMS)** (shut down 1 Apr 2023) and **CloudEndure Migration** (discontinued 30 Dec 2022) both mean MGN today. **VM Import/Export** still exists, but it imports an offline image, so downtime is longer and there is no continuous replication.', kind: 'note', title: 'Old names' },
+      { callout: 'Old names in question banks: **AWS Server Migration Service (SMS)** (discontinued March 2022; its APIs ran until March 2023) and **CloudEndure Migration** (ended 30 Dec 2022 in commercial Regions) both mean MGN today. **VM Import/Export** still exists, but it imports an offline image, so downtime is longer and there is no continuous replication.', kind: 'note', title: 'Old names' },
       { h: '{drs|Elastic Disaster Recovery}: same engine, never ends' },
       'DRS uses the same continuous block-level replication, but the job never finishes. Servers keep replicating to AWS; in a disaster you **fail over** to recovery instances in AWS, and after repair you **fail back**. RPO is seconds and RTO is minutes. Nothing is migrating.',
       { pair: 'mgn-drs' },
@@ -204,10 +204,10 @@
         ['Outposts', '**your** building: AWS-managed racks, linked to a parent Region', 'data residency, local processing, very low latency to on-prem systems'],
         ['Local Zones', 'an AWS site in a **metro area**', 'single-digit ms for users in that city, no hardware of yours'],
         ['Wavelength', 'inside a telco **5G** network', 'mobile devices, AR/VR, connected vehicles'],
-        ['ECS / EKS Anywhere', 'your **existing** servers', 'containers under the AWS control plane, no new hardware'],
+        ['ECS / EKS Anywhere', 'your **existing** servers', 'containers on hardware you already own (ECS Anywhere: control plane in AWS; EKS Anywhere: you run the cluster)'],
         ['SSM hybrid activations', 'your existing servers', 'patch, run commands, inventory next to EC2']] } },
       { callout: 'The 1U and 2U **Outposts servers** are no longer sold to new customers; **Outposts racks** remain (second generation since 2025, a single-rack option since Sept 2026). Older material describes “racks or servers”.', kind: 'update' },
-      { callout: 'Systems Manager removed its advanced-instances tier on 30 Jun 2026. ECS Anywhere narrowed its supported operating systems in 2026 (Amazon Linux 2023, Ubuntu 20/22/24, RHEL 9). Neither changes the exam trigger.', kind: 'update', title: 'Smaller changes' },
+      { callout: 'Systems Manager removed its advanced-instances tier on 30 Jun 2026 (no 1,000-node limit for hybrid nodes); from 30 Sep 2026 Session Manager and Run Command on hybrid nodes are pay-as-you-go. ECS Anywhere narrowed its supported operating systems in 2026 (Amazon Linux 2023, Ubuntu 20/22/24, RHEL 9). Neither changes the exam trigger.', kind: 'update', title: 'Smaller changes' },
       { pair: 'place' },
       { callout: '**Local Zones for “data must stay in our facility”.** A Local Zone is an AWS building. Your own facility means Outposts.', kind: 'note', title: 'Trap' },
       { widget: 'chooser', args: { title: 'Placement chooser', tree: PLACEMENT } },
@@ -220,9 +220,10 @@
       { table: { head: ['Option', 'What it is', 'Good for', 'Cannot'], key: true, rows: [
         ['AD Connector', 'a **doorman**: forwards every request to on-prem AD, stores nothing', 'console and app sign-in with AD credentials; cheapest', '**RDS for SQL Server, FSx for Windows**; survive a link outage'],
         ['AWS Managed Microsoft AD', 'a **real AD** in AWS: two DCs in two AZs', 'trusts with on-prem, RDS SQL Server Windows auth, FSx for Windows, WorkSpaces; keeps working without the link', '— (costs more)'],
-        ['Simple AD', 'small, Samba-based', 'a basic domain for a few instances', 'trusts; RDS SQL Server / FSx for Windows'],
+        ['Simple AD', 'small, Samba-based; closed to new customers since 30 Jul 2026', 'a basic domain for a few instances', 'trusts; RDS SQL Server / FSx for Windows'],
         ['Self-managed AD on EC2', 'your own DCs', 'full control', 'save you any operations']] } },
       'Two facts decide most identity questions: AD Connector is **not compatible with RDS for SQL Server or FSx for Windows**, and it **fails when the link to on-prem fails**. (IAM Identity Center with AD goes deep in Session 6.)',
+      { callout: '**Simple AD** closed to new customers on 30 Jul 2026; existing customers keep it. AWS points to Managed Microsoft AD or AD Connector. Question banks still use Simple AD as the “small, cheap, no trusts” answer.', kind: 'update' },
       { pair: 'ad' },
       { widget: 'chooser', args: { title: 'AD chooser', tree: AD } },
       { check: fromDrill('M6') },
