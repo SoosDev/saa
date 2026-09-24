@@ -108,6 +108,18 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | DMS | DMS Schema Conversion (in console) and AWS SCT (desktop, recommended for large data warehouses) both exist. DMS Serverless exists. The source stays operational during migration. |
 | AD Connector | Proxy only. **Not compatible with RDS for SQL Server or FSx for Windows** (AWS whitepaper). |
 
+| VMware Cloud on AWS | Still sold, but **only by Broadcom** and its resellers since 30 Apr 2024 (not AWS). Banks keep it as the Relocate answer. |
+| Amazon Elastic VMware Service (EVS) | **GA Aug 2025** (more Regions Dec 2025): VMware Cloud Foundation in your own VPC (i4i.metal, bring your own VCF licence), migrate with VMware HCX, no VM conversion, keep vCenter. AWS's current Relocate answer. |
+| AWS Outposts | **1U and 2U Outposts servers no longer sold** to new customers. Second-generation racks GA Apr 2025; single-rack second-gen Outposts GA 10 Sep 2026. |
+| Local Zones / Wavelength | Confirmed: Local Zones = AWS infrastructure in metro areas close to end users; Wavelength = AWS compute/storage inside telco (5G) networks. |
+| SSM hybrid activations | Still how on-prem/other-cloud servers become managed nodes (`mi-` IDs); docs section "hybrid and multicloud". Advanced-instances tier removed 30 Jun 2026; Session Manager / Run Command on hybrid nodes pay-as-you-go from 30 Sep 2026. |
+| ECS Anywhere / EKS Anywhere | Both available. ECS Anywhere: Windows deprecated; from 7 Aug 2026 supported OS = AL2023, Ubuntu 20/22/24, RHEL 9. EKS Anywhere: CloudStack provider removed. |
+| S3 File Gateway storage classes | **Does not support Glacier Instant Retrieval.** Works with Standard, Standard-IA, One Zone-IA, Intelligent-Tiering (frequent/infrequent). Glacier Flexible / Deep Archive need a restore. (Session 2 drill S7 therefore uses Standard-IA.) |
+| MGN old names | SMS: full shutdown 1 Apr 2023. CloudEndure Migration: discontinued 30 Dec 2022. VM Import/Export still available. |
+| DMS details | Replication instance Multi-AZ and Serverless Multi-AZ confirmed. DMS Schema Conversion is free (storage only) and built on the SCT engine; SCT remains the tool for warehouse sources (Teradata, Netezza, Greenplum, Vertica …) → Redshift, with data extraction agents. S3 target: CSV default, Parquet option. |
+| AD Connector | Confirmed from Directory Service and FSx docs: RDS is compatible with Managed Microsoft AD only; FSx for Windows supports neither AD Connector nor Simple AD. |
+| ADS Discovery Connector | Full shutdown 17 Nov 2025 (the old agentless connector). AWS Transform discovery provides agentless (OVA for vCenter/Hyper-V) and agent-based collection. |
+
 **Rule for every new session:** before publishing, check every number and every "is it still available" claim against current AWS docs. Add new changes to this table and to the session's callouts. Never print a limit you did not verify.
 
 ## 7. Design

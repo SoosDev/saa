@@ -726,6 +726,7 @@
         L.switch.map(sw => { const T = LINES[sw.to]; return h('button', { cls: 'swrow', type: 'button', on: { click: () => opt.onPick(sw.to) } }, h('span', { cls: 'dot', style: { background: color(T) } }), h('span', null, sw.when + ' → ', h('b', { text: T.short || T.name }))); })));
       const siteMiss = S.drills.filter(d => d.line === id && (store.get(k('drill'), {})[d.id] || {}).ok === false).map(d => d.id);
       if (L.misses || siteMiss.length) box.appendChild(callout((L.misses || '') + (siteMiss.length ? (L.misses ? ' ' : '') + 'In the drill: ' + siteMiss.join(', ') + '.' : ''), 'miss', 'Your misses on this line'));
+      if (L.traps && L.traps.length) box.appendChild(h('div', { cls: 'stack g6' }, eyebrow('Traps on this line'), L.traps.map(x => h('p', { cls: 'small' }, '✗ ', md(x)))));
       if (L.update) box.appendChild(callout(L.update, 'update'));
       const n = S.drills.filter(d => d.line === id).length;
       if (n) box.appendChild(h('a', { cls: 'btn line', href: '#drill/line:' + id, style: lineVars(L), text: 'Drill ' + (L.short || L.name) + ' · ' + n + ' scenario' + (n > 1 ? 's' : '') }));
