@@ -14,29 +14,30 @@ Commit attribution: end commit messages with `Co-Authored-By: Claude …` as you
    the design rules in §7, the architecture in §8 and the per-session workflow in §9. It is the source of truth.
 2. `design/DESIGN.md` and all six `design/mockups/*.html`. The mockups win over any text.
 3. `docs/SCHEMA.md`, the data format the engine renders.
-4. The most recent complete session: `docs/session-04-global.md` and all of `sessions/04-global/*.js`.
-   Copy its structure, depth and tone. `sessions/03-networking/` is the other reference.
+4. The most recent complete session: `docs/session-05-security.md` and all of `sessions/05-security/*.js`.
+   Copy its structure, depth and tone. `sessions/04-global/` is the other reference.
 5. `tools/check/README.md`, the Playwright check harness.
 
 Don't ask the user to re-explain context. It's all in those files.
 
-## Current state (2026-09-24)
+## Current state (2026-09-25)
 | # | Session | Status | Totals (chapters / drills / cards) |
 |---|---|---|---|
 | 1 | Storage & data movement | live | 12 / 42 / 52 |
 | 2 | Migration & hybrid | live, facts re-verified via AWS MCP | 10 / 30 / 40 |
 | 3 | Networking & connectivity | live | 12 / 30 / 40 |
 | 4 | Global architecture & edge | live | 12 / 30 / 40 |
-| 5–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
+| 5 | Security services & identity | live | 12 / 30 / 40 |
+| 6–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
 
-**Next up: Session 5, Security services & identity.** It covers KMS, Secrets Manager / Parameter Store, ACM, WAF,
-Shield, GuardDuty, Inspector, Macie, Security Hub, Detective and Cognito; the §5 weight is D1 ●●●. Then 6, 7 … 13,
-in the order in CONTEXT §5.
+**Next up: Session 6, Multi-account & governance.** It covers Organizations, SCPs, IAM Identity Center, Control
+Tower, RAM and Config (plus the IAM policy mechanics Session 5 left as boundaries); the §5 weight is D1 ●● D4 ●.
+Then 7, 8 … 13, in the order in CONTEXT §5.
 
 **Open items**
 - Session 2 quiz M1–M6 and S7 has no answers recorded yet. When the learner reports them, set `mine: true` and
   `tag` on the missed drills in `sessions/02-migration/drills.js` and add a `log` entry in `core.js`.
-- Sessions 3 and 4 also have "not taken yet" log entries. Update them the same way when results arrive.
+- Sessions 3, 4 and 5 also have "not taken yet" log entries. Update them the same way when results arrive.
 - Three facts rest on web or SDK sources, not the AWS MCP docs: SMS dates, the EKS Anywhere provider removals, and
   OpsWorks EOL. Re-check them if the MCP docs ever cover them.
 
@@ -47,7 +48,7 @@ in the order in CONTEXT §5.
    course material, add a "Changed since the exam guide" callout and a row in the brief's change table.
    Never print a limit you didn't verify. Spot-check anything surprising yourself, even when a subagent reports it.
    Lambda@Edge quotas and the regional NAT gateway were both surprising and both turned out true.
-2. **Write the brief** `docs/session-NN-name.md`, in the same shape as `session-04-global.md`. It holds:
+2. **Write the brief** `docs/session-NN-name.md`, in the same shape as `session-05-security.md`. It holds:
    - colour rule and declared colours, domains
    - facts with URLs and the change table
    - the session's own 4 stub slots with a reason for each

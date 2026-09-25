@@ -138,6 +138,15 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | Global Accelerator | 2 static anycast IPv4 (**4 with dual-stack**); ALB/NLB/EC2/EIP endpoints; **NLB with security groups keeps the client IP**; no caching. |
 | Route 53 | Geoproximity records no longer need Traffic Flow (Jan 2024). Resolver → **VPC Resolver**; **Global Resolver** GA Mar 2026; Profiles (Apr 2024); Accelerated Recovery (Nov 2025). Route 53 ARC is now **Amazon ARC**; readiness checks closed to new customers. |
 
+| **Session 5 — security & identity** (verified 2026-09-25 via AWS MCP; URLs in `docs/session-05-security.md`) | |
+| KMS | Rotation **90–2,560 days + on-demand** (Apr 2024; imported material Jun 2025). AWS managed keys rotate **yearly** and are a legacy type. **FIPS 140-3 Level 3** (CloudHSM too — single-tenant decides, not FIPS level). Symmetric crypto quota **10,000 / 20,000 / 100,000 req/s** by Region. Encrypt direct ≤ 4 KB → GenerateDataKey. |
+| S3 encryption | SSE-S3 default since Jan 2023; DSSE-KMS (Jun 2023); **SSE-C blocked by default on new buckets since Apr 2026** (`BlockedEncryptionTypes`, 403). |
+| Secrets / Parameter Store | Secrets Manager **managed rotation** (RDS, Aurora, DocumentDB, Redshift), Lambda otherwise; $0.40/secret/month. Parameter Store standard 10,000 / 4 KB free, advanced 100,000 / 8 KB / policies $0.05; no rotation. |
+| ACM | Public certs **198 days, renew 45 days before** (Feb 2026; older 395-day certs renew at 60). **Exportable public certs** (Jun 2025) and ACME (Jul 2026) for EC2. CloudFront certs in us-east-1. |
+| WAF / Shield / FMS / NFW | WAF rate-based **min 10, windows 1/2/5/10 min**; resources + Cognito, App Runner, Verified Access, Amplify (not NLB); 1,500 WCU included, up to 5,000; $5/ACL, $1/rule, $0.60/M. Network Firewall native **TGW attachment** (2025). Firewall Manager adds NACL + third-party policies. |
+| Detection | GuardDuty: + Runtime, Malware Protection (EC2, S3, Backup), RDS, Lambda, **AI Protection**; **Extended Threat Detection** (Dec 2024). **Inspector Classic ended 20 May 2026**; agentless EC2; code security. Security Hub → **Security Hub CSPM**; new **AWS Security Hub** GA 2 Dec 2025 (OCSF, exposure). Detective: GuardDuty no longer a listed prerequisite. **Audit Manager closed to new customers.** |
+| Cognito | Hosted UI → **managed login**; plans **Lite / Essentials / Plus** (Nov 2024), advanced security → **threat protection (Plus)**; **10,000 MAU free** (Lite, Essentials). |
+
 **Rule for every new session:** before publishing, check every number and every "is it still available" claim against current AWS docs. Add new changes to this table and to the session's callouts. Never print a limit you did not verify.
 
 ## 7. Design
