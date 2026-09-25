@@ -156,6 +156,15 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | Control Tower | Guardrails → **controls**: preventive (SCP/RCP/declarative), detective (Config), proactive (CloudFormation Hooks). **Landing zone 4.0** (17 Nov 2025): Config/CloudTrail/Backup/security-role integrations optional, Security OU no longer required, controls-only setup. |
 | RAM / Config / billing | RAM now shares security groups (in-org), Route 53 Profiles, EBS volumes. Config daily recording option; proactive rules report, don't block. RI/SP sharing adds prioritized/restricted group sharing; billing transfer. |
 
+| **Session 7 — HA & DR** (verified 2026-09-25 via AWS MCP; URLs in `docs/session-07-ha-dr.md`) | |
+| DR strategies | Well-Architected: backup & restore RPO hours / RTO ≤ 24 h; pilot light minutes / tens of min; warm standby seconds / minutes; multi-site near zero. Pilot light cannot serve until compute starts; warm standby serves at once. Data plane over control plane; static stability. |
+| RDS | Multi-AZ instance: sync, no reads, CNAME, 60–120 s. **Multi-AZ DB cluster**: 2 readable standbys, < 35 s (MySQL/PG). **Read replicas 15** (MySQL/MariaDB/PG; was 5), Oracle/SQL Server 5, Db2 3. Backups 0–35 d, PITR ~5 min. |
+| Aurora | 6 copies/3 AZs; 15 replicas, tiers 0–15, failover < 60 s (often < 30). **Global Database up to 10 secondary Regions** (May 2025; whitepaper still 5), lag < 1 s; **switchover** (planned) / **failover** (Aug 2023). Backtrack MySQL 72 h. DSQL GA May 2025. |
+| DynamoDB / cache | Global tables MREC ~1 s; **MRSC** GA Jun 2025 (RPO 0, exactly 3 Regions or 2 + witness). **PITR 1–35 days** configurable (Jan 2025). ElastiCache Global Datastore: 2 secondary Regions. |
+| S3 / EFS / EBS | CRR needs versioning, new objects only (Batch Replication). **RTC SLA 99.9%** (99.99% design). EFS replication RPO 15 min. Recycle Bin now covers EBS volumes. |
+| AWS Backup / DRS | Vault Lock compliance ≥ 72 h grace; air-gapped vault as primary target (Nov 2025); restore testing (Nov 2023); continuous backup 35 d. DRS RPO seconds, **RTO 5–20 min**. |
+| Failover | Route 53 checks 30 s / 10 s, threshold 1–10 (default 3); private → CloudWatch-alarm check. **Amazon ARC**: readiness checks closed to new customers (Apr 2026); **Region switch** (Aug 2025). Route 53 accelerated recovery (Nov 2025). GA reuses ALB/NLB health checks. **Fault Injection Service** (renamed). Resilience Hub next gen (May 2026). |
+
 **Rule for every new session:** before publishing, check every number and every "is it still available" claim against current AWS docs. Add new changes to this table and to the session's callouts. Never print a limit you did not verify.
 
 ## 7. Design
