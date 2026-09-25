@@ -6,7 +6,7 @@ window.SAA_SESSIONS = [
   { id: '03-networking', n: 3, title: 'Networking & connectivity', domains: 'D1 D2 D3 D4', path: 'sessions/03-networking/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '04-global', n: 4, title: 'Global architecture & edge', domains: 'D1 D2 D3 D4', path: 'sessions/04-global/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '05-security', n: 5, title: 'Security services & identity', domains: 'D1 D2 D3 D4', path: 'sessions/05-security/', totals: { chapters: 12, drills: 30, cards: 40 } },
-  { id: '06-governance', n: 6, title: 'Multi-account & governance', soon: true, start: 'weak' },
+  { id: '06-governance', n: 6, title: 'Multi-account & governance', domains: 'D1 D2 D3 D4', path: 'sessions/06-governance/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '07-ha-dr', n: 7, title: 'HA & disaster recovery', soon: true, start: 'mixed' },
   { id: '08-databases', n: 8, title: 'Databases & caching', soon: true, start: 'mixed' },
   { id: '09-serverless', n: 9, title: 'Serverless, events, integration & analytics', soon: true, start: 'mixed' },

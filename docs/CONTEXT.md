@@ -147,6 +147,15 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | Detection | GuardDuty: + Runtime, Malware Protection (EC2, S3, Backup), RDS, Lambda, **AI Protection**; **Extended Threat Detection** (Dec 2024). **Inspector Classic ended 20 May 2026**; agentless EC2; code security. Security Hub → **Security Hub CSPM**; new **AWS Security Hub** GA 2 Dec 2025 (OCSF, exposure). Detective: GuardDuty no longer a listed prerequisite. **Audit Manager closed to new customers.** |
 | Cognito | Hosted UI → **managed login**; plans **Lite / Essentials / Plus** (Nov 2024), advanced security → **threat protection (Plus)**; **10,000 MAU free** (Lite, Essentials). |
 
+| **Session 6 — multi-account & governance** (verified 2026-09-25 via AWS MCP; URLs in `docs/session-06-governance.md`) | |
+| SCPs | **Full IAM policy language** (Sep 2025: conditions, resource ARNs, NotAction in Allow). Quotas **10 per root/OU/account, 10,240 characters** (May 2026; was 5 / 5,120). Never grant; never apply to the management account or service-linked roles. OU nesting 5 levels. |
+| Other policy types | **RCPs** (Nov 2024; 5 per node; not the management account, SLRs or AWS managed KMS keys), **declarative** (Dec 2024; applies to the management account too), tag, backup, AI opt-out, chat, Security Hub, Inspector, Bedrock, S3 … |
+| Organizations | **Direct account transfer between organizations** (Nov 2025; no standalone step). Centralized root access management, `sts:AssumeRoot`. |
+| IAM | Managed policies per role **20 default / 25 max** (user 10/20); role trust policy **2,048 default / 8,192 max**. Access Analyzer: external (free) + internal and unused access (paid) + custom policy checks. |
+| Identity Center | Renamed from AWS SSO Jul 2022; **multi-Region replication** GA Feb 2026 (org instances, multi-Region CMK); free. |
+| Control Tower | Guardrails → **controls**: preventive (SCP/RCP/declarative), detective (Config), proactive (CloudFormation Hooks). **Landing zone 4.0** (17 Nov 2025): Config/CloudTrail/Backup/security-role integrations optional, Security OU no longer required, controls-only setup. |
+| RAM / Config / billing | RAM now shares security groups (in-org), Route 53 Profiles, EBS volumes. Config daily recording option; proactive rules report, don't block. RI/SP sharing adds prioritized/restricted group sharing; billing transfer. |
+
 **Rule for every new session:** before publishing, check every number and every "is it still available" claim against current AWS docs. Add new changes to this table and to the session's callouts. Never print a limit you did not verify.
 
 ## 7. Design
