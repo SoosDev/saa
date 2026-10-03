@@ -88,12 +88,8 @@
         ['Global Accelerator', '**static IPs**; fails over at the edge with no DNS wait.'],
         ['Amazon ARC', '**switches**: routing controls, zonal shift, Region switch plans.']], label: 'Built for' },
       { h: 'Try it on H3' },
-      'One of your pattern drills. Fill the four slots before you look at the options. Then ask of the option with Global Accelerator in it: which slot does it fail?',
-      { widget: 'stubTrainer', args: { drill: 'H3', title: 'Stub trainer · H3 (exam pattern)', why: {
-        fail: '“a Regional disaster”.',
-        rto: '“RTO of 24 hours” — hours.',
-        rpo: '“RPO of 24 hours” — hours.',
-        sup: '“most cost-effective”.' } } },
+      'One of your pattern drills. Name the failure, the RTO and the RPO before you look at the options. Then ask of the option with Global Accelerator in it: which of those does it fail?',
+      { callout: S.drills.find(d => d.id === 'H3').q + ' [[#drill/H3|Solve it in the drill →]]', kind: 'note', title: 'Exam pattern' },
       { check: { id: 'ch1-ga', src: 'Exam pattern', q: 'An option adds **AWS Global Accelerator** to a DR design whose RTO is 24 hours and whose clients use DNS normally. Why cross it out?', opts: [
         { t: 'It fails the SUPERLATIVE: it pays for instant, IP-level failover that a 24-hour RTO never needs.', why: 'its built-for reasons — static IPs, no DNS caching — are absent.' },
         { t: 'It fails FAILURE: Global Accelerator fronts endpoints in a single Region, so it cannot fail over.', why: 'false; endpoint groups in several Regions are one of its jobs.' },

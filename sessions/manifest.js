@@ -84,7 +84,7 @@ window.SAA_HUB = {
 (Sessions may redefine the stub slots; the mechanics stay the same.)`,
   principles: [
     ['Recall before reveal', 'Every card and question hides the answer until you commit.'],
-    ['Stub before options', 'Options stay locked until the four slots are filled.'],
+    ['Constraints before options', 'Name the constraints the question states before you read the options. The stub is an optional scratchpad, never scored.'],
     ['Spaced boxes 1 → 5', 'Missed cards go back to box 1; known ones come back after 1, 2, 4, 8 days.'],
     ['Interleaved drills', 'Scenarios shuffle lines, so you choose instead of recognising.'],
     ['One line, one colour, one verb', 'Every service family is a transit line. Colour always means the same service.'],

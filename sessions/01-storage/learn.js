@@ -51,12 +51,8 @@
       'Example. Global Accelerator was built for TCP/UDP applications that need static anycast IPs and fast failover across Regions. If the stub says “single Region, download files”, any option containing Global Accelerator is crossed out on sight, however sensible the rest of the sentence reads.',
       { callout: 'Fixing only this habit and keyword reading would move the baseline from about 55% to about 72%. That is the single biggest lever you have.', kind: 'note', title: 'Why it matters' },
       { h: 'Try it on R1' },
-      'The retest question you missed. Fill the four slots before looking at any option. The drill makes you do the same.',
-      { widget: 'stubTrainer', args: { drill: 'D07', title: 'Stub trainer · Retest R1', why: {
-        size: '120 TB at 1 Gbps is about 11 days on a free link; about 22 days at the ~50% left over in business hours. Inside a month.',
-        time: '“within a month” + “never edited” = a fixed set that leaves once. Not a sync.',
-        proto: 'an on-premises NAS exported over NFS.',
-        sup: '“MOST cost-effective”.' } } },
+      'The retest question you missed. Before reading any option, say out loud how big it is, whether it happens once or keeps going, what protocol it speaks, and what the question asks you to optimise.',
+      { callout: S.drills.find(d => d.id === 'D07').q + ' [[#drill/D07|Solve it in the drill →]]', kind: 'note', title: 'Retest R1' },
       { check: { id: 'ch1-r1', src: 'Retest R1', q: 'Which slot did R1 hinge on?', opts: [{ t: 'SIZE / NET' }, { t: 'TIME' }, { t: 'PROTOCOL / APP' }, { t: 'SUPERLATIVE' }], a: 1,
         why: '“Within a month” + “never edited” = a fixed set leaving once: TIME is **one-off**. Reading it as ongoing pulled you toward the bridge (S3 File Gateway) instead of the mover.' } }
     ] },

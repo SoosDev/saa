@@ -6,13 +6,6 @@ const sortAll = async (w, n) => { const rows = w.locator('.sortrow'); const k = 
 const steps = async (p, B, ch, title, n) => { await go(p, B + '#learn/' + ch); const w = p.locator('.widget', { hasText: title }); for (let i = 0; i < n - 1; i++) await w.locator('button', { hasText: 'Next' }).click(); if (!new RegExp('Step ' + n + ' of ' + n).test(await txt(w))) throw new Error('stepper ' + title); };
 const row = (w, label) => w.locator('.stubrow', { hasText: label });
 module.exports = {
-  stubTrainer: async (p, B) => {
-    await go(p, B + '#learn/ch1'); const w = p.locator('.widget', { hasText: 'Stub trainer' }); const rows = w.locator('.stubrow');
-    await rows.nth(0).locator('button.chip', { hasText: 'Region' }).click();
-    for (let i = 1; i < 4; i++) await rows.nth(i).locator('button.chip').first().click();
-    await w.locator('button', { hasText: 'Reveal' }).click();
-    if ((await w.locator('.vt.y').count()) < 4) throw new Error('all four slots should be ✓');
-  },
   drPicker: async (p, B) => {
     await go(p, B + '#learn/ch2'); const w = p.locator('.widget', { hasText: 'DR strategy picker' });
     if (!/Backup & restore\s*cheapest/.test(await txt(w.locator('.stats')))) throw new Error('default 4h/1h → backup & restore, got ' + (await txt(w.locator('.stats'))));

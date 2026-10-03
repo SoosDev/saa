@@ -67,7 +67,7 @@
         '**What must stay running?** The downtime budget. It decides between a one-shot copy and continuous replication or CDC.'] },
       '**Hybrid** is the case where nothing moves and both places keep running. The question then becomes: which piece of AWS reaches on-premises? A placement service, identity, DNS, or management.',
       { h: 'The stub for this session' },
-      'Session 1’s slots (SIZE, TIME, PROTOCOL, SUPERLATIVE) don’t fit here, so this session uses four new ones. The mechanics are the same: fill them before the options unlock, cross out every option that breaks one, and let the superlative decide among survivors.',
+      'Session 1’s slots (SIZE, TIME, PROTOCOL, SUPERLATIVE) don’t fit here, so this session uses four new ones. The mechanics are the same: name them before you read the options, cross out every option that breaks one, and let the superlative decide among survivors.',
       { table: { head: ['Slot', 'Ask', 'Values'], rows: [
         ['WHAT', 'What moves, or what runs in both places?', '`servers` · `database` · `files` · `inventory/plan` · `identity` · `DNS` · `placement`'],
         ['CHANGE', 'How much may the application change?', '`none (rehost)` · `replatform` · `refactor/rebuy` · `n/a`'],

@@ -33,7 +33,6 @@ const only = process.argv[2] || '';
   await shot('w-sorter-phone', L + '#learn/ch2', P, W('Which one answers this'));
   await shot('w-chooser-phone', L + '#learn/ch6', P, W('Edge-compute chooser'));
   await shot('w-stepper-phone', L + '#learn/ch7', P, W('Host example.com on S3'));
-  await shot('w-stub-phone', L + '#learn/ch1', P, W('Stub trainer'));
   await shot('drill-phone', L + '#drill/Q4', P, { full: true, act: async p => {
     for (const t of ['static content', 'global users', 'cache', 'cheapest']) await p.locator('.stubrow', { hasText: '' }).locator('button.chip', { hasText: new RegExp('^' + t + '$') }).first().click();
     const opts = p.locator('.optlist > div');

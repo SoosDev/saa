@@ -111,12 +111,8 @@
         ['Detective', '**investigates** a finding: root cause, scope, timeline.'],
         ['Cognito', '**signs in app users** (user pool) and hands them **AWS credentials** (identity pool).']], label: 'Built for' },
       { h: 'Try it on S1' },
-      'One of your pattern drills. Fill the four slots before you look at any option. Then ask of the option with ACM in it: which slot does it fail?',
-      { widget: 'stubTrainer', args: { drill: 'S1', title: 'Stub trainer · S1 (exam pattern)', why: {
-        asset: 'customer contracts stored in S3 — data at rest.',
-        layer: 'the protection acts on the bucket’s objects: the data store.',
-        mode: '“encrypted”, “can be disabled” — this must prevent reading, not find something.',
-        sup: '“least operational overhead”.' } } },
+      'One of your pattern drills. Name the asset, the layer and the mode before you look at any option. Then ask of the option with ACM in it: which of those does it fail?',
+      { callout: S.drills.find(d => d.id === 'S1').q + ' [[#drill/S1|Solve it in the drill →]]', kind: 'note', title: 'Exam pattern' },
       { check: { id: 'ch1-acm', src: 'Exam pattern', q: 'An option says “Use AWS Certificate Manager to encrypt the S3 objects”. Which stub slot rules it out immediately?', opts: [
         { t: 'MODE: ACM only detects certificates that are about to expire, and the question asks to prevent unencrypted data.', why: 'ACM issues and renews certificates; detect versus prevent is not where it fails — what it protects is.' },
         { t: 'SUPERLATIVE: ACM charges per certificate, so it cannot be the option with the least operational overhead.', why: 'public ACM certificates for integrated services are free, and cost is not overhead anyway.' },

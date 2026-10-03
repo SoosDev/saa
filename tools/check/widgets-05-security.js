@@ -3,12 +3,6 @@ const txt = async l => (await l.innerText());
 const tipOf = async (p, loc) => { await loc.scrollIntoViewIfNeeded(); await loc.hover(); await p.waitForTimeout(120); return p.locator('.tip').innerText(); };
 const qc = async (p, label, want) => { const b = p.locator('.qcbtn', { hasText: label }).first(); await b.scrollIntoViewIfNeeded(); await b.click(); if (!(await p.locator('.qcbtn.' + want).count())) throw new Error('quick check ' + label); };
 module.exports = {
-  stubTrainer: async (p, B) => {
-    await go(p, B + '#learn/ch1'); const w = p.locator('.widget', { hasText: 'Stub trainer' }); const rows = w.locator('.stubrow');
-    for (let i = 0; i < 4; i++) await rows.nth(i).locator('button.chip').first().click();
-    await w.locator('button', { hasText: 'Reveal' }).click();
-    if (!(await w.locator('.vt.y').count())) throw new Error('ASSET data at rest should be ✓');
-  },
   whichServiceSorter: async (p, B) => {
     await go(p, B + '#learn/ch2'); const w = p.locator('.widget', { hasText: 'Which service answers this' }); const rows = w.locator('.sortrow'); const n = await rows.count();
     for (let i = 0; i < n; i++) await rows.nth(i).locator('button.chip').first().click();

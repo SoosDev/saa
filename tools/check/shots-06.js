@@ -28,7 +28,6 @@ const only = process.argv[2] || '';
   await shot('learn1-desk', L + '#learn/ch1', D, { full: true, both: false });
   await shot('learn4-desk', L + '#learn/ch4', D, { full: true, both: false });
   await shot('learn5-phone', L + '#learn/ch5', P, { full: true, both: false });
-  await shot('w-stub-phone', L + '#learn/ch1', P, W('Stub trainer'));
   await shot('w-sorter-phone', L + '#learn/ch2', P, Object.assign(W('Which service answers this'), { both: false }));
   await shot('w-scptree-phone', L + '#learn/ch4', P, W('SCP inheritance tree'));
   await shot('w-scptree-desk', L + '#learn/ch4', D, Object.assign(W('SCP inheritance tree'), { both: false }));

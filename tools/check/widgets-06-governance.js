@@ -4,13 +4,6 @@ const tipOf = async (p, loc) => { await loc.scrollIntoViewIfNeeded(); await loc.
 const qc = async (p, label, want) => { const b = p.locator('.qcbtn', { hasText: label }).first(); await b.scrollIntoViewIfNeeded(); await b.click(); if (!(await p.locator('.qcbtn.' + want).count())) throw new Error('quick check ' + label); };
 const sortAll = async (w, n) => { const rows = w.locator('.sortrow'); const k = await rows.count(); if (k !== n) throw new Error('rows ' + k); for (let i = 0; i < k; i++) await rows.nth(i).locator('button.chip').first().click(); await w.locator('button', { hasText: 'Check' }).click(); };
 module.exports = {
-  stubTrainer: async (p, B) => {
-    await go(p, B + '#learn/ch1'); const w = p.locator('.widget', { hasText: 'Stub trainer' }); const rows = w.locator('.stubrow');
-    await rows.nth(0).locator('button.chip', { hasText: 'whole org' }).click();
-    for (let i = 1; i < 4; i++) await rows.nth(i).locator('button.chip').first().click();
-    await w.locator('button', { hasText: 'Reveal' }).click();
-    if ((await w.locator('.vt.y').count()) < 3) throw new Error('SCOPE, CONTROL, WHO should be ✓');
-  },
   whichServiceSorter: async (p, B) => {
     await go(p, B + '#learn/ch2'); const w = p.locator('.widget', { hasText: 'Which service answers this' });
     await sortAll(w, 12); if ((await w.locator('.sortrow.correct').count()) !== 2) throw new Error('expected 2 SCP right');

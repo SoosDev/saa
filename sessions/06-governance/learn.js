@@ -100,12 +100,8 @@
         ['AWS Config', '**records configuration** and **checks compliance**; remediates via SSM.'],
         ['Consolidated billing', '**one bill**, pooled volume tiers, **shared RI/SP discounts**.']], label: 'Built for' },
       { h: 'Try it on G1' },
-      'One of your pattern drills. Fill the four slots before you look at the options. Then ask of the option with Control Tower in it: which slot does it fail?',
-      { widget: 'stubTrainer', args: { drill: 'G1', title: 'Stub trainer · G1 (exam pattern)', why: {
-        scope: '60 member accounts in several OUs — the whole organization.',
-        control: '“no one … can create” — the action must be blocked, not found.',
-        who: 'the people in the accounts, administrators included.',
-        sup: '“least operational overhead”.' } } },
+      'One of your pattern drills. Name the scope, the kind of control and who it applies to before you look at the options. Then ask of the option with Control Tower in it: which of those does it fail?',
+      { callout: S.drills.find(d => d.id === 'G1').q + ' [[#drill/G1|Solve it in the drill →]]', kind: 'note', title: 'Exam pattern' },
       { check: { id: 'ch1-ct', src: 'Exam pattern', q: 'An option says “Set up AWS Control Tower and enable its Region deny control” for an organization that already exists and needs only that one rule. Why cross it out?', opts: [
         { t: 'It fails CONTROL: Control Tower has no Region deny control, so this rule cannot be built with it.', why: 'it has one — the Region deny control is an SCP underneath.' },
         { t: 'It fails the SUPERLATIVE: a landing zone and enrolling every account for what one root SCP does.', why: 'the job is one guardrail; the built-for job of Control Tower is a governed landing zone.' },

@@ -19,7 +19,7 @@ Domains: D1 (encryption and access, deep in Session 5), D2 (replication and back
 - Two mechanisms produce ~50%. First, recall by familiarity instead of by problem, which leads to the tempting distractor. Second, not turning the scenario into a constraint list, which lets "cheapest" or "least ops" get ignored.
 - Show his baseline diagnosis for this cluster: Q8, Q12, Q29, Q41, Q54, Q56, Q4, Q11, Q33 (short table: question · what he picked · real cause).
 - The reduction method (4 steps) and the 4-slot stub. The "prestige distractor" rule: for each option ask "what was this service built for?" If Global Accelerator was built for "TCP/UDP apps, static IPs, multi-Region" and the stub says "single Region, download files", it is out before you weigh anything else.
-- ▶ **Stub trainer**: show R1's scenario, let him fill the 4 slots, and reveal the truth per slot with the reason ("within a month" + "never edited" = one-off).
+- ~~Stub trainer~~ (removed 2026-10-03: stub is optional and unscored; R1's scenario is now a callout linking to the drill): show R1's scenario, let him fill the 4 slots, and reveal the truth per slot with the reason ("within a month" + "never edited" = one-off).
 - ▶ Checkpoint: "Which slot did R1 hinge on?" → TIME.
 
 ### Ch 2 · Two questions hide under "storage"

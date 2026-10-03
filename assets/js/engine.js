@@ -314,35 +314,6 @@
     return box;
   };
 
-  /* Stub trainer: fill the slots for a drill scenario, then reveal the truth per slot. */
-  widgets.stubTrainer = function (a, ctx) {
-    const d = ctx.S.drills.find(x => x.id === a.drill);
-    const box = h('div', { cls: 'card widget' });
-    let v = {}, shown = false;
-    const paint = () => {
-      clear(box);
-      box.appendChild(eyebrow(a.title || 'Stub trainer · ' + d.src));
-      box.appendChild(P(d.q, 'scen'));
-      ctx.S.stub.forEach(sl => {
-        const truth = d.stub[sl.id];
-        const ok = truth === 'any' || v[sl.id] === truth;
-        box.appendChild(h('div', { cls: 'stubrow' },
-          h('span', { cls: 'stublab', text: sl.label }),
-          h('div', { cls: 'chiprow' }, sl.values.map(val => h('button', { cls: 'chip', type: 'button', 'aria-pressed': String(v[sl.id] === val), disabled: shown, text: val, on: { click: () => { v[sl.id] = val; paint(); } } }))),
-          shown ? h('div', { cls: 'row', style: { gap: '8px', alignItems: 'baseline', flexWrap: 'nowrap' } },
-            h('span', { cls: 'vt ' + (ok ? 'y' : 'n'), text: sl.short + (ok ? ' ✓' : ' ✕') }),
-            h('span', { cls: 'small' }, md('**' + truth + '** — ' + ((a.why || {})[sl.id] || ''))))
-            : null));
-      });
-      const n = Object.keys(v).length;
-      box.appendChild(h('div', null, shown
-        ? h('button', { cls: 'btn ghost sm', type: 'button', text: 'Try again', on: { click: () => { v = {}; shown = false; paint(); } } })
-        : h('button', { cls: 'btn sm', type: 'button', disabled: n < ctx.S.stub.length, text: 'Reveal the stub', on: { click: () => { shown = true; paint(); } } })));
-    };
-    paint();
-    return box;
-  };
-
   /* Searchable trigger table generated from the cards. */
   widgets.triggerTable = function (a, ctx) {
     const inp = h('input', { cls: 'inp', type: 'search', placeholder: 'Search a phrase or a service…', 'aria-label': 'Search triggers' });

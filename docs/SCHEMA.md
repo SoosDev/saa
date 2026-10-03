@@ -31,6 +31,6 @@ Inline markup: `**bold**`, `` `code` ``, `{lineId|Service}`, `[[#tab|link]]`, `=
 
 ## Widgets
 
-Generic (engine): `sorter`, `stubTrainer`, `triggerTable`, `stepper`, `chooser`.
+Generic (engine): `sorter`, `triggerTable`, `stepper`, `chooser`.
 Session widgets register on `SAA.widgets[name] = (args, ctx) => Node` and may use `SAA.h/s/md/hbars/mountChart/…`.
 Charts: hand-built SVG, ink marks, recessive grid, every mark has a `data-tip` tooltip, identity by swatch + label.

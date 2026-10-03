@@ -112,7 +112,7 @@ other owns. Afterwards, review the diff, spot-check facts and screenshots, merge
   and give narrow widths their own label offsets or shorter labels.
 - The tooltip hides on scroll by design. In tests, scroll into view before hovering.
 - The engine exports `SAA.h/s/md/hbars/mountChart/callout/table/treeWidget/swatch/color/tcolor/…`.
-  Generic widgets: `sorter`, `stubTrainer`, `triggerTable`, `stepper`, `chooser`.
+  Generic widgets: `sorter`, `triggerTable`, `stepper`, `chooser`.
   Session 1's `widgets.js` (pipe calculator, class picker …) can be reused by loading `../01-storage/widgets.js`.
 - Inline markup: `**bold**`, `` `code` ``, `{lineId|Service}`, `[[#tab|link]]`, `==highlight==`.
 - `localStorage` keys are `saa:<sessionId>:{learn,check,drill,cards,ui}`. Never change a session's `meta.id`.

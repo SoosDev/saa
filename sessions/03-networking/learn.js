@@ -76,12 +76,8 @@
         ['Direct Connect', 'a **private line**, weeks to provision, **unencrypted** by default.']], label: 'Built for' },
       'If the one-line job does not match the stub, cross the option out, however sensible the rest reads. Chapter 11 drills this on its own.',
       { h: 'Try it on Q7' },
-      'Your exam miss. Fill the four slots before looking at any option; the drill makes you do the same.',
-      { widget: 'stubTrainer', args: { drill: 'Q7', title: 'Stub trainer · Exam Q7', why: {
-        who: 'B and C are both VPCs.',
-        scale: 'one new pair: B with C. A is already fine.',
-        path: 'VPC-to-VPC traffic stays on the AWS network.',
-        sup: '“most cost-effective … least configuration”.' } } },
+      'Your exam miss. Before reading any option, name who talks to whom, how many pairs, which path the traffic takes, and what the question asks you to optimise.',
+      { callout: S.drills.find(d => d.id === 'Q7').q + ' [[#drill/Q7|Solve it in the drill →]]', kind: 'note', title: 'Exam Q7' },
       { check: { id: 'ch1-q7', src: 'Exam Q7', q: 'Which single fact decides Q7?', opts: [
         { t: 'Peering connections are limited per VPC.', why: 'true, but three VPCs are nowhere near a quota.' },
         { t: 'Peering is not transitive.', why: 'A never forwards between its peers, so B–C needs its own connection.' },

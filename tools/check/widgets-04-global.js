@@ -3,7 +3,6 @@ const txt = async l => (await l.innerText());
 const tipOf = async (p, loc) => { await loc.scrollIntoViewIfNeeded(); await loc.hover(); await p.waitForTimeout(120); return p.locator('.tip').innerText(); };
 const qc = async (p, label, want) => { const b = p.locator('.qcbtn', { hasText: label }).first(); await b.scrollIntoViewIfNeeded(); await b.click(); if (!(await p.locator('.qcbtn.' + want).count())) throw new Error('quick check ' + label); };
 module.exports = {
-  stubTrainer: async (p, B) => { await go(p, B + '#learn/ch1'); const w = p.locator('.widget', { hasText: 'Stub trainer' }); const rows = w.locator('.stubrow'); for (let i = 0; i < 4; i++) await rows.nth(i).locator('button.chip').first().click(); await w.locator('button', { hasText: 'Reveal' }).click(); if (!(await w.locator('.vt.y').count())) throw new Error('WHAT static content should be ✓'); },
   whichOneSorter: async (p, B) => { await go(p, B + '#learn/ch2'); const w = p.locator('.widget', { hasText: 'Which one answers this' }); const rows = w.locator('.sortrow'); const n = await rows.count(); for (let i = 0; i < n; i++) await rows.nth(i).locator('button.chip').first().click(); await w.locator('button', { hasText: 'Check' }).click(); if ((await w.locator('.sortrow.correct').count()) !== 3) throw new Error('expected 3 CloudFront right'); },
   albCfPair: async (p, B) => { await go(p, B + '#learn/ch3'); await qc(p, 'ALB listener rules', 'correct'); },
   cacheSim: async (p, B) => {

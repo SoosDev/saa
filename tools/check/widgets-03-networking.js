@@ -1,7 +1,6 @@
 const go = async (p, url) => { await p.goto(url); await p.waitForTimeout(300); };
 const txt = async l => (await l.innerText());
 module.exports = {
-  stubTrainer: async (p, B) => { await go(p, B + '#learn/ch1'); const w = p.locator('.widget', { hasText: 'Stub trainer' }); const rows = w.locator('.stubrow'); for (let i = 0; i < 4; i++) await rows.nth(i).locator('button.chip').first().click(); await w.locator('button', { hasText: 'Reveal' }).click(); if (!(await w.locator('.vt').count())) throw new Error('no reveal'); },
   cidrCalc: async (p, B) => {
     await go(p, B + '#learn/ch2'); const w = p.locator('.widget', { hasText: 'CIDR calculator' });
     if (!/too small/.test(await txt(w))) throw new Error('K1 preset /26 should be too small');

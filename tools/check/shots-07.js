@@ -27,7 +27,6 @@ const only = process.argv[2] || '';
   await shot('map-full-phone', L + '#map/full', P, { full: true, both: false });
   await shot('learn2-desk', L + '#learn/ch2', D, { full: true, both: false });
   await shot('learn4-phone', L + '#learn/ch4', P, { full: true, both: false });
-  await shot('w-stub-phone', L + '#learn/ch1', P, W('Stub trainer'));
   await shot('w-picker-phone', L + '#learn/ch2', P, W('DR strategy picker'));
   await shot('w-picker-desk', L + '#learn/ch2', D, Object.assign(W('DR strategy picker'), { both: false }));
   await shot('w-az-phone', L + '#learn/ch3', P, W('AZ capacity'));

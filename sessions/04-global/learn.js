@@ -60,12 +60,8 @@
         ['S3 Transfer Acceleration', 'faster transfers **into one bucket** from far away. No cache.'],
         ['ALB', 'layer-7 routing **by path and host** inside **one Region**.']], label: 'Built for' },
       { h: 'Try it on Q4' },
-      'Your exam miss. Fill the four slots before looking at any option.',
-      { widget: 'stubTrainer', args: { drill: 'Q4', title: 'Stub trainer · Exam Q4', why: {
-        what: 'installation packages: the same files, read many times.',
-        scope: 'customers in Europe, Asia and South America.',
-        need: '“the same packages many times a day” — the word that means cache.',
-        sup: '“most cost-effective”.' } } },
+      'Your exam miss. Before reading any option, name what is served, where the users are, what they need (cache, static IPs, routing), and what the question asks you to optimise.',
+      { callout: S.drills.find(d => d.id === 'Q4').q + ' [[#drill/Q4|Solve it in the drill →]]', kind: 'note', title: 'Exam Q4' },
       { check: { id: 'ch1-q4', src: 'Exam Q4', q: 'Which single fact decides Q4?', opts: [
         { t: 'Transfer Acceleration speeds only uploads into a bucket, so it cannot help customers who download.', why: 'not quite: it accelerates transfers to and from one bucket — but it never caches.' },
         { t: 'Global Accelerator would be cheaper than CloudFront, but it cannot reach a bucket in us-east-1.', why: 'GA cannot use S3 as an endpoint in any Region, and its price is not what decides Q4.' },
