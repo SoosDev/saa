@@ -46,7 +46,7 @@ Topics (neutral chips): `tiers` = DR strategies · RTO and RPO; `nbr` = Neighbou
 
 **Databases**
 - RDS Multi-AZ DB instance (sync, no reads, 60–120 s, CNAME) — https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html · Multi-AZ DB cluster (< 35 s, MySQL/PostgreSQL) — https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts-failover.html
-- **Read replicas 15 (MySQL/MariaDB/PostgreSQL), 5 (Oracle, SQL Server), 3 (Db2)** — https://aws.amazon.com/rds/faqs/ (spot-checked) · https://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance-read-replica.html
+- **Read replicas 15 (MySQL/MariaDB/PostgreSQL/Oracle/SQL Server; ≤ 5 recommended on Oracle and SQL Server for lag), 3 (Db2)** — corrected 2026-10-03: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html · https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/SQLServer.ReadReplicas.html · https://aws.amazon.com/rds/faqs/ (spot-checked) · https://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance-read-replica.html
 - Backups 0–35 d, PITR ~last 5 min, cross-Region automated backups, snapshot copy — https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/AutomatedBackups.Replicating.Enable.html · https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CopySnapshot.html
 - Aurora storage and failover (< 60 s, often < 30 s; tiers 0–15; ~10 min without a replica) — https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.AuroraHighAvailability.html
 - **Aurora Global Database up to 10 secondary Regions (May 2025)**, lag < 1 s, switchover/failover — https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html · https://aws.amazon.com/about-aws/whats-new/2025/05/amazon-aurora-global-database-support-10-secondary-region-clusters/ · https://aws.amazon.com/about-aws/whats-new/2023/08/amazon-aurora-global-database-failover/
@@ -67,7 +67,7 @@ Topics (neutral chips): `tiers` = DR strategies · RTO and RPO; `nbr` = Neighbou
 | Old (banks / older courses) | Now | Source |
 |---|---|---|
 | Aurora Global Database: up to 5 secondary Regions | **up to 10** (May 2025; the DR whitepaper still says 5) | whats-new 2025/05 |
-| RDS read replicas: 5 per source | **15** for MySQL, MariaDB, PostgreSQL (Oracle, SQL Server 5; Db2 3) | RDS FAQ |
+| RDS read replicas: 5 per source | **15** for MySQL, MariaDB, PostgreSQL, Oracle, SQL Server (≤ 5 recommended on Oracle/SQL Server; Db2 3) | RDS quotas page, SQL Server replica docs (corrected 2026-10-03) |
 | “Managed planned failover”, detach and promote | **Switchover** (planned) / managed **failover** (Aug 2023) | aurora-global-database.html |
 | Multi-AZ = one idle standby | + **Multi-AZ DB cluster** (2 readable standbys, < 35 s) | multi-az-db-clusters |
 | DynamoDB global tables are eventually consistent; PITR 35 days | + **MRSC** (June 2025, RPO 0); PITR **1–35 days** configurable | whats-new 2025/06, 2025/01 |

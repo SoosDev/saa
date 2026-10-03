@@ -14,13 +14,13 @@ Commit attribution: end commit messages with `Co-Authored-By: Claude …` as you
    the design rules in §7, the architecture in §8 and the per-session workflow in §9. It is the source of truth.
 2. `design/DESIGN.md` and all six `design/mockups/*.html`. The mockups win over any text.
 3. `docs/SCHEMA.md`, the data format the engine renders.
-4. The most recent complete session: `docs/session-07-ha-dr.md` and all of `sessions/07-ha-dr/*.js`.
-   Copy its structure, depth and tone. `sessions/06-governance/` is the other reference.
+4. The most recent complete session: `docs/session-08-databases.md` and all of `sessions/08-databases/*.js`.
+   Copy its structure, depth and tone. `sessions/07-ha-dr/` is the other reference.
 5. `tools/check/README.md`, the Playwright check harness.
 
 Don't ask the user to re-explain context. It's all in those files.
 
-## Current state (2026-09-25)
+## Current state (2026-10-03)
 | # | Session | Status | Totals (chapters / drills / cards) |
 |---|---|---|---|
 | 1 | Storage & data movement | live | 12 / 42 / 52 |
@@ -30,24 +30,26 @@ Don't ask the user to re-explain context. It's all in those files.
 | 5 | Security services & identity | live | 12 / 30 / 40 |
 | 6 | Multi-account & governance | live | 12 / 30 / 40 |
 | 7 | HA & disaster recovery | live | 12 / 30 / 40 |
-| 8–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
+| 8 | Databases & caching | live (facts via AWS docs web pages; MCP was down) | 12 / 30 / 40 |
+| 9–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
 
-**Next up: Session 8, Databases & caching.** It covers choosing RDS vs Aurora vs DynamoDB vs Redshift vs the purpose-built
-engines, RDS Proxy (his baseline Q15), read scaling, DynamoDB capacity modes / DAX / indexes, ElastiCache (Redis OSS / Valkey /
-Memcached) caching patterns, and database performance. Session 7 already covers the resilience side (Multi-AZ, replicas, Global
-Database, global tables, PITR) — reference it, don't repeat it. The §5 weight is D1 ● D2 ●● D3 ●●● D4 ●. Then 9 … 13, in the
-order in CONTEXT §5.
+**Next up: Session 9, Serverless, events, integration & analytics.** SQS (standard vs FIFO, visibility timeout, DLQ,
+long polling), SNS fan-out, EventBridge (rules, buses, Pipes, Scheduler), Kinesis Data Streams vs Firehose (his
+baseline **Q1**: Firehose vs Lambda), Step Functions, Lambda event sources, API Gateway, Glue (his **Q50**: "least ops" →
+Glue), Athena, EMR (his **Q57** half, the Spark side; Session 8 drill B2 covers the Redshift side), Lake Formation,
+QuickSight, MSK. The §5 weight is D1 · D2 ●● D3 ●● D4 ●●. Then 10 … 13.
 
 **Open items**
 - Session 2 quiz M1–M6 and S7 has no answers recorded yet. When the learner reports them, set `mine: true` and
   `tag` on the missed drills in `sessions/02-migration/drills.js` and add a `log` entry in `core.js`.
-- Sessions 3, 4, 5, 6 and 7 also have "not taken yet" log entries. Update them the same way when results arrive.
+- Sessions 3, 4, 5, 6, 7 and 8 also have "not taken yet" log entries. Update them the same way when results arrive.
 - Three facts rest on web or SDK sources, not the AWS MCP docs: SMS dates, the EKS Anywhere provider removals, and
   OpsWorks EOL. Re-check them if the MCP docs ever cover them.
 
 ## Workflow for each new session (CONTEXT §9, as it is actually done)
 1. **Verify facts with the AWS MCP server.** Load the tools with ToolSearch
    `select:mcp__aws-mcp__aws___search_documentation,mcp__aws-mcp__aws___read_documentation`.
+   If the MCP server is down (it was for Session 8), use WebFetch/WebSearch on docs.aws.amazon.com and the What's New feed.
    Every number, limit, date and "no longer available" claim gets a doc URL. Where current docs differ from older
    course material, add a "Changed since the exam guide" callout and a row in the brief's change table.
    Never print a limit you didn't verify. Spot-check anything surprising yourself, even when a subagent reports it.

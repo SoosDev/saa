@@ -190,7 +190,7 @@
       'For **RDS for MySQL and PostgreSQL** there is a second deployment type: a **Multi-AZ DB cluster** with one **writer** and **two readable standbys** in three AZs, kept in sync semisynchronously. Failover is typically **under 35 seconds**, and the standbys serve reads through a reader endpoint. Many banks predate it; when a question wants faster failover **and** readable standbys on RDS, it is the answer.',
       { h: 'Read replicas: copies for reading' },
       'A **read replica** is an **asynchronous**, readable copy, in the same AZ, another AZ or **another Region**. Its job is **read scaling**: point reporting and read-heavy traffic at it. It is also a cheap cross-Region DR copy, but it is **promoted manually** — it never takes over on its own. Limits: **15** read replicas per source for MySQL, MariaDB and PostgreSQL, **5** for Oracle and SQL Server, **3** for Db2. The source must have automated backups enabled. SQL Server does not support cross-Region replicas.',
-      { callout: 'Older material says 5 read replicas per RDS database. For MySQL, MariaDB and PostgreSQL the limit is now **15** (Oracle and SQL Server stay at 5).', kind: 'update' },
+      { callout: 'Older material says 5 read replicas per RDS database. The limit is now **15** per source for MySQL, MariaDB, PostgreSQL, Oracle and SQL Server; on Oracle and SQL Server AWS suggests staying at 5 or fewer to limit replication lag.', kind: 'update' },
       { pair: 'maz-rr' },
       { check: fromDrill('H11') },
       { check: fromDrill('H12') },
