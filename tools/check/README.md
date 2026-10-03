@@ -9,3 +9,8 @@
 one drill end to end, one card rated, every checkpoint) and then `widgets-<session>.js`, which must
 interact with every widget of that session once. `shots.js` / `sbs.js` produce the mockup comparison
 screenshots in design/compare/ (git-ignored).
+
+Question quality (no browser needed):
+
+    node options.js [NN-name]        # flags answers findable by length: answer longest, stub-length distractors
+    node drills-lint.js [NN-name]    # syntax, words in q, stub chip values, no "option B" letter references

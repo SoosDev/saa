@@ -33,24 +33,24 @@ const fail = []; const ok = m => console.log('  ✓ ' + m); const bad = m => { c
     const chs = await p.evaluate(() => SAA.ctx.S.learn.map(c => c.id));
     for (const c of chs) { await p.goto(BASE + '#learn/' + c); await p.waitForTimeout(200); await noScroll('learn ' + c); }
     ok(chs.length + ' chapters render');
-    // drill end to end
+    // drill end to end: options open without a stub, the stub toggle works, the result is graded on the answer only
     await p.goto(BASE + '#drill'); await p.waitForTimeout(300);
-    const stub = await p.evaluate(() => SAA.ctx.S.stub.map(s => s.values[0]));
-    const rows = p.locator('.stubrow');
-    for (let i = 0; i < stub.length; i++) await rows.nth(i).locator('button.chip').first().click();
+    (await p.locator('.stubrow').count()) === 0 ? ok('drill opens without a stub') : bad('stub shown by default');
+    await p.locator('button', { hasText: 'Use the stub' }).click(); await p.waitForTimeout(150);
+    (await p.locator('.stubrow').count()) > 0 ? ok('stub toggle shows the slots') : bad('stub toggle failed');
+    await p.locator('.stubrow').first().locator('button.chip').first().click();
+    await p.locator('button', { hasText: 'Hide stub' }).click(); await p.waitForTimeout(150);
     const opts = p.locator('.optlist > div');
     await opts.nth(1).locator('.xbtn').click(); await p.locator('.reasons button').first().click();
-    const need = await p.evaluate(() => { const id = document.querySelector('.drillcol .eyebrow').textContent; return 1; });
-    const nOpt = await opts.count();
-    const btnTxt = async () => (await p.locator('.drillcol button.btn').first().innerText());
+    const btnTxt = async () => (await p.locator('.drillcol button.btn').last().innerText());
     await opts.nth(0).click();
     if ((await btnTxt()).startsWith('Pick')) await opts.nth(2).click();
     await p.locator('.drillcol button.btn', { hasText: /^Check$/ }).click();
     await p.waitForTimeout(200);
-    (await p.locator('.vt.y, .vt.n').count()) >= stub.length ? ok('drill submitted, slot verdicts shown') : bad('drill verdicts missing');
+    (await p.locator('.vt.n').count()) === 0 && (await p.locator('h2.step', { hasText: /^(Right|Where it broke)$/ }).count()) ? ok('drill submitted, no stub verdicts') : bad('drill result card wrong');
     await p.locator('button', { hasText: /Next scenario|Finish set/ }).click(); await p.waitForTimeout(200);
-    const saved = await p.evaluate(sid => Object.keys(JSON.parse(localStorage.getItem('saa:' + sid + ':drill') || '{}')).length, SESS);
-    saved ? ok('drill result saved') : bad('drill not saved');
+    const saved = await p.evaluate(sid => Object.values(JSON.parse(localStorage.getItem('saa:' + sid + ':drill') || '{}')), SESS);
+    saved.length && !('stub' in saved[0]) ? ok('drill result saved') : bad('drill not saved');
     // card rated
     await p.goto(BASE + '#cards'); await p.waitForTimeout(200);
     await p.locator('button', { hasText: 'Show answer' }).click();

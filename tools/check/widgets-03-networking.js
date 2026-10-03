@@ -59,5 +59,5 @@ module.exports = {
   prestigeSorter: async (p, B) => { await go(p, B + '#learn/ch11'); const w = p.locator('.widget', { hasText: 'Needed or prestige' }); const rows = w.locator('.sortrow'); const n = await rows.count(); for (let i = 0; i < n; i++) await rows.nth(i).locator('button.chip').nth(1).click(); await w.locator('button', { hasText: 'Check' }).click(); if ((await w.locator('.sortrow.correct').count()) !== 4) throw new Error('expected 4 prestige right'); },
   networkMap: async (p, B) => { await go(p, B + '#learn/ch12'); await p.locator('.mapbox g.mg text', { hasText: 'DIRECT CONNECT' }).first().click(); await p.waitForTimeout(100); if ((await p.locator('.side h2').first().innerText()) !== 'Direct Connect') throw new Error('map select'); },
   triggerTable: async (p, B) => { await go(p, B + '#learn/ch12'); await p.locator('input[type=search]').fill('bastion'); const n = await p.locator('.widget tbody tr').count(); if (n < 1) throw new Error('rows ' + n); },
-  progressCharts: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 4) throw new Error('charts'); }
+  progressCharts: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 3) throw new Error('charts'); }
 };

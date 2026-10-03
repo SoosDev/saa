@@ -95,14 +95,14 @@
         rpo: '“RPO of 24 hours” — hours.',
         sup: '“most cost-effective”.' } } },
       { check: { id: 'ch1-ga', src: 'Exam pattern', q: 'An option adds **AWS Global Accelerator** to a DR design whose RTO is 24 hours and whose clients use DNS normally. Why cross it out?', opts: [
-        { t: 'Global Accelerator cannot fail over between Regions.', why: 'it can; that is one of its jobs.' },
-        { t: 'It fails the SUPERLATIVE: it pays for instant, IP-level failover that a 24-hour RTO does not need.', why: 'its built-for reasons — static IPs, no DNS caching — are absent.' },
-        { t: 'It fails FAILURE: Global Accelerator only works inside one AZ.', why: 'false; it fronts endpoints in several Regions.' }], a: 1,
+        { t: 'It fails the SUPERLATIVE: it pays for instant, IP-level failover that a 24-hour RTO never needs.', why: 'its built-for reasons — static IPs, no DNS caching — are absent.' },
+        { t: 'It fails FAILURE: Global Accelerator fronts endpoints in a single Region, so it cannot fail over.', why: 'false; endpoint groups in several Regions are one of its jobs.' },
+        { t: 'It fails the job: Global Accelerator carries only UDP traffic, so the HTTPS clients cannot reach it.', why: 'false; it carries TCP and UDP.' }], a: 0,
         why: 'Keep Global Accelerator only when the scenario gives its built-for reason: fixed IP addresses, IP allow lists, UDP, or failover that must not wait for DNS.' } },
       { check: { id: 'ch1-az', src: 'Exam pattern', q: 'A question asks to survive **the failure of one Availability Zone**. Which kind of answer should you expect?', opts: [
-        { t: 'A second Region with a DR strategy.', why: 'that answers a Region failure, at a higher cost.' },
-        { t: 'Resources spread across AZs in the same Region (Auto Scaling group behind a load balancer, Multi-AZ database).', why: 'high availability inside the Region — automatic and cheap.' },
-        { t: 'Backups copied to another Region.', why: 'a restore takes hours; the application stops meanwhile.' }], a: 1,
+        { t: 'A warm standby in a second Region, with Route 53 failover records that move users when the AZ fails.', why: 'that answers a Region failure, at a higher cost.' },
+        { t: 'Hourly backups copied to another Region, restored into a healthy AZ after the zone has failed.', why: 'a restore takes hours; the application stops meanwhile.' },
+        { t: 'Instances and a Multi-AZ database spread across AZs in the same Region, behind one load balancer.', why: 'high availability inside the Region — automatic and cheap.' }], a: 2,
         why: 'FAILURE = AZ → Multi-AZ. Save the second Region for FAILURE = Region.' } }
     ] },
 
@@ -205,9 +205,9 @@
         '**Cross-Region automated backup replication** copies snapshots and logs to a second Region so you can do point-in-time restore there — a backup-and-restore DR design for RDS.'] },
       { check: fromDrill('H13') },
       { check: { id: 'ch4-replica-bad', q: 'A developer ran `UPDATE orders SET status = \'cancelled\'` without a WHERE clause on an RDS for MySQL Multi-AZ database with two read replicas, ten minutes ago. Which copy still has the right data?', opts: [
-        { t: 'The Multi-AZ standby.', why: 'synchronous — it applied the update at the same moment.' },
-        { t: 'The read replicas.', why: 'asynchronous, but lag is seconds; they applied it long ago.' },
-        { t: 'A point-in-time restore to a moment before the update.', why: 'automated backups plus logs let you go back to the second before.' }], a: 2,
+        { t: 'A point-in-time restore of the DB instance to a moment just before the UPDATE ran.', why: 'automated backups plus logs let you go back to the second before.' },
+        { t: 'The Multi-AZ standby instance, reached by forcing a failover with a reboot.', why: 'synchronous — it applied the update at the same moment.' },
+        { t: 'The read replicas, because asynchronous replication runs behind the primary.', why: 'asynchronous, but lag is seconds; they applied it long ago.' }], a: 0,
         why: 'Standbys and replicas protect against losing infrastructure, not against bad writes. Bad data needs a copy from before the mistake.' } },
       { drills: ['H1', 'H11', 'H12', 'H13'] }
     ] },
@@ -407,9 +407,9 @@
         '**AWS Resilience Hub** assesses an application against resilience policies (RTO/RPO targets) and recommends improvements.'] },
       { callout: 'The **next generation of AWS Resilience Hub** (GA May 2026) replaces the single RTO/RPO policy per application with **modular policies** (disaster recovery, availability, data recovery), models applications as systems and user journeys, discovers dependencies, and integrates with AWS Organizations. The first version stays available. **Fault Injection Simulator** was renamed **Fault Injection Service**.', kind: 'update' },
       { check: { id: 'ch11-fis', q: 'A company claims its web tier survives an AZ failure. The CTO wants proof in a controlled experiment before the next audit. What should the architect use?', opts: [
-        { t: 'AWS Resilience Hub only.', why: 'it assesses and recommends; it does not disrupt anything to prove behaviour.' },
-        { t: 'AWS Fault Injection Service with an AZ power-interruption scenario.', why: 'it injects the failure and lets you watch the application survive it.' },
-        { t: 'Amazon ARC readiness checks.', why: 'closed to new customers, and they check configuration, not behaviour.' }], a: 1,
+        { t: 'AWS Resilience Hub, assessing the web tier against an availability policy for AZ loss.', why: 'it assesses and recommends; it does not disrupt anything to prove behaviour.' },
+        { t: 'AWS Fault Injection Service, running an AZ power-interruption scenario on the web tier.', why: 'it injects the failure and lets you watch the application survive it.' },
+        { t: 'Amazon ARC readiness checks, verifying the web tier’s capacity in each Availability Zone.', why: 'closed to new customers, and they check configuration, not behaviour.' }], a: 1,
         why: 'Proof by experiment = FIS. Resilience Hub assesses; restore testing proves backups.' } },
       { drills: ['H3', 'H6', 'H9'] }
     ] },

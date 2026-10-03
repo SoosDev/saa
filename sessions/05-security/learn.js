@@ -118,16 +118,16 @@
         mode: '“encrypted”, “can be disabled” — this must prevent reading, not find something.',
         sup: '“least operational overhead”.' } } },
       { check: { id: 'ch1-acm', src: 'Exam pattern', q: 'An option says “Use AWS Certificate Manager to encrypt the S3 objects”. Which stub slot rules it out immediately?', opts: [
-        { t: 'MODE: ACM detects, it does not prevent.', why: 'ACM neither detects nor prevents at rest; the mismatch is earlier.' },
-        { t: 'ASSET: ACM protects data in transit (TLS), and the asset is data at rest.', why: 'Certificates secure connections. Nothing in ACM encrypts stored objects.' },
-        { t: 'SUPERLATIVE: ACM is expensive.', why: 'public ACM certificates are free — cost is not the problem.' },
-        { t: 'None: ACM can encrypt S3 objects with a private key.', why: 'false; that is SSE-KMS or SSE-C.' }], a: 1,
+        { t: 'MODE: ACM only detects certificates that are about to expire, and the question asks to prevent unencrypted data.', why: 'ACM issues and renews certificates; detect versus prevent is not where it fails — what it protects is.' },
+        { t: 'SUPERLATIVE: ACM charges per certificate, so it cannot be the option with the least operational overhead.', why: 'public ACM certificates for integrated services are free, and cost is not overhead anyway.' },
+        { t: 'None: an ACM private certificate can encrypt S3 objects when it is set as the bucket’s default encryption key.', why: 'false; S3 encrypts at rest with SSE-S3, SSE-KMS, DSSE-KMS or SSE-C — never with a certificate.' },
+        { t: 'ASSET: ACM protects data in transit with TLS certificates, and the asset in this question is data at rest.', why: 'Certificates secure connections. Nothing in ACM encrypts stored objects.' }], a: 3,
         why: 'Name the built-for job first: ACM = TLS certificates. The asset is data at rest → KMS. Crossing it out on ASSET is the whole prestige test.' } },
       { check: { id: 'ch1-nfw', src: 'Exam pattern', q: 'Before keeping an option that contains **Network Firewall**, which question should you be able to answer “yes”?', opts: [
-        { t: 'Is the attack serious?', why: 'every attack in an exam question is serious; that selects nothing.' },
-        { t: 'Does traffic cross a VPC boundary and need stateful inspection, IPS or domain filtering that SGs and NACLs cannot do?', why: 'that is its built-for job.' },
-        { t: 'Is the application behind CloudFront?', why: 'CloudFront traffic is filtered by WAF, not by a VPC firewall.' },
-        { t: 'Does the company have many accounts?', why: 'that points to Firewall Manager, which can deploy Network Firewall — but only if Network Firewall is needed at all.' }], a: 1,
+        { t: 'Does traffic cross a VPC boundary and need stateful inspection, IPS or domain filtering beyond SGs and NACLs?', why: 'that is its built-for job.' },
+        { t: 'Do the HTTP requests carry SQL injection or XSS payloads that must be blocked before they reach the application?', why: 'that is WAF at the entry point (ALB, CloudFront, API Gateway) with managed rule groups.' },
+        { t: 'Does the company run many VPCs in many accounts that need the same firewall rules managed centrally?', why: 'that points to Firewall Manager, which can deploy Network Firewall — but only if Network Firewall is needed at all.' },
+        { t: 'Does the attack come from thousands of IP addresses at a volume that could exhaust the application?', why: 'a volumetric attack is Shield’s job (Advanced for the response team and cost protection), not an IPS.' }], a: 0,
         why: 'Network Firewall = VPC-level, stateful, any protocol, IPS and domains. No VPC-boundary traffic to inspect → cross it out.' } }
     ] },
 
@@ -159,14 +159,14 @@
         { t: '24/7 access to AWS DDoS experts during an attack', b: 'shield', why: 'Shield Response Team.' },
         { t: 'Database credentials available in the DR Region, same name', b: 'secrets', why: 'secret replication.' }] } },
       { check: { id: 'ch2-mode', q: 'A question asks to “**prevent** EC2 instances from communicating with known malicious IP addresses”. One option is “Enable Amazon GuardDuty”. Keep it or cross it out?', opts: [
-        { t: 'Keep it: GuardDuty knows the malicious IPs.', why: 'it knows them and raises a finding — then the traffic has already happened.' },
-        { t: 'Cross it out on MODE: GuardDuty detects; it prevents nothing on its own.', why: 'prevention needs a filter (Network Firewall, NACL, DNS Firewall) or an automated response wired to the finding.' },
-        { t: 'Cross it out on ASSET: GuardDuty only reads S3.', why: 'false; it reads CloudTrail, flow logs and DNS logs.' }], a: 1,
+        { t: 'Keep it: GuardDuty has threat lists of known malicious IPs and checks every connection against them.', why: 'it knows them and raises a finding — after the traffic has already happened.' },
+        { t: 'Cross it out on ASSET: GuardDuty reads only S3 data events, so it never sees EC2 network traffic.', why: 'false; it reads CloudTrail, VPC Flow Logs and DNS logs.' },
+        { t: 'Cross it out on MODE: GuardDuty raises findings after the traffic happens; on its own it blocks nothing.', why: 'prevention needs a filter (Network Firewall, NACL, DNS Firewall) or an automated response wired to the finding.' }], a: 2,
         why: 'MODE = prevent. GuardDuty is a detector. If the option said “GuardDuty + EventBridge + Lambda that updates a NACL”, it would be a detect-and-respond design — read options to the end.' } },
       { check: { id: 'ch2-staff', q: 'Employees must sign in once with the corporate identity provider and reach 30 AWS accounts. Which service family is this?', opts: [
-        { t: 'Cognito user pools', why: 'Cognito is for your application’s end users, not your workforce.' },
-        { t: 'IAM Identity Center (Session 6)', why: 'workforce single sign-on across accounts.' },
-        { t: 'Secrets Manager', why: 'stores credentials; it signs nobody in.' }], a: 1,
+        { t: 'IAM Identity Center connected to the corporate identity provider, with permission sets for each account.', why: 'workforce single sign-on across accounts (Session 6).' },
+        { t: 'Cognito user pools with the corporate identity provider federated through SAML, shared by all 30 accounts.', why: 'Cognito is for your application’s end users, not your workforce’s access to AWS accounts.' },
+        { t: 'Secrets Manager holding an IAM user’s credentials for each employee in each of the 30 accounts.', why: 'stores credentials; it signs nobody in, and 30 IAM users per person is the opposite of single sign-on.' }], a: 0,
         why: 'Boundary: customers of your app → Cognito. Your own staff across accounts → IAM Identity Center, taught in Session 6.' } }
     ] },
 
@@ -196,10 +196,10 @@
         '**IAM policy**: works only if the key policy delegates to IAM. Can always narrow (deny).',
         '**Grants**: temporary, programmatic permissions a service creates for itself — this is how EBS lets an EC2 instance use a key to attach an encrypted volume. Eventually consistent (usually within 5 minutes).'] },
       { check: { id: 'ch3-policy', q: 'A role has an IAM policy allowing `kms:Decrypt` on a key, yet every Decrypt call is denied. The key was created with a custom key policy. What is the most likely cause?', opts: [
-        { t: 'KMS needs a VPC endpoint.', why: 'without a route the call would time out, not be denied.' },
-        { t: 'The key policy does not allow the account’s IAM policies (or the role) to use the key.', why: 'without that statement, IAM permissions have no effect on the key.' },
-        { t: 'The role also needs an ACM certificate.', why: 'certificates have nothing to do with KMS permissions.' },
-        { t: 'Decrypt is only allowed for the root user.', why: 'false.' }], a: 1,
+        { t: 'Calls from the role need an interface VPC endpoint for KMS, and the VPC does not have one.', why: 'without a route the call would time out, not be denied.' },
+        { t: 'The IAM policy grants kms:Decrypt but not kms:GenerateDataKey, which Decrypt also requires.', why: 'Decrypt needs only kms:Decrypt; GenerateDataKey is for encrypting new data.' },
+        { t: 'The key is an AWS managed key, whose policy lets only the integrated service call Decrypt.', why: 'the key was created with a custom key policy, so it is a customer managed key.' },
+        { t: 'The key policy has no statement that lets the account’s IAM policies, or the role, use the key.', why: 'without that statement, IAM permissions have no effect on the key.' }], a: 3,
         why: 'Key policy first. IAM counts only when the key policy lets it count.' } },
       { h: 'Envelope encryption' },
       'The KMS **Encrypt** API accepts at most **4 KB (4,096 bytes)** of plaintext. That is enough for a password or another key, and nowhere near enough for a file. So KMS encrypts **keys**, and those keys encrypt the data. This is **envelope encryption**, and it is how every integrated service works:',
@@ -212,9 +212,9 @@
       { widget: 'envelope' },
       { check: fromDrill('S6') },
       { check: { id: 'ch3-types', q: 'An EBS snapshot is encrypted with `aws/ebs`. Which statement is true?', opts: [
-        { t: 'You can edit the key policy of aws/ebs to add a partner account.', why: 'AWS managed key policies cannot be edited.' },
-        { t: 'Only principals in the same account can use aws/ebs, so the snapshot cannot be shared as it is.', why: 'this is why sharing needs a re-encrypted copy with a customer managed key.' },
-        { t: 'aws/ebs rotates every three years.', why: 'every year since 2022.' }], a: 1,
+        { t: 'You can edit the key policy of aws/ebs to add a partner account, and then share the snapshot as it is.', why: 'AWS managed key policies cannot be edited.' },
+        { t: 'aws/ebs can be used by other accounts in the same AWS Organization, so the snapshot can be shared there.', why: 'there is no organization exception: AWS managed keys work only in their own account.' },
+        { t: 'Only principals in the same account can use aws/ebs, so the snapshot cannot be shared as it is.', why: 'this is why sharing needs a re-encrypted copy with a customer managed key.' }], a: 2,
         why: 'AWS managed keys: visible, not controllable, not shareable. Chapter 5 walks through the sharing procedure.' } },
       { drills: ['S1', 'S6'] }
     ] },
@@ -379,9 +379,9 @@
       { check: fromDrill('S2', 'Exam pattern') },
       { check: fromDrill('S3', 'Exam pattern') },
       { check: { id: 'ch7-count', q: 'A new managed rule group might block legitimate traffic. How do you see what it would block without affecting users?', opts: [
-        { t: 'Add it with its rule actions overridden to Count, review the logs and metrics, then switch to Block.', why: 'Count records matches and lets requests continue.' },
-        { t: 'Set the web ACL default action to Block.', why: 'that blocks everything no rule allows.' },
-        { t: 'Enable Shield Advanced first.', why: 'unrelated to rule testing.' }], a: 0,
+        { t: 'Add the rule group with its rule actions overridden to CAPTCHA, so users can still pass while you review.', why: 'every matched user gets a puzzle — that affects users.' },
+        { t: 'Add the rule group with its rule actions overridden to Count, review logs and metrics, then switch to Block.', why: 'Count records matches and lets requests continue.' },
+        { t: 'Put the rule group in a second web ACL set to Count, and associate both web ACLs with the same production ALB.', why: 'a resource can have only one web ACL associated.' }], a: 1,
         why: 'Count is WAF’s dry-run mode: non-terminating, visible in metrics, sampled requests and logs.' } },
       { check: fromDrill('S23') },
       { drills: ['S2', 'S3', 'S23'] }
@@ -482,10 +482,10 @@
         ['AWS Audit Manager', 'continuously collecting evidence of your AWS usage against audit frameworks', 'prepare for an audit, collect evidence']] } },
       { callout: '**AWS Audit Manager is no longer open to new customers** (availability change announced in 2026; existing customers keep using it). Recognise it in older questions; in new designs, evidence comes from Security Hub CSPM standards, Config conformance packs and Artifact.', kind: 'update' },
       { check: { id: 'ch10-artifact', q: 'An external auditor asks for AWS’s latest SOC 2 report for the data centres that host the company’s workloads. Where does the company get it?', opts: [
-        { t: 'AWS Artifact', why: 'AWS’s own compliance reports, on demand.' },
-        { t: 'Security Hub CSPM', why: 'scores your configuration, not AWS’s data centres.' },
-        { t: 'Amazon Macie', why: 'finds sensitive data in S3.' },
-        { t: 'AWS Config', why: 'records your resources’ configuration.' }], a: 0,
+        { t: 'Export the CIS and PCI DSS standard results from Security Hub CSPM and give them to the auditor.', why: 'scores your own configuration, not AWS’s data centres.' },
+        { t: 'Run an AWS Audit Manager assessment with the SOC 2 framework and share its assessment report.', why: 'collects evidence about your own use of AWS — and it is closed to new customers.' },
+        { t: 'Download the report from AWS Artifact in the console after accepting its terms, and pass it on.', why: 'AWS’s own compliance reports, on demand.' },
+        { t: 'Generate a compliance report from an AWS Config conformance pack across the company’s accounts.', why: 'records and checks your resources’ configuration, not AWS’s.' }], a: 2,
         why: 'Reports about AWS itself → Artifact. Reports about your own configuration → Security Hub CSPM / Config.' } },
       { drills: ['S26', 'S29'] }
     ] },
@@ -517,10 +517,10 @@
       { callout: 'Since **November 2024**: feature plans **Lite / Essentials / Plus**, the hosted UI became **managed login**, **passwordless** sign-in, and “advanced security features” became **threat protection** in Plus. The free tier is **10,000 monthly active users** for Lite and Essentials (older material: 50,000). Identity pools are free. WAF can also protect a user pool against sign-in abuse.', kind: 'update' },
       { check: fromDrill('S30') },
       { check: { id: 'ch11-alb', q: 'An internal web app on EC2 behind an ALB must require users to sign in, with the least code changes. Users are in a Cognito user pool. What do you configure?', opts: [
-        { t: 'An identity pool and IAM roles for each user.', why: 'AWS credentials are not needed to reach a web page.' },
-        { t: 'A listener rule with the authenticate-cognito action on the ALB’s HTTPS listener, then forward to the target group.', why: 'the ALB handles the login redirect and passes the user’s claims to the app.' },
-        { t: 'A WAF rule that checks for a password header.', why: 'WAF filters requests; it does not sign users in.' },
-        { t: 'An ACM certificate on each instance.', why: 'TLS is not authentication.' }], a: 1,
+        { t: 'Add the authenticate-cognito action to a rule on the ALB’s HTTPS listener, then forward to the targets.', why: 'the ALB handles the login redirect and passes the user’s claims to the app.' },
+        { t: 'Add the authenticate-cognito action to the ALB’s HTTP listener on port 80, then forward to the targets.', why: 'authentication actions work only on HTTPS listeners.' },
+        { t: 'Create a Cognito identity pool, and give each signed-in user an IAM role that is allowed to reach the ALB.', why: 'AWS credentials are not needed to reach a web page, and an ALB does not check IAM.' },
+        { t: 'Add an AWS WAF rule to the ALB that blocks requests without a valid Cognito ID token in a header.', why: 'WAF can match a header but cannot validate a token or run the sign-in flow.' }], a: 0,
         why: 'ALB + user pool: authentication at the load balancer, HTTPS listener required, session cookie afterwards. The app reads the claims from headers.' } },
       { drills: ['S30'] }
     ] },

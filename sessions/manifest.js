@@ -19,7 +19,7 @@ window.SAA_SESSIONS = [
 window.SAA_HUB = {
   eyebrow: 'SAA-C03 · 13 sessions',
   title: 'SAA Transit Maps',
-  lead: 'Every family of look-alike services is a coloured transit line with one verb. Each session is the full lesson, then drills that make you write the constraint stub before the options unlock, and trigger cards on spaced repetition. The goal is a stable 80%+.',
+  lead: 'Every family of look-alike services is a coloured transit line with one verb. Each session is the full lesson, then exam-style drills with same-sized options (an optional constraint stub helps you read them), and trigger cards on spaced repetition. The goal is a stable 80%+.',
 
   diagnosis: {
     title: 'Your diagnosis',

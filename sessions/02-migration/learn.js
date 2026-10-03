@@ -76,7 +76,7 @@
       { pre: S.method, label: 'The method' },
       'Files are still the {datasync|DataSync} line from Session 1: a NAS moving to S3, EFS or FSx is the same mover whether the word “migration” appears or not. [[../01-storage/#learn/ch8|Session 1, chapter 8 →]]',
       { check: { id: 'ch1-slot', q: '“A data-center lease ends in 3 months. The company wants to move its applications with minimal changes.” Which slot decides the approach?', opts: [
-        { t: 'WHAT', why: 'servers, but that alone allows rehost or refactor.' }, { t: 'CHANGE', why: 'minimal changes = none → rehost.' }, { t: 'DOWNTIME', why: 'not stated.' }, { t: 'SUPERLATIVE', why: 'the deadline hints at speed, but the change limit decides.' }], a: 1,
+        { t: 'WHAT = servers: whole applications are moving', why: 'true, but servers alone still allow rehost or refactor.' }, { t: 'CHANGE = none: the apps move as they are', why: 'minimal changes = none → rehost.' }, { t: 'DOWNTIME = minimal: the move must not stop work', why: 'no downtime limit is stated.' }, { t: 'SUPERLATIVE = fastest: the lease end sets a deadline', why: 'the deadline hints at speed, but the change limit decides.' }], a: 1,
         why: '“Minimal changes” sets CHANGE = none, which means **Rehost**, and for servers that is {mgn|MGN}.' } }
     ] },
 
@@ -150,7 +150,11 @@
       { h: 'Traps' },
       { ul: ['**MGN into RDS.** MGN always lands on EC2. A managed database target is DMS.', '**DRS used to migrate, or MGN used for DR.** Look for the ending: decommission the source → MGN; fail back → DRS.'] },
       { check: fromDrill('M1') },
-      { check: { id: 'ch4-drs', q: '“Servers stay on-prem. We need RPO in seconds and must fail back after repair.” Which service?', opts: [{ t: 'AWS Application Migration Service', why: 'one-way; ends at cutover.' }, { t: 'AWS Elastic Disaster Recovery', why: 'continuous, fail over and fail back.' }, { t: 'AWS Backup', why: 'scheduled backups: RPO of hours.' }, { t: 'VM Import/Export', why: 'offline images, no replication.' }], a: 1, why: 'Round trip + seconds of RPO = DRS.' } },
+      { check: { id: 'ch4-drs', q: '“Servers stay on-prem. We need RPO in seconds and must fail back after repair.” Which service?', opts: [
+        { t: 'Application Migration Service, replicating continuously and launching cutover instances in a disaster', why: 'one-way; it ends at cutover, with no failback.' },
+        { t: 'AWS Backup, with hourly backups of the servers restored to EC2 and back on-premises after repair', why: 'scheduled backups: an RPO of up to an hour.' },
+        { t: 'Elastic Disaster Recovery, replicating continuously and failing back to the data center after repair', why: 'continuous, fail over and fail back.' },
+        { t: 'VM Import/Export, with nightly server images imported as AMIs and kept ready to launch in a disaster', why: 'offline nightly images: an RPO of a day.' }], a: 2, why: 'Round trip + seconds of RPO = DRS.' } },
       { drills: ['M1', 'N7', 'N8'] }
     ] },
 

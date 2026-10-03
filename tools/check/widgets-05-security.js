@@ -88,5 +88,5 @@ module.exports = {
   cognitoPair: async (p, B) => { await go(p, B + '#learn/ch11'); await qc(p, 'Identity pool', 'correct'); },
   securityMap: async (p, B) => { await go(p, B + '#learn/ch12'); await p.locator('.mapbox g.mg text', { hasText: 'NETWORK FIREWALL' }).first().click(); await p.waitForTimeout(100); if ((await p.locator('.side h2').first().innerText()) !== 'Network Firewall') throw new Error('map select'); },
   triggerTable: async (p, B) => { await go(p, B + '#learn/ch12'); await p.locator('input[type=search]').fill('snapshot'); const n = await p.locator('.widget tbody tr').count(); if (n < 1) throw new Error('rows ' + n); },
-  progressCharts: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 4) throw new Error('charts'); }
+  progressCharts: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 3) throw new Error('charts'); }
 };

@@ -123,10 +123,10 @@
         ['S3', '“**S**tuff over HTTP”'],
         ['Instance store', '“dies with the box”']] },
       { check: { id: 'ch3-q33', src: 'Exam Q33', q: 'Which statement about Amazon EBS is true?', opts: [
-        { t: 'Volumes are automatically replicated to another Region.', why: 'EBS replicates inside one AZ only.' },
-        { t: 'A volume can be attached to an instance in any AZ of the Region.', why: 'only in its own AZ.' },
-        { t: 'A volume persists independently of the life of the instance it is attached to.', why: 'unless DeleteOnTermination removes it (the default for root volumes).' },
-        { t: 'Snapshots are stored in Amazon RDS.', why: 'in S3 storage you cannot see.' }], a: 2,
+        { t: 'A volume is automatically replicated to a second Region for durability.', why: 'EBS replicates inside one AZ only.' },
+        { t: 'A volume can be attached to an instance in any AZ of its Region.', why: 'only in its own AZ.' },
+        { t: 'A volume can persist independently of the instance it is attached to.', why: 'unless DeleteOnTermination removes it (the default for root volumes).' },
+        { t: 'Snapshots are stored in an S3 bucket in your account that you can replicate.', why: 'in S3 storage you cannot see — no bucket to replicate.' }], a: 2,
         why: 'EBS is AZ-scoped: replicated and attachable only inside its AZ. Snapshots go to S3 storage you cannot see. What EBS does promise is that the volume outlives the instance.' } }
     ] },
 
@@ -358,7 +358,11 @@
       { h: 'Answering with old names' },
       'Answer the **trigger**, not the product name. “Petabytes, a poor network, one time” is the truck line whether the option says Snowball Edge or Data Transfer Terminal. An answer set will usually contain one of them, rarely both.',
       '“Windows users on SMB with a local cache in front of FSx for Windows” is FSx File Gateway in a question bank. In a current design it is S3 File Gateway with an SMB share (if S3 is the target) or FSx for Windows directly.',
-      { check: { id: 'ch11-old', q: 'An older bank asks: 500 TB, a 100 Mbps link, one-time import into S3, fastest. Options: A) AWS DataSync, B) AWS Snowball Edge Storage Optimized, C) AWS Direct Connect, D) S3 Transfer Acceleration. Which do you pick?', opts: [{ t: 'A · DataSync', why: 'about 500 days at 1 TB/day.' }, { t: 'B · Snowball Edge', why: 'the bank’s truck.' }, { t: 'C · Direct Connect', why: 'never for a one-off; weeks to provision.' }, { t: 'D · Transfer Acceleration', why: 'adds no bandwidth.' }], a: 1,
+      { check: { id: 'ch11-old', q: 'An older practice bank asks: 500 TB on-premises, a 100 Mbps link, a one-time import into Amazon S3, FASTEST. Its options name Snowball Edge, not Data Transfer Terminal. Which do you pick?', opts: [
+        { t: 'Install an AWS DataSync agent and copy the 500 TB to S3 over the 100 Mbps link.', why: 'about 500 days at 1 TB/day.' },
+        { t: 'Order AWS Snowball Edge Storage Optimized devices, load the data, and ship them back.', why: 'the bank’s truck.' },
+        { t: 'Order an AWS Direct Connect connection and copy the 500 TB over it with DataSync.', why: 'never for a one-off; weeks to provision.' },
+        { t: 'Enable S3 Transfer Acceleration and upload the 500 TB through the nearest edge location.', why: 'still 100 Mbps; adds no bandwidth.' }], a: 1,
         why: 'The trigger is the truck line. In this bank the truck is Snowball, so pick it. Today you would book a Data Transfer Terminal.' } }
     ] },
 

@@ -50,7 +50,7 @@
         ['Q7', 'VPC-A peered with B and with C; B must reach C', 'routing B → C through A', '**F** peering is not transitive'],
         ['Q46', 'admins must SSH to private instances through a bastion', 'bastion in the private subnet', '**R** misread which subnet is public'],
         ['6 others', 'various', 'Transit Gateway, Global Accelerator, Network Firewall …', '**C** prestige distractor: no role in the scenario']] } },
-      { callout: 'In 6 baseline misses you chose an option containing a service with no job in the scenario. Three of those services live in this session: **Transit Gateway**, **Global Accelerator**, **Network Firewall**. Every drill below has at least one of them as a distractor or as the real answer, so you learn when each one earns its place.', kind: 'miss', title: 'Your misses' },
+      { callout: 'In 6 baseline misses you chose an option containing a service with no job in the scenario. Three of those services live in this session: **Transit Gateway**, **Global Accelerator**, **Network Firewall**. Most drills below carry at least one of them, as a distractor dressed up like a real design or as the real answer, so you learn when each one earns its place.', kind: 'miss', title: 'Your misses' },
       { h: 'Every networking question is about two ends' },
       'Strip the story until you can say: **traffic goes from X to Y**. The two ends decide the family of answers before you read any option:',
       { table: { head: ['The two ends', 'Family of answers'], key: true, rows: [

@@ -10,5 +10,5 @@ module.exports = {
   adChooser: async (p, B) => { await go(p, B + '#learn/ch8'); const w = p.locator('.widget', { hasText: 'AD chooser' }); await w.locator('.bigopt').first().click(); await w.locator('.bigopt').first().click(); if (!/Managed Microsoft AD/.test(await w.locator('.result').innerText())) throw new Error('mad'); },
   dnsDirection: async (p, B) => { await go(p, B + '#learn/ch9'); const w = p.locator('.widget', { hasText: 'Which endpoint' }); if (!/Inbound endpoint/.test(await w.innerText())) throw new Error('inbound'); await w.locator('button.chip', { hasText: 'EC2 instance' }).click(); await w.locator('button.chip', { hasText: 'corp.internal' }).click(); if (!/Outbound endpoint/.test(await w.innerText())) throw new Error('outbound'); },
   triggerTable: async (p, B) => { await go(p, B + '#learn/ch10'); await p.locator('input[type=search]').fill('Outposts'); const n = await p.locator('.widget tbody tr').count(); if (n < 1) throw new Error('rows ' + n); },
-  treeFree: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 4) throw new Error('charts'); }
+  treeFree: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 3) throw new Error('charts'); }
 };

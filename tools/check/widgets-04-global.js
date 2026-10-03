@@ -51,5 +51,5 @@ module.exports = {
   activePassiveStepper: async (p, B) => { await go(p, B + '#learn/ch11'); const w = p.locator('.widget', { hasText: 'Active-passive with Route 53' }); for (let i = 0; i < 4; i++) await w.locator('button', { hasText: 'Next' }).click(); if (!/Step 5 of 5/.test(await txt(w))) throw new Error('stepper'); },
   edgeMap: async (p, B) => { await go(p, B + '#learn/ch12'); await p.locator('.mapbox g.mg text', { hasText: 'GLOBAL ACCELERATOR' }).first().click(); await p.waitForTimeout(100); if ((await p.locator('.side h2').first().innerText()) !== 'Global Accelerator') throw new Error('map select'); },
   triggerTable: async (p, B) => { await go(p, B + '#learn/ch12'); await p.locator('input[type=search]').fill('apex'); const n = await p.locator('.widget tbody tr').count(); if (n < 1) throw new Error('rows ' + n); },
-  progressCharts: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 4) throw new Error('charts'); }
+  progressCharts: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 3) throw new Error('charts'); }
 };

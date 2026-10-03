@@ -107,15 +107,15 @@
         who: 'the people in the accounts, administrators included.',
         sup: '“least operational overhead”.' } } },
       { check: { id: 'ch1-ct', src: 'Exam pattern', q: 'An option says “Set up AWS Control Tower and enable its Region deny control” for an organization that already exists and needs only that one rule. Why cross it out?', opts: [
-        { t: 'Control Tower cannot deny Regions.', why: 'it can — its Region deny control is an SCP underneath.' },
-        { t: 'It fails the SUPERLATIVE: a whole landing zone and account enrollment for what one SCP does.', why: 'the job is one guardrail; the built-for job of Control Tower is a governed landing zone.' },
-        { t: 'It fails SCOPE: Control Tower works on one account only.', why: 'false; it governs OUs and accounts across the organization.' },
-        { t: 'Control Tower costs a large monthly fee.', why: 'there is no extra charge; you pay for the services it uses.' }], a: 1,
+        { t: 'It fails CONTROL: Control Tower has no Region deny control, so this rule cannot be built with it.', why: 'it has one — the Region deny control is an SCP underneath.' },
+        { t: 'It fails the SUPERLATIVE: a landing zone and enrolling every account for what one root SCP does.', why: 'the job is one guardrail; the built-for job of Control Tower is a governed landing zone.' },
+        { t: 'It fails SCOPE: Control Tower governs one account at a time, and this rule must cover every OU.', why: 'false; it governs OUs and accounts across the organization.' },
+        { t: 'It fails on cost: Control Tower adds a monthly fee per enrolled account on top of what it uses.', why: 'there is no extra charge; you pay only for the services it deploys.' }], a: 1,
         why: 'Name the built-for job first: Control Tower = set up and govern many accounts. When the organization exists and the need is one restriction, an SCP is the least-effort answer.' } },
       { check: { id: 'ch1-tgw', src: 'Exam pattern', q: 'Before keeping an option with **Transit Gateway** in it, which question should you be able to answer “yes”?', opts: [
-        { t: 'Are there many accounts?', why: 'many accounts can share one VPC with RAM and no transit gateway at all.' },
-        { t: 'Do many separate VPCs (or on-premises networks) need to route to each other?', why: 'that is its built-for job: a transitive hub.' },
-        { t: 'Is the question about networking?', why: 'most networking questions have simpler answers (peering, VPC sharing, endpoints).' }], a: 1,
+        { t: 'Do many accounts in the organization need to launch resources into the same network?', why: 'that is VPC sharing with RAM — one VPC, no transit gateway at all.' },
+        { t: 'Does the scenario connect a VPC to on-premises over Direct Connect or Site-to-Site VPN?', why: 'one VPC to on-premises needs only a virtual private gateway or a Direct Connect gateway.' },
+        { t: 'Must many separate VPCs, and maybe on-premises networks, all route to each other?', why: 'that is its built-for job: a transitive hub.' }], a: 2,
         why: 'Transit Gateway = hub for many separate VPCs and on-premises. One central VPC for many accounts → VPC sharing (RAM).' } }
     ] },
 
@@ -147,9 +147,9 @@
         { t: 'New accounts arrive already governed, through a self-service catalog', b: 'ct', why: 'Account Factory.' },
         { t: 'Developers can create roles, never beyond a defined maximum', b: 'iam', why: 'permission boundary.' }] } },
       { check: { id: 'ch2-prevent', q: 'A question asks to “**prevent** anyone in the Dev accounts from deleting CloudTrail trails”. One option is “Create an AWS Config rule that checks CloudTrail is enabled”. Keep it or cross it out?', opts: [
-        { t: 'Keep it: Config watches CloudTrail.', why: 'it would notice afterwards — the trail has already been deleted.' },
-        { t: 'Cross it out on CONTROL: Config detects; the requirement is to prevent.', why: 'prevention = an SCP denying cloudtrail:DeleteTrail and StopLogging.' },
-        { t: 'Cross it out on SCOPE: Config works only in one Region.', why: 'Config is regional per recorder, but aggregators cover all Regions; that is not the problem.' }], a: 1,
+        { t: 'Cross it out on CONTROL: the rule reports after the trail is gone; the job is to stop it.', why: 'prevention = an SCP denying cloudtrail:DeleteTrail and StopLogging.' },
+        { t: 'Keep it: with automatic remediation, Config recreates a deleted trail within a few minutes.', why: 'the deletion has already happened, and a gap in logging is exactly what “prevent” rules out.' },
+        { t: 'Cross it out on SCOPE: a Config rule runs in one account, and the Dev accounts are several.', why: 'organization conformance packs deploy rules to many accounts; scope is not the problem.' }], a: 0,
         why: 'CONTROL = prevent → SCP. Config would be the right half of a detect-and-remediate design, not a preventive control.' } },
       { check: { id: 'ch2-cognito', q: 'Employees must sign in once with the corporate IdP and reach 30 AWS accounts. Which is the look-alike you must cross out?', opts: [
         { t: 'IAM Identity Center', why: 'this is the answer: workforce + many accounts.' },
@@ -192,9 +192,9 @@
         { title: 'Re-create access and billing extras', text: 'Assign Identity Center permission sets in the new organization, re-share RAM resources, and re-activate cost allocation tags if needed.' }] } },
       { check: fromDrill('G30') },
       { check: { id: 'ch3-billing', q: 'A company uses AWS Organizations with **consolidated billing only** and now wants to attach SCPs. What must happen first?', opts: [
-        { t: 'Nothing; SCPs work in every organization.', why: 'policies are an all-features capability.' },
-        { t: 'Enable all features; every invited member account must approve the change.', why: 'the one-way switch that unlocks policies and integrations.' },
-        { t: 'Create a new organization.', why: 'unnecessary; the existing one can be upgraded.' }], a: 1,
+        { t: 'Nothing: SCPs can be attached in any organization, consolidated billing only included.', why: 'policies are an all-features capability.' },
+        { t: 'Create a new organization with all features and move every member account into it.', why: 'unnecessary; the existing organization can be switched to all features.' },
+        { t: 'Enable all features in the existing organization; invited accounts must approve.', why: 'the one-way switch that unlocks policies and integrations.' }], a: 2,
         why: 'All features adds policies and service integrations on top of consolidated billing, which it keeps.' } },
       { drills: ['G7', 'G30', 'G28'] }
     ] },
@@ -220,9 +220,9 @@
       { widget: 'scpTree' },
       { check: fromDrill('G6') },
       { check: { id: 'ch4-inherit', q: 'The root has FullAWSAccess. The Workloads OU has only an SCP that **allows** `ec2:*` and `s3:*` (FullAWSAccess removed). The Prod account under it has FullAWSAccess. Can an administrator in Prod create a DynamoDB table?', opts: [
-        { t: 'Yes: the account has FullAWSAccess.', why: 'every level on the path must allow it; the OU does not.' },
-        { t: 'No: the Workloads OU level has no Allow for DynamoDB.', why: 'an Allow must exist at the root, every OU and the account.' },
-        { t: 'Yes: administrators are not affected by SCPs.', why: 'they are; only the management account and service-linked roles are exempt.' }], a: 1,
+        { t: 'No: the Workloads OU’s SCP has no Allow for DynamoDB, and every level must allow it.', why: 'an Allow must exist at the root, every OU and the account.' },
+        { t: 'Yes: the Prod account’s own FullAWSAccess SCP allows every action, DynamoDB included.', why: 'every level on the path must allow it; the OU does not.' },
+        { t: 'Yes: SCPs restrict IAM users and roles in Prod, but not the account’s administrators.', why: 'they do restrict administrators; only the management account and service-linked roles are exempt.' }], a: 0,
         why: 'Allow-list SCPs work because the Allow must be present at every level. The OU becomes the narrowest filter for everything below it.' } },
       { h: 'Resource control policies (RCPs)' },
       'An SCP looks at **who** is calling from inside your organization. An **RCP** (November 2024) looks at **your resources**: it sets the maximum permissions **on resources in member accounts**, whoever the caller is — including principals from **other** organizations. Typical use: a **data perimeter** (“no identity outside our organization may ever read our S3 objects or use our KMS keys, whatever a bucket policy says”, “every S3 request must use TLS”).',
@@ -242,9 +242,9 @@
         ['newer (2025–26)', 'Security Hub, Amazon Inspector, Amazon Bedrock guardrails, upgrade rollout, Amazon S3 policies']] } },
       { callout: 'Older material lists four policy types (SCP, tag, backup, AI opt-out). Today Organizations groups them as **authorization** policies (SCP, RCP) and **declarative / management** policies (EC2 declarative, backup, tag, chat, AI opt-out, Security Hub, Inspector, Bedrock, upgrade rollout, S3). For the exam, SCPs and tag policies remain the ones asked about.', kind: 'update' },
       { check: { id: 'ch4-rcp', q: 'A partner company’s role can read a bucket in one of your member accounts because a developer wrote a permissive bucket policy. Security wants a central rule that stops **all principals outside your organization** from reading any S3 object in member accounts. What is it?', opts: [
-        { t: 'An SCP denying s3:GetObject unless aws:PrincipalOrgID is yours.', why: 'SCPs only apply to your own principals; the partner’s role is not in your organization.' },
-        { t: 'An RCP denying s3:GetObject when aws:PrincipalOrgID is not yours.', why: 'RCPs restrict access to your resources whoever the caller is.' },
-        { t: 'A permission boundary on the bucket.', why: 'boundaries attach to users and roles, not resources.' }], a: 1,
+        { t: 'An SCP on the root that denies s3:GetObject unless aws:PrincipalOrgID is your organization.', why: 'SCPs only apply to your own principals; the partner’s role is not in your organization.' },
+        { t: 'A permission boundary on each bucket that denies s3:GetObject to principals outside your org.', why: 'boundaries attach to IAM users and roles, not to buckets.' },
+        { t: 'An RCP on the root that denies s3:GetObject when aws:PrincipalOrgID is not your own org.', why: 'RCPs restrict access to your resources whoever the caller is.' }], a: 2,
         why: 'Resource side + outsiders = RCP. (Add exceptions for AWS service principals where needed.)' } },
       { drills: ['G1', 'G6', 'G8', 'G10', 'G29'] }
     ] },
@@ -282,9 +282,9 @@
       { h: 'Session policies' },
       'When you assume a role (or federate) you can pass a **session policy** — one inline JSON policy and up to 10 managed policy ARNs. The session gets the **intersection** of the role’s permissions and the session policy. Use it when one role serves many callers and each session should get less, for example a broker that hands each tenant credentials scoped to its own S3 prefix.',
       { check: { id: 'ch5-deny', q: 'A role has AdministratorAccess. An inline policy on the same role denies `s3:DeleteBucket`. The SCP path allows everything. Can the role delete a bucket?', opts: [
-        { t: 'Yes: AdministratorAccess allows everything.', why: 'an explicit Deny beats any Allow.' },
-        { t: 'No: the explicit Deny in the inline policy wins.', why: 'explicit Deny is checked first and ends the evaluation.' },
-        { t: 'Only from the root user.', why: 'the question is about the role.' }], a: 1,
+        { t: 'Yes: AdministratorAccess is a managed policy, and it overrides the inline policy.', why: 'policy type does not matter; an explicit Deny beats any Allow.' },
+        { t: 'No: the explicit Deny in the inline policy beats the AdministratorAccess Allow.', why: 'explicit Deny is checked first and ends the evaluation.' },
+        { t: 'Yes: an inline Deny applies only when no attached policy allows the same action.', why: 'backwards — an explicit Deny wins over every Allow, wherever it sits.' }], a: 1,
         why: 'Explicit Deny anywhere → denied. It does not matter which policy type contains it.' } },
       { drills: ['G6', 'G8', 'G9', 'G11', 'G13'] }
     ] },
@@ -504,9 +504,9 @@
       { pair: 'tag-scp' },
       { check: fromDrill('G29') },
       { check: { id: 'ch11-tags', q: 'Tags are on every resource, but the finance team cannot see a CostCenter column in Cost Explorer. What is missing?', opts: [
-        { t: 'A tag policy for CostCenter.', why: 'tag policies standardise values; they do not make tags visible in billing.' },
         { t: 'Activating CostCenter as a cost allocation tag in the management account’s Billing console.', why: 'tags appear in cost tools only after activation.' },
-        { t: 'An SCP requiring the tag.', why: 'the tags already exist.' }], a: 1,
+        { t: 'A tag policy on the organization root that defines CostCenter and lists its allowed values.', why: 'tag policies standardise values; they do not make tags visible in billing.' },
+        { t: 'An SCP that denies creating resources without a CostCenter tag in every member account.', why: 'the tags already exist; an SCP makes nothing visible in billing.' }], a: 0,
         why: 'Billing ignores tags until they are activated as cost allocation tags.' } },
       { drills: ['G27', 'G28', 'G29'] }
     ] },
@@ -520,7 +520,7 @@
       { pre: S.cheat, label: 'Cheat block · copy it by hand' },
       { h: 'Your record' },
       { log: true },
-      'G1–G5 carry your prestige pattern and are marked as yours in the drill (source “Exam pattern”, tag C). In G1–G3 Control Tower, Transit Gateway and Network Firewall are tempting and wrong; in G4 and G5 Control Tower and Transit Gateway are the answer. Ten more drills put a prestige service among the options. Run the 30 scenarios once; your new misses appear in Progress.',
+      'G1–G5 carry your prestige pattern and are marked as yours in the drill (source “Exam pattern”, tag C). In G1–G3 Control Tower, Transit Gateway and Network Firewall are tempting and wrong; in G4 and G5 Control Tower and Transit Gateway are the answer. Seven more drills put a prestige service among the options. Run the 30 scenarios once; your new misses appear in Progress.',
       { link: '#drill', text: 'Go to the drill (30 scenarios)', btn: true }
     ] }
   ];

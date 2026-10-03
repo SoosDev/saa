@@ -56,14 +56,28 @@ A/R  reasoning / misread  6   Q15 (raised Lambda concurrency; needed RDS Proxy) 
 
 Sessions may redefine the stub slots when a cluster needs different ones (Session 2 does, see its file). The mechanics stay the same:
 
-- Options are locked until the stub is filled.
+- The stub is an **optional, unscored** scratchpad ("Use the stub" in the drill). It never locks the options. Changed 2026-10-03 after learner feedback: grading his stub punished right answers whenever the setter's reading of an ambiguous stem differed from his.
+- Options are shuffled per attempt.
 - The user crosses out options with a reason chip (violates SIZE / TIME / PROTOCOL / SUPERLATIVE, wrong job for the service, false/impossible).
-- Feedback shows a ✓/✕ per stub slot, the deciding words highlighted in the scenario, a why for every option, and a miss-tag picker (F fact · C confused · K keyword · R misread · A reasoning · L limit).
+- Feedback is graded on the answer only: the deciding words highlighted in the scenario, a why for every option, the setter's stub as a neutral reference, and a miss-tag picker on wrong answers (F fact · C confused · K keyword · R misread · A reasoning · L limit).
+
+**Writing questions (learner feedback, 2026-10-03).** In 289 of 401 questions the answer was the longest option and
+distractors were one-to-two-word stubs. Every drill and multi-option checkpoint now follows these rules
+(`node tools/check/options.js` and `node tools/check/drills-lint.js` enforce the measurable ones):
+
+- All options of a question are within about ±20% of each other in length. The answer is the longest option in at most
+  ~1/3 of a session's questions.
+- Every distractor is a full, plausible architecture with real services, using the scenario's own specifics, wrong
+  because of ONE detail: a stated constraint it breaks, a limit, a missing feature, the wrong scope or mode, or a
+  working design that loses on the stated superlative. Prestige distractors are dressed up the same way.
+- The deciding qualifier is stated in the stem the way AWS does ("MOST cost-effectively", "LEAST operational
+  overhead", "must be immutable for 7 years"). No answer may hinge on a qualifier that is only implied.
+- `why` texts and `expl` never refer to options by letter (order is shuffled).
 
 Learning principles to build in:
 
 - Recall before reveal.
-- Stub before options.
+- Read the constraints before the options (the stub is the tool, not a gate).
 - Leitner spaced repetition: boxes 1→5, intervals 1/2/4/8 days, Missed → box 1.
 - Interleaved, shuffled drill sets with filters (by line/topic, my misses, not yet solved).
 - Dual coding: every service family is a coloured transit line with one verb.
@@ -184,7 +198,7 @@ Follow `design/DESIGN.md` and the six mockups exactly. Known drift from the firs
   - Phone bottom bar: **Learn · Lines · Cards · Drill · More**. "More" opens a sheet with Tree, Classes, Compare, Traps, Cheat sheet, Progress, All sessions.
 - **Checkpoint** component: the same option rows as the drill (neutral → correct/wrong), one question, instant why, "Try again".
 - **Charts**: hand-built SVG, one axis, recessive grid, ink bars. Identity comes from a line-colour swatch plus a text label, never colour alone. Every bar has a hover tooltip. Charts work in dark mode. The line palette fails colour-blind separation between DMS green and the grey truck line, which is why the truck line is always dashed and labelled and why chart bars stay ink.
-- **Progress tab**: drill accuracy by line, stub slots missed, Leitner box distribution, miss-tag counts, chapters done, session log.
+- **Progress tab**: drill accuracy by line, Leitner box distribution, miss-tag counts, chapters done, session log.
 - Mastery in the header = (chapters done + drills solved on last try + cards in box ≥3) / total.
 
 ## 8. Architecture (keep or refactor what exists, but end up here)

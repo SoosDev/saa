@@ -17,7 +17,7 @@ A tab appears only when its key exists.
 | `compare` | Compare | `[{ id, short, title, sides[{name, line?, fig{dir, cache, cacheLabel, left, right, keep, dash}, gist}], rows[[label, …]], check{q, opts[], a, why} }]` |
 | `cards` | Trigger cards | `[{ id, line, f, b, why, tempt, mine?, src?, update? }]` |
 | `drills` | Drill | `[{ id, src, line, mine?, tag?, q, opts[{t, ok, why}], stub{slotId: value|'any'}, words[], expl, update? }]`. `words` must appear verbatim in `q`. More than one `ok` = "pick N". |
-| `stub` | Drill | `[{ id, label, short, values[] }]` — the session's slots. |
+| `stub` | Drill | `[{ id, label, short, values[] }]` — the session's slots. Optional and unscored in the drill; each drill's `stub` is shown after the answer as the setter's read. |
 | `traps`, `method`, `cheat`, `log` | Traps, Cheat sheet, Progress | as in `sessions/01-storage/core.js` |
 
 ## Blocks (learn chapters and pages)

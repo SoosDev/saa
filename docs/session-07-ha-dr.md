@@ -111,7 +111,7 @@ Figure-6 labels of the DR whitepaper (image; Well-Architected text used instead)
 
 ## Traps (16), compare pairs (8), cards (40), drills (30)
 Pairs: HA · DR · pilot light · warm standby · multi-site · Multi-AZ instance · cluster · read replica · Aurora Global · cross-Region replica · global tables · Aurora Global · replication · backup · DRS · Backup · MGN · Route 53 · GA · ARC.
-Drills: two select-TWO (H11, H24); correct letters **A 7 · B 7 · C 7 · D 7 · BD 1 · AC 1**; `words` verbatim in `q` (script-checked). Prestige option wrong in H3, H5, H6, H9, H10, H13, H22, H26, H28, H30; right in H4 (GA), H8 (multi-site), H14 (Aurora Global).
+Drills: two select-TWO (H11, H24); correct letters **A 7 · B 7 · C 7 · D 7 · BD 1 · AC 1**; `words` verbatim in `q` (script-checked). Prestige option wrong in H1, H3, H5, H6, H9, H10, H13, H28, H29, H30 (rebalanced 2026-10-03: same-sized options, each distractor wrong in one detail); right in H4 (GA), H8 (multi-site), H14 (Aurora Global).
 
 ## Checks
 `tools/check/widgets-07-ha-dr.js` interacts with every widget (stub trainer, DR picker incl. four target changes and a tooltip, three sorters, four steppers, database chooser, AZ calculator, threat matrix incl. three threats and a tooltip, failover chart, cost ladder incl. three rates, eight pair quick checks, map, trigger table, progress). Screenshots: `node shots-07.js` → `design/compare/s7-*.png`. Engine/CSS: **no change**.

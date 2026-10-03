@@ -967,8 +967,10 @@
         return;
       }
       const d = D.find(x => x.id === set[mem.drillI]);
-      if (!mem.work || mem.work.id !== d.id) mem.work = { id: d.id, stub: {}, picks: new Set(), crossed: {}, openX: null, done: false };
+      /* options are shuffled once per attempt so position never gives the answer away */
+      if (!mem.work || mem.work.id !== d.id) mem.work = { id: d.id, stub: {}, picks: new Set(), crossed: {}, openX: null, done: false, order: shuffle(d.opts.map((o, i) => i)) };
       const w = mem.work;
+      const stubOn = !!ui.stubOn;
       head({ title: 'Drill', meta: (mem.drillI + 1) + ' / ' + set.length, bar: (mem.drillI + 1) / set.length });
       const correct = d.opts.map((o, i) => (o.ok ? i : -1)).filter(i => i >= 0);
       const need = correct.length;
@@ -990,26 +992,28 @@
       if (need > 1) eb.push('pick ' + need);
       col.appendChild(h('div', { cls: 'card stack g8' }, h('div', { cls: 'row', style: { gap: '6px' } }, h('span', { cls: 'eyebrow sm', text: eb.join(' · ') })), qNode));
 
-      /* step 1: stub */
-      const stubFilled = () => S.stub.every(sl => w.stub[sl.id]);
+      /* optional stub: a scratchpad for reading the scenario. It never locks the options and is never scored. */
       const stubBox = h('div', { cls: 'stack g12' });
       const paintStub = () => {
         clear(stubBox);
-        stubBox.appendChild(h('div', { cls: 'row between base' }, h('h2', { cls: 'step', text: '1 · Fill the stub' }), stubFilled() ? h('span', { cls: 'small ok-t', text: 'done' }) : h('span', { cls: 'small muted', text: 'options unlock when all ' + S.stub.length + ' are set' })));
+        if (!stubOn || w.done) return;
+        stubBox.appendChild(h('div', { cls: 'row between base' }, h('h2', { cls: 'step', text: 'Stub' }), h('span', { cls: 'small muted', text: 'optional · not scored' })));
         S.stub.forEach(sl => stubBox.appendChild(h('div', { cls: 'stubrow' }, h('span', { cls: 'stublab', text: sl.label }),
-          h('div', { cls: 'chiprow' }, sl.values.map(v => h('button', { cls: 'chip', type: 'button', disabled: w.done, 'aria-pressed': String(w.stub[sl.id] === v), text: v, on: { click: () => { w.stub[sl.id] = v; paintStub(); paintOpts(); } } }))))));
+          h('div', { cls: 'chiprow' }, sl.values.map(v => h('button', { cls: 'chip', type: 'button', 'aria-pressed': String(w.stub[sl.id] === v), text: v, on: { click: () => { w.stub[sl.id] = w.stub[sl.id] === v ? undefined : v; paintStub(); } } }))))));
       };
       col.appendChild(stubBox);
 
-      /* step 2: options */
+      /* options */
       const optBox = h('div', { cls: 'stack g10' });
       const REASONS = S.stub.map(sl => 'violates ' + sl.short).concat(['wrong job for the service', 'false / impossible']);
       const paintOpts = () => {
         clear(optBox);
-        optBox.appendChild(h('h2', { cls: 'step', text: '2 · Cross out, then pick' + (need > 1 ? ' ' + need : '') }));
+        optBox.appendChild(h('div', { cls: 'row between base' }, h('h2', { cls: 'step', text: 'Cross out, then pick' + (need > 1 ? ' ' + need : '') }),
+          !w.done ? h('button', { cls: 'btn ghost sm', type: 'button', text: stubOn ? 'Hide stub' : 'Use the stub', on: { click: () => { ui.stubOn = !stubOn; saveUi(); render(); } } }) : null));
         if (!w.done) optBox.appendChild(h('p', { cls: 'small muted', text: 'For each option ask what the service was built for. ✗ crosses it out with the constraint it breaks.' }));
-        const list = h('div', { cls: 'optlist' + (!stubFilled() && !w.done ? ' locked' : ''), 'aria-disabled': String(!stubFilled() && !w.done) });
-        d.opts.forEach((o, i) => {
+        const list = h('div', { cls: 'optlist' });
+        w.order.forEach((i, pos) => {
+          const o = d.opts[i];
           const picked = w.picks.has(i), crossed = w.crossed[i];
           let cls = 'opt', note = null;
           if (w.done) {
@@ -1020,10 +1024,10 @@
           } else if (crossed) { cls += ' crossed'; note = '✗ ' + crossed; }
           else if (picked) cls += ' picked';
           const txt = h('span', { cls: 'otxt' }, md(o.t));
-          const top = h('div', { cls: 'otop' }, h('b', { cls: 'okey', text: LET[i] }), txt);
+          const top = h('div', { cls: 'otop' }, h('b', { cls: 'okey', text: LET[pos] }), txt);
           const row = h('div', { cls, role: w.done ? null : 'button', tabindex: w.done ? null : 0, 'aria-pressed': w.done ? null : String(picked), style: w.done ? null : { cursor: 'pointer' } }, top);
           if (!w.done) {
-            const x = h('button', { cls: 'xbtn', type: 'button', 'aria-label': crossed ? 'Restore option ' + LET[i] : 'Cross out option ' + LET[i], text: crossed ? '↺' : '✗' });
+            const x = h('button', { cls: 'xbtn', type: 'button', 'aria-label': crossed ? 'Restore option ' + LET[pos] : 'Cross out option ' + LET[pos], text: crossed ? '↺' : '✗' });
             x.addEventListener('click', e => { e.stopPropagation(); if (crossed) { delete w.crossed[i]; w.openX = null; } else w.openX = w.openX === i ? null : i; paintOpts(); });
             top.appendChild(x);
             const onPick = () => {
@@ -1040,7 +1044,7 @@
           list.appendChild(row);
         });
         optBox.appendChild(list);
-        if (!w.done) optBox.appendChild(h('button', { cls: 'btn', type: 'button', disabled: !stubFilled() || w.picks.size !== need, text: w.picks.size === need ? 'Check' : need > 1 ? 'Pick ' + need : 'Pick one', on: { click: submit } }));
+        if (!w.done) optBox.appendChild(h('button', { cls: 'btn', type: 'button', disabled: w.picks.size !== need, text: w.picks.size === need ? 'Check' : need > 1 ? 'Pick ' + need : 'Pick one', on: { click: submit } }));
       };
       col.appendChild(optBox);
 
@@ -1050,11 +1054,9 @@
       function submit() {
         w.done = true;
         const ok = w.picks.size === need && correct.every(i => w.picks.has(i));
-        const stubOk = {};
-        S.stub.forEach(sl => { const t = d.stub[sl.id]; stubOk[sl.id] = t === 'any' || t === w.stub[sl.id]; });
         const r = store.get(k('drill'), {});
         const p = r[d.id] || {};
-        r[d.id] = { ok, n: (p.n || 0) + 1, ever: p.ever || ok, stub: stubOk, tag: ok ? p.tag || null : p.tag || null, at: Date.now() };
+        r[d.id] = { ok, n: (p.n || 0) + 1, ever: p.ever || ok, tag: p.tag || null, at: Date.now() };
         store.set(k('drill'), r);
         w.result = r[d.id];
         paintQ(); paintStub(); paintOpts(); paintBroke();
@@ -1065,14 +1067,15 @@
         clear(brokeBox);
         if (!w.done) return;
         const r = w.result;
-        const allStub = Object.values(r.stub).every(Boolean);
         const card = h('div', { cls: 'card stack g10' },
-          h('div', { cls: 'row between base' }, h('h2', { cls: 'step', text: '3 · ' + (r.ok && allStub ? 'Clean run' : 'Where it broke') }), h('span', { cls: 'small ' + (r.ok ? 'ok-t' : 'bad-t'), text: r.ok ? 'right answer' : 'wrong answer' })),
-          h('div', { cls: 'row', style: { gap: '10px' } }, S.stub.map(sl => h('span', { cls: 'vt ' + (r.stub[sl.id] ? 'y' : 'n'), text: sl.short + (r.stub[sl.id] ? ' ✓' : ' ✕') }))));
-        S.stub.filter(sl => !r.stub[sl.id]).forEach(sl => card.appendChild(h('p', { cls: 'small' }, md('**' + sl.short + '** was **' + d.stub[sl.id] + '** — you set ' + w.stub[sl.id] + '.'))));
+          h('div', { cls: 'row between base' }, h('h2', { cls: 'step', text: r.ok ? 'Right' : 'Where it broke' }), h('span', { cls: 'small ' + (r.ok ? 'ok-t' : 'bad-t'), text: r.ok ? 'right answer' : 'wrong answer' })));
         card.appendChild(P(d.expl, 'scen'));
+        /* the setter's reading of the scenario, for reference only */
+        const read = S.stub.filter(sl => d.stub && d.stub[sl.id] && d.stub[sl.id] !== 'any');
+        if (read.length) card.appendChild(h('div', { cls: 'row', style: { gap: '8px', alignItems: 'baseline' } }, h('span', { cls: 'small muted', text: 'Setter’s read' }),
+          read.map(sl => h('span', { cls: 'vt', text: sl.short + ' · ' + d.stub[sl.id] + (stubOn && w.stub[sl.id] && w.stub[sl.id] !== d.stub[sl.id] ? ' (you: ' + w.stub[sl.id] + ')' : '') }))));
         if (d.update) card.appendChild(callout(d.update, 'update'));
-        if (!r.ok || !allStub) {
+        if (!r.ok) {
           const tagRow = h('div', { cls: 'row', style: { gap: '8px' } }, h('span', { cls: 'small muted', text: 'Tag the miss' }));
           const paintTags = () => {
             while (tagRow.children.length > 1) tagRow.removeChild(tagRow.lastChild);
@@ -1126,7 +1129,6 @@
         const ds = S.drills.filter(d => d.line === g), t = ds.filter(d => res[d.id]), okN = t.filter(d => res[d.id].ok).length;
         return { label: groupName(g), line: LINES[g] || null, value: t.length ? Math.round((okN / t.length) * 100) : 0, text: t.length ? okN + '/' + t.length : '—', tip: groupName(g) + ': ' + okN + ' of ' + t.length + ' tried solved on the last try (' + ds.length + ' in the bank)', soft: !t.length };
       });
-      const slotMiss = S.stub.map(sl => { const n = tried.filter(id => res[id].stub && res[id].stub[sl.id] === false).length; return { label: sl.label, value: n, tip: sl.label + ': wrong on ' + n + ' of ' + tried.length + ' drills (last try)' }; });
       const boxN = [1, 2, 3, 4, 5].map(b => { const n = S.cards.filter(c => ((cst[c.id] || {}).box || 1) === b).length; return { label: b === 5 ? 'box 5 · known' : 'box ' + b, value: n, tip: (b === 1 ? 'Box 1 includes cards you have not seen yet. ' : '') + n + ' cards' }; });
       const tagN = TAGS.map(([t, n]) => { const c = tried.filter(id => res[id].tag === t).length; return { label: t + ' · ' + n, value: c, tip: c + ' drill misses tagged ' + t + ' (' + n + ')' }; });
 
@@ -1136,7 +1138,6 @@
         stats,
         h('div', { cls: 'grid g2' },
           chart('Drill accuracy by line', hbars({ rows: acc, max: 100, ticks: [0, 25, 50, 75, 100], fmt: v => v + '%', title: 'Drill accuracy by line' }), 'Last try per scenario. A dash means nothing tried on that line yet.'),
-          chart('Stub slots missed', hbars({ rows: slotMiss, title: 'Stub slots missed' }), 'The slot you misread most is the habit to fix first.'),
           chart('Leitner boxes', hbars({ rows: boxN, title: 'Leitner box distribution' }), 'Missed → box 1. Knew it → one box up.'),
           chart('Miss tags', hbars({ rows: tagN, title: 'Miss tag counts' }), 'Tags you set in the drill’s “Where it broke” step.')),
         h('div', { cls: 'card stack g10' }, h('h2', { cls: 'step', text: 'Chapters' }),

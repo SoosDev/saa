@@ -61,8 +61,10 @@ order in CONTEXT §5.
    - `index.html`: copy the previous shell and change the title and description.
    - `core.js`: meta, lines, map, stub, method, cheat, 8 compare pairs, ~15 traps, a log with a "not taken yet" entry.
    - `drills.js`: 30 exam-style drills. Every option has a `why`. `words` must be verbatim, case-insensitive
-     substrings of `q`. Include 2 "select TWO" drills and vary the position of the correct answer. His exam misses
-     get `mine: true`, `src: 'Exam Qn'` and a `tag`.
+     substrings of `q`. Include 2 "select TWO" drills. His exam misses get `mine: true`, `src: 'Exam Qn'` and a `tag`.
+     **Follow "Writing questions" in CONTEXT §4**: same-sized options, every distractor a plausible full architecture
+     wrong in one detail, the qualifier stated in the stem, no letter references. `node tools/check/options.js NN-name`
+     and `node tools/check/drills-lint.js NN-name` must both pass.
    - `cards.js`: 40 cards.
    - `widgets.js`: session widgets.
    - `learn.js`: 10–12 chapters of **full lesson prose**, in second person, plain and direct, with a checkpoint

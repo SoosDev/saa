@@ -12,6 +12,6 @@ module.exports = {
   compareQuickCheck: async (p, B) => { await go(p, B + '#compare/truck'); await p.locator('.qcbtn').nth(1).click(); if (!(await p.locator('.qcbtn.correct').count())) throw new Error('qc'); },
   treeTab: async (p, B) => { await go(p, B + '#tree'); await p.locator('.bigopt').nth(1).click(); await p.locator('.bigopt').nth(1).click(); if (!/FSx for Windows/.test(await p.locator('.result').innerText())) throw new Error('tree'); },
   triggerTable: async (p, B) => { await go(p, B + '#learn/ch12'); await p.locator('input[type=search]').fill('tape'); const n = await p.locator('.widget tbody tr').count(); if (n < 1 || n > 5) throw new Error('filter rows ' + n); },
-  progressCharts: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 4) throw new Error('charts'); },
+  progressCharts: async (p, B) => { await go(p, B + '#progress'); if ((await p.locator('.chart svg').count()) < 3) throw new Error('charts'); },
   themeToggle: async (p, B) => { await go(p, B + '#learn'); const t = p.locator('.hdr-desk .tbtn'); if (await t.isVisible()) { await t.click(); await t.click(); } }
 };

@@ -137,7 +137,7 @@ SCP · boundary · identity policy · SCP · RCP · Identity Center · IAM users
 c01–c12 Organizations/SCP/RCP (**c01 mine**) · c13–c23 IAM mechanics (**c18 mine**) · c24–c27 Identity Center · c28–c31 Control Tower (**c28 mine**) · c32–c35 RAM (**c32, c33 mine**) · c36–c38 Config · c39–c40 billing. Mine cards: `src: 'Exam pattern'`.
 
 ## Drills (30)
-Stub values as above; every option has a why; `words` verbatim in `q` (script-checked); two select-TWO (G13, G24); correct letters **A 7 · B 7 · C 7 · D 7 · AC 1 · BD 1**.
+Stub values as above; every option has a why; `words` verbatim in `q` (script-checked); two select-TWO (G13, G24); correct letters **A 7 · B 7 · C 7 · D 7 · AC 1 · BD 1**. Options rebalanced 2026-10-03: same-sized, each distractor wrong in one detail; prestige distractors now in G1–G6, G15, G19, G20, G22, G28, G30.
 
 | ID | Line | Scenario → answer | Prestige role |
 |---|---|---|---|
@@ -150,7 +150,7 @@ Stub values as above; every option has a why; `words` verbatim in `q` (script-ch
 | G7 | org | SCP didn’t stop management-account user → move workloads out | — |
 | G8 | org | FullAWSAccess but no IAM policy → attach identity policy | — |
 | G9 | iam | developers create roles safely → permission boundary | — |
-| G10 | org | sandbox instance types, admins can’t remove → SCP on OU | CT distractor |
+| G10 | org | sandbox instance types, admins can’t remove → SCP on OU | — (near-misses: Budgets action, Config rule) |
 | G11 | iam | cross-account, bucket policy only → add identity policy | — |
 | G12 | iam | SaaS vendor, confused deputy → role + external ID | — |
 | G13 | iam | (TWO) Lambda writes cross-account → identity + bucket policy | — |

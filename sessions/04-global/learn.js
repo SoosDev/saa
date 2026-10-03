@@ -67,10 +67,10 @@
         need: '“the same packages many times a day” — the word that means cache.',
         sup: '“most cost-effective”.' } } },
       { check: { id: 'ch1-q4', src: 'Exam Q4', q: 'Which single fact decides Q4?', opts: [
-        { t: 'Transfer Acceleration only works for uploads.', why: 'not quite: it accelerates transfers to and from one bucket — but it never caches.' },
-        { t: 'CloudFront caches objects at the edge; Transfer Acceleration caches nothing.', why: 'repeat downloads of the same file are served from the edge only with a cache.' },
-        { t: 'Global Accelerator is cheaper than CloudFront.', why: 'irrelevant: GA cannot use S3 as an endpoint at all.' },
-        { t: 'S3 cannot serve files to other continents.', why: 'false: it can, just slowly.' }], a: 1,
+        { t: 'Transfer Acceleration speeds only uploads into a bucket, so it cannot help customers who download.', why: 'not quite: it accelerates transfers to and from one bucket — but it never caches.' },
+        { t: 'Global Accelerator would be cheaper than CloudFront, but it cannot reach a bucket in us-east-1.', why: 'GA cannot use S3 as an endpoint in any Region, and its price is not what decides Q4.' },
+        { t: 'CloudFront keeps copies of the packages at edge locations; Transfer Acceleration caches nothing.', why: 'repeat downloads of the same file are served from the edge only with a cache.' },
+        { t: 'S3 serves objects only inside its own Region, so customers abroad need an edge service.', why: 'false: S3 serves any continent, just slowly from far away.' }], a: 2,
         why: 'NEED = cache. Only CloudFront caches. Transfer Acceleration shortens each trip but every download still starts in us-east-1.' } }
     ] },
 
@@ -100,10 +100,10 @@
         { t: 'Move 10% of users to a new stack for a canary, using DNS', b: 'r53', why: 'weighted records.' },
         { t: 'IoT devices cache DNS for a day; fail over between Regions within a minute', b: 'ga', why: 'no DNS involved in failover.' }] } },
       { check: { id: 'ch2-a', q: 'A question says “improve performance for users worldwide of an application that serves **dynamic HTTP** content”. Nothing about IPs or protocols. Which is the safer first reading?', opts: [
-        { t: 'Global Accelerator: dynamic content cannot use CloudFront.', why: 'false: CloudFront accelerates dynamic HTTP over the AWS network too.' },
-        { t: 'CloudFront, unless another requirement (UDP, static IPs, DNS-free failover) points to GA.', why: 'CloudFront is the HTTP answer; GA needs a reason.' },
-        { t: 'Route 53 latency routing, always.', why: 'only helps if there are several Regions to choose from.' },
-        { t: 'S3 Transfer Acceleration.', why: 'for transfers into a bucket.' }], a: 1,
+        { t: 'CloudFront, unless another requirement such as UDP, fixed IPs or DNS-free failover points to GA.', why: 'CloudFront is the HTTP answer; GA needs a reason.' },
+        { t: 'Global Accelerator, because CloudFront only caches static files and cannot speed up dynamic HTTP.', why: 'false: CloudFront accelerates dynamic HTTP over the AWS network too.' },
+        { t: 'Route 53 latency routing, because DNS is the cheapest way to bring an application closer to users.', why: 'only helps if there are several Regions to choose from.' },
+        { t: 'S3 Transfer Acceleration, because it carries HTTP over the AWS network from the nearest edge.', why: 'it only accelerates transfers into and out of one S3 bucket.' }], a: 0,
         why: 'HTTP → CloudFront by default. Look for the words that earn GA: UDP / non-HTTP, static or fixed IPs, allowlisting, failover without DNS.' } }
     ] },
 
@@ -142,10 +142,10 @@
       { callout: '**Q43** was a keyword miss. “Path-based routing” and “host-based routing” are ALB phrases. Route 53 cannot see paths (DNS only sees names) and an NLB works on ports.', kind: 'miss', title: 'Your misses' },
       { check: fromDrill('Q43', 'Exam Q43') },
       { check: { id: 'ch3-beh', q: 'One domain must serve `/api/*` from an ALB in eu-west-1 and everything else from an S3 bucket, to users worldwide, with caching for the static files. What do you configure?', opts: [
-        { t: 'Two Route 53 records, one per path.', why: 'DNS cannot see the path.' },
-        { t: 'One CloudFront distribution with two origins and a `/api/*` behaviour (caching disabled) plus the default behaviour to S3.', why: 'behaviours route by path to origins, each with its own cache settings.' },
-        { t: 'An ALB with a rule that forwards everything that is not /api/* to S3.', why: 'ALB target groups cannot be S3 buckets, and it caches nothing.' },
-        { t: 'Global Accelerator with two endpoint groups.', why: 'GA routes by Region, not by path.' }], a: 1,
+        { t: 'Two Route 53 alias records on the domain: one sends `/api/*` to the ALB, the other sends the rest to S3.', why: 'DNS cannot see the path.' },
+        { t: 'An ALB in eu-west-1 with a listener rule that forwards `/api/*` to the app and every other path to S3.', why: 'ALB target groups cannot be S3 buckets, and an ALB caches nothing.' },
+        { t: 'Global Accelerator with one endpoint group for the ALB and one for the bucket, in front of both.', why: 'GA routes by Region, not by path, cannot use S3 as an endpoint, and caches nothing.' },
+        { t: 'One CloudFront distribution, two origins: a `/api/*` behaviour to the ALB, caching off; default to S3.', why: 'behaviours route by path to origins, each with its own cache settings.' }], a: 3,
         why: 'Worldwide + caching + split by path across different origins → CloudFront cache behaviours.' } }
     ] },
 
@@ -176,8 +176,8 @@
       { callout: 'Since November 2025 CloudFront also has **flat-rate pricing plans** (Free, Pro, Business, Premium) that bundle the CDN with WAF, DDoS protection, Route 53 DNS and S3 credits, with no overage charges. Pay-as-you-go still exists. Banks will not ask about it yet.', kind: 'update' },
       { check: fromDrill('G6') },
       { check: { id: 'ch4-ttl', q: 'An origin sends no Cache-Control or Expires headers and the cache policy uses its defaults. How long does CloudFront keep an object?', opts: [
-        { t: 'Not at all', why: 'CloudFront caches by default.' }, { t: '60 seconds', why: 'a common choice for dynamic content, not the default.' },
-        { t: '24 hours (86,400 s)', why: 'the default TTL.' }, { t: 'One year', why: 'the default maximum TTL.' }], a: 2,
+        { t: 'It does not cache the object at all', why: 'CloudFront caches by default.' }, { t: 'For 60 seconds, then it revalidates', why: 'a common choice for dynamic content, not the default.' },
+        { t: 'For 24 hours (86,400 seconds)', why: 'the default TTL.' }, { t: 'For one year (31,536,000 seconds)', why: 'the default maximum TTL.' }], a: 2,
         why: 'Default TTL = 86,400 s, used only when the origin sends no caching headers.' } },
       { drills: ['G1', 'G5', 'G6'] }
     ] },
