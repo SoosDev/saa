@@ -2,7 +2,8 @@
    One file renders every session from its data (window.SESSION) and the hub from
    sessions/manifest.js. No framework, no build step. DOM is built with
    createElement/textContent only; lesson text uses the tiny inline markup in md().
-   localStorage keys: saa:<sessionId>:{learn,check,drill,cards,ui} and saa:theme. */
+   localStorage keys: saa:<sessionId>:{learn,check,drill,cards,ui}, saa:theme and
+   saa:feed:state (the feed at the site root, assets/js/feed.js). */
 (function () {
   'use strict';
   const SAA = (window.SAA = window.SAA || {});
@@ -50,7 +51,9 @@
 
   /* ================= inline markup =================
      **bold**  `code`  {lineId|Service}  [[#tab|link]]  ==highlight==            */
-  let LINES = {}; // id -> line, filled on mount
+  let LINES = {}; // id -> line, filled on mount (or by the feed, per session, before each paint)
+  function useLines(lines) { LINES = {}; (lines || []).forEach(l => { LINES[l.id] = l; }); return LINES; }
+  SAA.useLines = useLines;
   const MD = /\*\*(.+?)\*\*|`([^`]+)`|\{([\w-]+)\|([^}]+)\}|\[\[([^|\]]+)\|([^\]]+)\]\]|==(.+?)==/g;
   function md(text) {
     const out = [];
@@ -76,6 +79,13 @@
     return out;
   }
   function P(text, cls) { return h('p', { cls }, md(text)); }
+  /* a drill scenario after submit: the deciding words wrapped in <mark> */
+  function markWords(q, words) {
+    if (!words || !words.length) return md(q);
+    const esc = words.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).sort((a, b) => b.length - a.length);
+    const re = new RegExp('(' + esc.join('|') + ')', 'gi');
+    return q.split(re).map((part, i) => (i % 2 ? h('mark', { text: part }) : document.createTextNode(part)));
+  }
 
   /* ================= line colours ================= */
   function color(L) { return L ? (L.cls === 'ink' ? 'var(--ink)' : 'var(--' + L.cls + ')') : null; }
@@ -199,6 +209,20 @@
   const INTERVAL = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 16 }; // days until due again, by box
   function endOfToday() { const d = new Date(); d.setHours(23, 59, 59, 999); return d.getTime(); }
 
+  /* ================= storage records (one definition, shared by sessions and the feed) ================= */
+  const rec = {
+    drill(prev, ok) { const p = prev || {}; return { ok, n: (p.n || 0) + 1, ever: p.ever || ok, tag: p.tag || null, at: Date.now() }; },
+    check(prev, ok) { const p = prev || {}; return { ok, n: (p.n || 0) + 1, ever: p.ever || ok }; },
+    card(prev, kind) {
+      const e = prev || { box: 1 };
+      let nb = e.box || 1;
+      if (kind === 'miss') nb = 1; else if (kind === 'knew') nb = Math.min(5, nb + 1);
+      return { box: nb, due: kind === 'miss' ? Date.now() : Date.now() + INTERVAL[nb] * DAY, n: (e.n || 0) + 1, last: kind };
+    }
+  };
+  SAA.rec = rec;
+  const TAGS = [['F', 'fact'], ['C', 'confused'], ['K', 'keyword'], ['R', 'misread'], ['A', 'reasoning'], ['L', 'limit']];
+
   /* ================= icons (24px stroke, from the mockups) ================= */
   const ICON = {
     learn: [['path', { d: 'M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z' }], ['path', { d: 'M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z' }]],
@@ -258,7 +282,7 @@
     const isOk = () => picks.size === answers.length && answers.every(a => picks.has(a));
     function submit() {
       done = true;
-      if (ctx && key) { const all = store.get(ctx.k('check'), {}); const prev = all[key] || {}; all[key] = { ok: isOk(), n: (prev.n || 0) + 1, ever: prev.ever || isOk() }; store.set(ctx.k('check'), all); }
+      if (ctx && key) { const all = store.get(ctx.k('check'), {}); all[key] = rec.check(all[key], isOk()); store.set(ctx.k('check'), all); }
       paint();
     }
     paint();
@@ -436,11 +460,60 @@
   }
   SAA.pairFig = pairFig;
 
+  /* design-system line card (mockup 00) */
+  function lineCard(L) {
+    return h('div', { cls: 'lcard' },
+      s('svg', { width: '100%', height: 18, viewBox: '0 0 300 18', preserveAspectRatio: 'none', 'aria-hidden': 'true' },
+        s('line', { x1: 8, y1: 9, x2: 292, y2: 9, stroke: color(L), 'stroke-width': L.dash ? 6 : 8, 'stroke-dasharray': L.dash || null, 'stroke-linecap': 'round' }),
+        s('circle', { cx: 9, cy: 9, r: 6, style: 'fill:var(--surface);stroke:var(--ink);stroke-width:3' })),
+      h('b', { style: { color: tcolor(L) }, text: L.name }),
+      h('span', null, h('b', { style: { fontFamily: 'var(--f-body)', fontSize: '15px' }, text: L.verb.split(' ')[0].toUpperCase() + ' ' }), L.verb.split(' ').slice(1).join(' ')),
+      L.built ? P(L.built, 'small muted') : null);
+  }
+  /* the first line whose name or alias appears in a text (quick-check buttons take its colour) */
+  function lineAlias(lines, text) {
+    const t = String(text).toLowerCase();
+    for (const L of lines || []) for (const a of [L.name].concat(L.alias || [])) if (t.includes(a.toLowerCase())) return L;
+    return null;
+  }
+
+  /* compare side cards (mockup 04): name, figure, gist; 6px top border in the line colour */
+  function pairSides(pr) {
+    const n = pr.sides.length;
+    const cols = n === 2 ? 'repeat(2,minmax(0,1fr))' : (phone() ? '1fr' : 'repeat(' + n + ',minmax(0,1fr))');
+    return h('div', { cls: 'pair', style: { gridTemplateColumns: cols } }, pr.sides.map(sd => {
+      const L = sd.line ? LINES[sd.line] : null;
+      return h('div', { cls: 'pcard', style: lineVars(L) }, h('b', { cls: 'pname', text: sd.name }), pairFig(sd.fig, L), h('span', { cls: 'gist' }, md(sd.gist)));
+    }));
+  }
+
+  /* trigger card (mockup 05): the front, and the back once shown. label names a group that is not a line. */
+  function trigCard(c, L, label, shown) {
+    const fc = h('div', { cls: 'fc', style: lineVars(L) },
+      h('div', { cls: 'front' }, eyebrow('The exam says', 'sm'), h('p', null, '“', md(c.f), '”')));
+    if (!shown) return fc;
+    fc.appendChild(h('div', { cls: 'fcbar' + (L && L.dash ? ' dash' : ''), style: L ? null : { background: 'var(--ink)' } }));
+    fc.appendChild(h('div', { cls: 'back' + (L ? '' : ' neutral') },
+      h('span', { cls: 'eyebrow sm', style: { color: tcolor(L) }, text: L ? (L.short || L.name) + ' line' : label }),
+      h('div', { cls: 'svc' }, md(c.b)),
+      c.why ? P(c.why) : null,
+      c.tempt ? h('p', { cls: 'temp' }, h('b', { text: 'Tempting: ' }), md(c.tempt)) : null,
+      c.update ? callout(c.update, 'small', 'Changed since the exam guide') : null,
+      c.mine ? h('span', { cls: 'ref', text: 'from your exam · ' + c.src }) : c.src ? h('span', { cls: 'ref', text: 'from ' + c.src }) : null));
+    return fc;
+  }
+  /* Missed / Hesitated / Knew it for a card in box b */
+  function rateRow(b, rate) {
+    return h('div', { cls: 'rate' },
+      h('button', { cls: 'rmiss', type: 'button', on: { click: () => rate('miss') } }, 'Missed', h('span', { text: '→ box 1' })),
+      h('button', { type: 'button', on: { click: () => rate('hes') } }, 'Hesitated', h('span', { text: 'stay' })),
+      h('button', { cls: 'rknew', type: 'button', on: { click: () => rate('knew') } }, 'Knew it', h('span', { text: b >= 5 ? 'stays known' : '→ box ' + (b + 1) })));
+  }
+
   /* ================= session mount ================= */
   SAA.mount = function (S) {
     const SID = S.meta.id;
-    LINES = {};
-    (S.lines || []).forEach(l => { LINES[l.id] = l; });
+    useLines(S.lines);
     tipInit();
     const k = name => 'saa:' + SID + ':' + name;
     const mem = {}; // in-memory view state across tab switches
@@ -448,11 +521,7 @@
     const saveUi = () => store.set(k('ui'), ui);
 
     const groupName = id => (LINES[id] ? LINES[id].name : (S.topics && S.topics[id]) || id);
-    const lineAlias = text => {
-      const t = String(text).toLowerCase();
-      for (const L of S.lines || []) for (const a of [L.name].concat(L.alias || [])) if (t.includes(a.toLowerCase())) return L;
-      return null;
-    };
+    const lineAliasS = text => lineAlias(S.lines, text);
     const totals = { chapters: (S.learn || []).length, drills: (S.drills || []).length, cards: (S.cards || []).length };
 
     /* ---- tabs ---- */
@@ -473,6 +542,7 @@
     const app = document.getElementById('app');
     clear(app);
     const home = S.meta.home || '../../';
+    const hubUrl = home + 'hub.html';
     const mbar = h('i', { style: { width: '0%' } });
     const mnum = h('span', { cls: 'mnum' });
     const phTitle = h('div', { cls: 'ttl' });
@@ -481,7 +551,7 @@
     const hdr = h('header', { cls: 'hdr' },
       h('div', { cls: 'hdr-in hdr-desk' },
         h('a', { cls: 'brand', href: '#learn', text: S.meta.brand }),
-        h('a', { cls: 'eyebrow', href: home, title: 'All sessions', text: 'SAA-C03 · Session ' + S.meta.n }),
+        h('a', { cls: 'eyebrow', href: hubUrl, title: 'All sessions', text: 'SAA-C03 · Session ' + S.meta.n }),
         h('div', { cls: 'mastery', title: 'Mastery = chapters done + drills solved on the last try + cards in box 3 or higher' }, h('span', { text: 'Mastery' }), h('div', { cls: 'bar' }, mbar), mnum),
         themeButton()),
       h('div', { cls: 'hdr-in hdr-phone' }, phTitle, phBar, phMeta));
@@ -509,7 +579,8 @@
     sheetBd.addEventListener('click', closeSheet);
     sheet.appendChild(h('div', { cls: 'row between' }, h('b', { cls: 'step', text: 'More' }), h('button', { cls: 'tbtn', type: 'button', text: 'Close', on: { click: closeSheet } })));
     TABS.filter(t => !PRIMARY.includes(t.key)).forEach(t => sheet.appendChild(h('a', { cls: 'bigopt', href: '#' + t.key, on: { click: closeSheet } }, h('b', { text: t.label }))));
-    sheet.appendChild(h('a', { cls: 'bigopt', href: home }, h('b', { text: 'All sessions' }), h('span', { text: 'the hub: diagnosis, knowledge map, every session' })));
+    sheet.appendChild(h('a', { cls: 'bigopt', href: home }, h('b', { text: 'Feed' }), h('span', { text: 'questions, cards and short reads from every session' })));
+    sheet.appendChild(h('a', { cls: 'bigopt', href: hubUrl }, h('b', { text: 'All sessions' }), h('span', { text: 'the hub: diagnosis, knowledge map, every session' })));
     sheet.appendChild(h('div', { cls: 'row between', style: { minHeight: '48px' } }, h('span', { text: 'Theme' }), themeButton()));
 
     add(app, [hdr, h('nav', { cls: 'tabs', 'aria-label': 'Sections' }, tabsIn), main, bbar, sheetBd, sheet]);
@@ -530,7 +601,7 @@
     }
 
     /* ---- ctx passed to views and widgets ---- */
-    const ctx = { S, k, store, mem, ui, saveUi, md, h, s, go, groupName, lineAlias, LINES, head, paintMastery, color, tcolor, lineVars, swatch, checkpoint, callout, table, hbars, mountChart, eyebrow };
+    const ctx = { S, k, store, mem, ui, saveUi, md, h, s, go, groupName, lineAlias: lineAliasS, LINES, head, paintMastery, color, tcolor, lineVars, swatch, checkpoint, callout, table, hbars, mountChart, eyebrow };
     SAA.ctx = ctx;
 
     /* ---- router: #tab/arg ---- */
@@ -588,16 +659,6 @@
       return out;
     }
     ctx.blocks = blocks;
-
-    function lineCard(L) {
-      return h('div', { cls: 'lcard' },
-        s('svg', { width: '100%', height: 18, viewBox: '0 0 300 18', preserveAspectRatio: 'none', 'aria-hidden': 'true' },
-          s('line', { x1: 8, y1: 9, x2: 292, y2: 9, stroke: color(L), 'stroke-width': L.dash ? 6 : 8, 'stroke-dasharray': L.dash || null, 'stroke-linecap': 'round' }),
-          s('circle', { cx: 9, cy: 9, r: 6, style: 'fill:var(--surface);stroke:var(--ink);stroke-width:3' })),
-        h('b', { style: { color: tcolor(L) }, text: L.name }),
-        h('span', null, h('b', { style: { fontFamily: 'var(--f-body)', fontSize: '15px' }, text: L.verb.split(' ')[0].toUpperCase() + ' ' }), L.verb.split(' ').slice(1).join(' ')),
-        L.built ? P(L.built, 'small muted') : null);
-    }
 
     function logTable() {
       return table({ head: ['When', 'What', 'Result', 'Lesson'], rows: (S.log || []).map(l => [l.when, l.what, '**' + l.result + '**', l.lesson]) });
@@ -769,11 +830,7 @@
       const n = pr.sides.length;
       const box = h('div', { cls: 'stack g16' });
       if (!embedded) box.appendChild(h('h2', { cls: 'hide-phone', style: { fontSize: '22px' } }, md(pr.title)));
-      const cols = n === 2 ? 'repeat(2,minmax(0,1fr))' : (phone() ? '1fr' : 'repeat(' + n + ',minmax(0,1fr))');
-      box.appendChild(h('div', { cls: 'pair', style: { gridTemplateColumns: cols } }, pr.sides.map(sd => {
-        const L = sd.line ? LINES[sd.line] : null;
-        return h('div', { cls: 'pcard', style: lineVars(L) }, h('b', { cls: 'pname', text: sd.name }), pairFig(sd.fig, L), h('span', { cls: 'gist' }, md(sd.gist)));
-      })));
+      box.appendChild(pairSides(pr));
       const lab = phone() ? '84px' : '130px';
       box.appendChild(h('div', { cls: 'spec' }, pr.rows.map(r => {
         const vals = r.slice(1);
@@ -794,7 +851,7 @@
         box.appendChild(P(c.q, null));
         const grid = h('div', { cls: 'qcgrid', style: { gridTemplateColumns: 'repeat(' + Math.min(c.opts.length, phone() && c.opts.length > 2 ? 1 : c.opts.length) + ',minmax(0,1fr))' } });
         c.opts.forEach((o, i) => {
-          const L = lineAlias(o);
+          const L = lineAliasS(o);
           let cls = 'qcbtn';
           if (chosen != null) { if (i === c.a) cls += ' correct'; else if (i === chosen) cls += ' wrong'; }
           grid.appendChild(h('button', { cls, type: 'button', style: lineVars(L), disabled: chosen != null && i !== c.a && i !== chosen, text: o, on: { click: () => { if (chosen == null) { chosen = i; paint(); } } } }));
@@ -858,20 +915,7 @@
           P(next && f === 'due' ? 'Next card is due ' + new Date(next).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' }) + '. You can still run every card.' : 'Pick another set, or run all of them again.', 'muted'),
           h('div', null, h('button', { cls: 'btn', type: 'button', text: 'Run all ' + all.length + ' cards', on: { click: () => setF('all') } }))));
       } else {
-        const L = LINES[cur.line];
-        const fc = h('div', { cls: 'fc', style: lineVars(L) },
-          h('div', { cls: 'front' }, eyebrow('The exam says', 'sm'), h('p', null, '“', md(cur.f), '”')));
-        if (mem.cardShown) {
-          fc.appendChild(h('div', { cls: 'fcbar' + (L && L.dash ? ' dash' : ''), style: L ? null : { background: 'var(--ink)' } }));
-          fc.appendChild(h('div', { cls: 'back' + (L ? '' : ' neutral') },
-            h('span', { cls: 'eyebrow sm', style: { color: tcolor(L) }, text: L ? (L.short || L.name) + ' line' : groupName(cur.line) }),
-            h('div', { cls: 'svc' }, md(cur.b)),
-            cur.why ? P(cur.why) : null,
-            cur.tempt ? h('p', { cls: 'temp' }, h('b', { text: 'Tempting: ' }), md(cur.tempt)) : null,
-            cur.update ? callout(cur.update, 'small', 'Changed since the exam guide') : null,
-            cur.mine ? h('span', { cls: 'ref', text: 'from your exam · ' + cur.src }) : cur.src ? h('span', { cls: 'ref', text: 'from ' + cur.src }) : null));
-        }
-        col.appendChild(fc);
+        col.appendChild(trigCard(cur, LINES[cur.line], groupName(cur.line), mem.cardShown));
         if (!mem.cardShown) {
           col.appendChild(h('button', { cls: 'btn wide', type: 'button', text: 'Show answer', on: { click: () => { mem.cardShown = true; render(); } } }));
           col.appendChild(h('p', { cls: 'small muted', text: 'Say the service out loud first. Recall before reveal.' }));
@@ -879,18 +923,12 @@
           const b = curBox;
           const rate = kind => {
             const mm = st();
-            const e = mm[cur.id] || { box: 1 };
-            let nb = e.box || 1;
-            if (kind === 'miss') nb = 1; else if (kind === 'knew') nb = Math.min(5, nb + 1);
-            mm[cur.id] = { box: nb, due: kind === 'miss' ? Date.now() : Date.now() + INTERVAL[nb] * DAY, n: (e.n || 0) + 1, last: kind };
+            mm[cur.id] = rec.card(mm[cur.id], kind);
             store.set(k('cards'), mm);
             if (kind === 'miss') mem.cardQ.push(cur.id); // comes back this sitting
             mem.cardI++; mem.cardShown = false; render();
           };
-          col.appendChild(h('div', { cls: 'rate' },
-            h('button', { cls: 'rmiss', type: 'button', on: { click: () => rate('miss') } }, 'Missed', h('span', { text: '→ box 1' })),
-            h('button', { type: 'button', on: { click: () => rate('hes') } }, 'Hesitated', h('span', { text: 'stay' })),
-            h('button', { cls: 'rknew', type: 'button', on: { click: () => rate('knew') } }, 'Knew it', h('span', { text: b >= 5 ? 'stays known' : '→ box ' + (b + 1) }))));
+          col.appendChild(rateRow(b, rate));
         }
         col.appendChild(h('p', { cls: 'mono small muted', text: (mem.cardI + 1) + ' / ' + mem.cardQ.length + ' in this set · boxes return after 1 / 2 / 4 / 8 days, known after 16' }));
       }
@@ -898,7 +936,6 @@
     };
 
     /* ================= DRILL ================= */
-    const TAGS = [['F', 'fact'], ['C', 'confused'], ['K', 'keyword'], ['R', 'misread'], ['A', 'reasoning'], ['L', 'limit']];
     VIEWS.drill = function (el, arg) {
       const D = S.drills;
       const res = store.get(k('drill'), {});
@@ -951,10 +988,7 @@
       const qNode = h('p', { cls: 'scen' });
       const paintQ = () => {
         clear(qNode);
-        if (!w.done || !d.words || !d.words.length) { add(qNode, md(d.q)); return; }
-        const esc = d.words.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).sort((a, b) => b.length - a.length);
-        const re = new RegExp('(' + esc.join('|') + ')', 'gi');
-        d.q.split(re).forEach((part, i) => qNode.appendChild(i % 2 ? h('mark', { text: part }) : document.createTextNode(part)));
+        add(qNode, w.done ? markWords(d.q, d.words) : md(d.q));
       };
       paintQ();
       const eb = [d.src || d.id];
@@ -1026,8 +1060,7 @@
         w.done = true;
         const ok = w.picks.size === need && correct.every(i => w.picks.has(i));
         const r = store.get(k('drill'), {});
-        const p = r[d.id] || {};
-        r[d.id] = { ok, n: (p.n || 0) + 1, ever: p.ever || ok, tag: p.tag || null, at: Date.now() };
+        r[d.id] = rec.drill(r[d.id], ok);
         store.set(k('drill'), r);
         w.result = r[d.id];
         paintQ(); paintStub(); paintOpts(); paintBroke();
@@ -1135,11 +1168,12 @@
     const hdr = h('header', { cls: 'hdr' }, h('div', { cls: 'hdr-in' },
       h('a', { cls: 'brand', href: './', text: 'SAA Transit Maps' }),
       h('span', { cls: 'eyebrow hide-phone', text: 'SAA-C03 · 13 sessions' }),
-      h('div', { style: { marginLeft: 'auto' } }, themeButton())));
+      h('div', { cls: 'hdr-r' }, h('a', { cls: 'hlink', href: './', text: 'Feed' }), themeButton())));
     const wrap = h('div', { cls: 'panel' });
     add(app, [hdr, h('main', null, wrap)]);
 
-    wrap.appendChild(h('div', { cls: 'hero' }, eyebrow(H.eyebrow || 'SAA-C03'), h('h1', { text: H.title || 'SAA Transit Maps' }), P(H.lead)));
+    wrap.appendChild(h('div', { cls: 'hero' }, eyebrow(H.eyebrow || 'SAA-C03'), h('h1', { text: H.title || 'SAA Transit Maps' }), P(H.lead),
+      h('div', null, h('a', { cls: 'btn', href: './', text: 'Open the feed' }))));
 
     /* sessions */
     const list = h('div', { cls: 'slist' });
@@ -1199,5 +1233,5 @@
   };
 
   /* exports for session widget files */
-  Object.assign(SAA, { h, s, md, P, clear, store, eyebrow, color, tcolor, lineVars, swatch, hbars, mountChart, niceTicks, callout, table, treeWidget, shuffle, themeButton });
+  Object.assign(SAA, { h, s, md, P, clear, store, eyebrow, color, tcolor, lineVars, swatch, hbars, mountChart, niceTicks, callout, table, treeWidget, shuffle, themeButton, lineCard, lineAlias, markWords, pairSides, trigCard, rateRow, TAGS, LET });
 })();

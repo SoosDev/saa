@@ -37,12 +37,16 @@ cd tools/check && node drills-lint.js && node options.js
 #    Start the server from the REPO ROOT, in the background, and kill it afterwards.
 python3 -m http.server 8765        # from the repo root
 cd tools/check && for s in 01-storage 02-migration 03-networking 04-global 05-security 06-governance 07-ha-dr 08-databases; do node check.js $s | tail -3; done
+cd tools/check && node feed.js | tail -3     # the feed at the site root
 ```
 
 Notes:
 - `check.js` does NOT set an exit code. It prints `ALL PASS` or `FAILED n` on the last
   line; read that line, never `$?`.
-- `check.js` covers the hub only for fonts and horizontal scroll, then one session:
+- The site root `index.html` is the feed (`assets/js/feed.js`); the hub is `hub.html`. `feed.js` covers
+  the feed (same output contract as `check.js`: read the last line). A change to `assets/js/feed.js`
+  needs `node feed.js`; a change to `engine.js` or `transit.css` needs it too, alongside all eight sessions.
+- `check.js` covers the hub (`hub.html`) for fonts, horizontal scroll and session cards, then one session:
   390x844 and 1440x900, light and dark, console errors, every tab and chapter, one drill
   end to end, one card rated, every checkpoint, every widget (`widgets-<session>.js`).
   A new page (anything that is not the hub or a `sessions/NN-name/` page) has NO coverage

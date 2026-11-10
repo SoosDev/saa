@@ -14,15 +14,21 @@ const fail = []; const ok = m => console.log('  ✓ ' + m); const bad = m => { c
     p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
     p.on('pageerror', e => errs.push('PAGEERR ' + e.message));
     const noScroll = async where => { const sw = await p.evaluate(() => document.documentElement.scrollWidth); if (sw > vp.width) bad(where + ' horizontal scroll ' + sw); };
-    // hub
-    await p.goto(ROOT); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(300);
+    // hub (the site root is the feed; tools/check/feed.js covers it)
+    await p.goto(ROOT + 'hub.html'); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(300);
     const fonts = await p.evaluate(() => [document.fonts.check('800 20px Overpass'), document.fonts.check('16px "Atkinson Hyperlegible"'), document.fonts.check('14px "Overpass Mono"')]);
     fonts.every(Boolean) ? ok('hub fonts ' + fonts) : bad('hub fonts ' + fonts);
     await noScroll('hub');
+    const nScard = await p.locator('a.scard').count();
+    nScard >= 8 ? ok('hub lists ' + nScard + ' sessions') : bad('hub session cards ' + nScard);
     // session tabs
     await p.goto(BASE); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(300);
     const f2 = await p.evaluate(() => [document.fonts.check('800 20px Overpass'), document.fonts.check('16px "Atkinson Hyperlegible"'), document.fonts.check('14px "Overpass Mono"')]);
     f2.every(Boolean) ? ok('session fonts') : bad('session fonts ' + f2);
+    const hubHref = await p.evaluate(() => [document.querySelector('.hdr-desk a.eyebrow').getAttribute('href')].concat(Array.from(document.querySelectorAll('.sheet a.bigopt')).filter(a => /All sessions/.test(a.textContent)).map(a => a.getAttribute('href'))));
+    hubHref.length === 2 && hubHref.every(x => x === '../../hub.html') ? ok('All sessions → ../../hub.html') : bad('All sessions href ' + hubHref);
+    const feedHref = await p.evaluate(() => Array.from(document.querySelectorAll('.sheet a.bigopt')).filter(a => /^Feed/.test(a.textContent)).map(a => a.getAttribute('href')));
+    feedHref.length === 1 && feedHref[0] === '../../' ? ok('More sheet Feed → ../../') : bad('More sheet Feed href ' + feedHref);
     const tabs = await p.evaluate(() => Array.from(document.querySelectorAll('.tabs-in a')).map(a => a.getAttribute('href').slice(1)));
     for (const t of tabs) {
       await p.goto(BASE + '#' + t); await p.waitForTimeout(250);
@@ -31,8 +37,14 @@ const fail = []; const ok = m => console.log('  ✓ ' + m); const bad = m => { c
     }
     ok(tabs.length + ' tabs render');
     const chs = await p.evaluate(() => SAA.ctx.S.learn.map(c => c.id));
-    for (const c of chs) { await p.goto(BASE + '#learn/' + c); await p.waitForTimeout(200); await noScroll('learn ' + c); }
+    let bigBold = [];
+    for (const c of chs) {
+      await p.goto(BASE + '#learn/' + c); await p.waitForTimeout(200); await noScroll('learn ' + c);
+      // bold inside a line card's "built" text stays at the paragraph's size (only the line name is the big Overpass label)
+      bigBold = bigBold.concat(await p.evaluate(() => Array.from(document.querySelectorAll('.lcard p b')).filter(b => getComputedStyle(b).fontSize !== getComputedStyle(b.closest('p')).fontSize).map(b => b.textContent)));
+    }
     ok(chs.length + ' chapters render');
+    bigBold.length ? bad('line card bold text at heading size: ' + bigBold.slice(0, 3).join(', ')) : ok('line card text keeps its size');
     // drill end to end: options open without a stub, the stub toggle works, the result is graded on the answer only
     await p.goto(BASE + '#drill'); await p.waitForTimeout(300);
     (await p.locator('.stubrow').count()) === 0 ? ok('drill opens without a stub') : bad('stub shown by default');
@@ -76,7 +88,12 @@ const fail = []; const ok = m => console.log('  ✓ ' + m); const bad = m => { c
     const W = require('./widgets-' + SESS + '.js');
     for (const [name, fn] of Object.entries(W)) { try { await fn(p, BASE); ok('widget ' + name); } catch (e) { bad('widget ' + name + ': ' + e.message.split('\n')[0]); } }
     // phone: More sheet
-    if (vp.width < 500) { await p.goto(BASE + '#learn'); await p.locator('.bbar button').click(); await p.waitForTimeout(150); (await p.locator('.sheet.open').count()) ? ok('More sheet opens') : bad('More sheet'); }
+    if (vp.width < 500) {
+      await p.goto(BASE + '#learn'); await p.locator('.bbar button').click(); await p.waitForTimeout(150);
+      (await p.locator('.sheet.open').count()) ? ok('More sheet opens') : bad('More sheet');
+      const small = await p.evaluate(() => Array.from(document.querySelectorAll('.sheet.open button, .sheet.open a')).map(e => [e.textContent.trim().slice(0, 20), Math.round(e.getBoundingClientRect().height)]).filter(([, hh]) => hh < 44));
+      small.length ? bad('More sheet tap targets < 44px ' + JSON.stringify(small)) : ok('More sheet tap targets ≥ 44px');
+    }
     errs.length ? bad('console errors: ' + errs.join(' | ')) : ok('zero console errors');
     await ctx.close();
   }

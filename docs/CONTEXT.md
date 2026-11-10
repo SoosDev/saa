@@ -210,12 +210,32 @@ Follow `design/DESIGN.md` and the six mockups exactly. Known drift from the firs
 - **Progress tab**: drill accuracy by line, Leitner box distribution, miss-tag counts, chapters done, session log.
 - Mastery in the header = (chapters done + drills solved on last try + cards in box ≥3) / total.
 
+**Feed (2026-11-10)** — the site root (`index.html`) is now a feed; the hub moved to `hub.html`.
+
+- One interleaved stream over every written session, derived at runtime from the sessions' own data files
+  (`assets/js/feed.js` loads `core.js`, `drills.js`, `cards.js`, `learn.js` of each session in turn). It adds no
+  content and no AWS facts; a new session joins the feed when its manifest entry is added.
+- Items: drill questions and the checkpoints that are not copies of a drill (pick, then Check: two taps, so a
+  scrolling thumb cannot commit an answer), compare quick checks (question first, the two sides after), trigger
+  cards that are due (Leitner intervals respected), and short reads: a line, a trap, a "changed since the exam
+  guide" callout, memory hooks.
+- **Recall first.** Mix serves `read, quiz, card, quiz, read, pair` per six items, so four of six need a commit;
+  after a line or trap the next question prefers an unsolved drill on it. Counters count answers, never scroll
+  distance. A plain stop marker every 10 items; nothing blocks.
+- One progress: answers write the session's own `drill` / `check` / `cards` records, so the hub bars, session
+  mastery and "My misses" move from the feed too.
+- What it does not train: cross-outs and the stub. Every feed question links to the same drill in its session,
+  where they live. The feed is the daily entry point; the sessions stay the lesson.
+- Coverage is stated in the feed: sessions 1 to 8 exist, clusters 9 to 13 are not written yet.
+
 ## 8. Architecture (keep or refactor what exists, but end up here)
 
 ```
-/index.html                  hub
+/index.html                  feed (main page; assets/js/feed.js)
+/hub.html                    hub
 /assets/css/transit.css      tokens (3-state theme: bare :root light, prefers-color-scheme dark guarded by :root:not([data-theme=light]), [data-theme=dark])
 /assets/js/engine.js         generic: chrome, router (#tab/arg), learn, map, tree, classes, compare, cards, drill, traps, cheat, progress, charts, widgets registry
+/assets/js/feed.js           the feed: sequential session loader, item derivation, ordering, saa:feed:state
 /sessions/manifest.js        sessions list + hub content
 /sessions/NN-name/index.html thin shell
 /sessions/NN-name/*.js       data only (+ session-specific widgets)

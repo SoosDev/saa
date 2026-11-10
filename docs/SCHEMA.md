@@ -34,3 +34,33 @@ Inline markup: `**bold**`, `` `code` ``, `{lineId|Service}`, `[[#tab|link]]`, `=
 Generic (engine): `sorter`, `triggerTable`, `stepper`, `chooser`.
 Session widgets register on `SAA.widgets[name] = (args, ctx) => Node` and may use `SAA.h/s/md/hbars/mountChart/…`.
 Charts: hand-built SVG, ink marks, recessive grid, every mark has a `data-tip` tooltip, identity by swatch + label.
+
+## Feed (`index.html`, `assets/js/feed.js`)
+
+The feed reads a session's existing data only; it never writes to it and adds no keys to it. It loads
+`core.js`, `drills.js`, `cards.js`, `learn.js` (never `widgets.js`) one session at a time, with
+`window.SESSION` reset to `{}` before each session. Session files must therefore keep writing only into
+`window.SESSION` and must not call the engine at load time.
+
+| Read | Becomes | Item key |
+|---|---|---|
+| `drills[]` | question | `<sid>\|drill\|<drillId>` |
+| `{check}` blocks whose id does not start with `ck-` | question | `<sid>\|check\|<checkId>` |
+| `compare[]` with a `check` | quick check, then the sides | `<sid>\|pair\|<pairId>` |
+| `cards[]` | trigger card (only when due) | `<sid>\|card\|<cardId>` |
+| `lines[]` | line card + exam says + switch lines | `<sid>\|line\|<lineId>` |
+| `traps[]` | trap | `<sid>\|trap\|t<index>` |
+| `{callout, kind:'update'}` blocks | update callout | `<sid>\|update\|<chapterId>.<blockIndex>` |
+| `{hooks}` blocks | memory hooks | `<sid>\|hooks\|<chapterId>.<blockIndex>` |
+
+Domains: a chapter's `domains` (`D1`–`D4`); a drill takes the domains of the chapters that list it in a
+`{drills}` block or hold its `ck-` checkpoint; cards and lines take the union over drills on the same `line`,
+traps over their `drills`; anything left takes the manifest entry's `domains`.
+
+Answers write the session's own records with `SAA.rec` (one definition, shared with the session views):
+`saa:<sid>:drill[<id>] = { ok, n, ever, tag, at }`, `saa:<sid>:check[<id>] = { ok, n, ever }`,
+`saa:<sid>:cards[<id>] = { box, due, n, last }`.
+
+The feed's own key, `saa:feed:state`:
+`{ v:1, day:'YYYY-MM-DD', today:{ answered, right }, streak:{ n, last:'YYYY-MM-DD' }, seen:{ <itemKey>: ts }, last:{ <sid>: ts }, mode:'mix'|'questions'|'cards'|'reading', domain:'all'|'D1'…'D4' }`.
+`seen` holds read items once scrolled past and questions once answered; `last` orders which session loads first.

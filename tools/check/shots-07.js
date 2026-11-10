@@ -52,6 +52,6 @@ const only = process.argv[2] || '';
   await shot('cards-phone', L + '#cards', P, { act: async p => { await p.locator('button', { hasText: 'Show answer' }).click(); } });
   await shot('cheat-phone', L + '#cheat', P, { full: true, both: false });
   await shot('traps-desk', L + '#traps', D, { full: true, both: false });
-  await shot('hub-desk', 'http://localhost:8765/', D, { full: true, both: false });
+  await shot('hub-desk', 'http://localhost:8765/hub.html', D, { full: true, both: false });
   await b.close();
 })();

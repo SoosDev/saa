@@ -13,9 +13,11 @@ anywhere.
 ## Layout
 
 ```
-/index.html                  hub: diagnosis, exam, knowledge map, method, sessions (from sessions/manifest.js)
+/index.html                  feed (main page): questions, trigger cards and short reads from every session, answered in place
+/hub.html                    hub: diagnosis, exam, knowledge map, method, sessions (from sessions/manifest.js)
 /assets/css/transit.css      tokens + both themes + every component
 /assets/js/engine.js         generic engine: chrome, router, learn, map, tree, compare, cards, drill, traps, cheat, progress, charts, widgets
+/assets/js/feed.js           the feed: loads each session's data files in turn and derives its items at runtime
 /sessions/manifest.js        sessions list + hub content
 /sessions/NN-name/           index.html (thin shell) + core.js, drills.js, cards.js, widgets.js, learn.js
 /design/                     approved mockups + DESIGN.md (compare/ is git-ignored screenshots)

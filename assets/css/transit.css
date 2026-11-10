@@ -296,9 +296,9 @@ button.opt:hover{background:var(--muted-fill)}
 .linecard svg{display:block}
 /* design-system line card (mockup 00) */
 .lcard{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-sm); padding:18px; display:flex; flex-direction:column; gap:10px}
-.lcard b{font-family:var(--f-display); font-weight:800; font-size:20px}
-.lcard span{font-size:15px}
-@media (max-width:640px){ .lcard{padding:14px} .lcard b{font-size:18px} }
+.lcard > b{font-family:var(--f-display); font-weight:800; font-size:20px}
+.lcard > span{font-size:15px}
+@media (max-width:640px){ .lcard{padding:14px} .lcard > b{font-size:18px} }
 
 /* ---------- tree / chooser ---------- */
 .crumbs{display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; font-size:13px; color:var(--ink2)}
@@ -467,6 +467,30 @@ a.scard:hover{border-color:var(--chip-border); color:var(--ink)}
 .hub2{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start}
 @media (max-width:900px){ .hub2{grid-template-columns:1fr} }
 
+/* ---------- header links (hub and feed) ---------- */
+.hlink{display:inline-flex; align-items:center; min-height:44px; font-size:14px; white-space:nowrap}
+.hdr-r{margin-left:auto; display:flex; align-items:center; gap:16px; min-width:0}
+.fcount{font-family:var(--f-mono); font-size:13px; color:var(--ink2); white-space:nowrap}
+.fttl{display:none}
+
+/* ---------- feed (site root): one column of existing components ---------- */
+.feed{max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
+.flist{display:flex; flex-direction:column; gap:24px}
+.fitem{display:flex; flex-direction:column; gap:8px; min-width:0}
+.fhead{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+.fhead .mono{font-size:12px; color:var(--ink2); white-space:nowrap}
+.ffoot{display:flex; flex-wrap:wrap; gap:0 16px}
+.ffoot a{display:inline-flex; align-items:center; min-height:44px; font-size:14px}
+.dombar{display:grid; grid-template-columns:max-content minmax(40px,1fr) max-content; gap:10px 12px; align-items:center; font-size:14px}
+.dombar .bar{width:auto}
+.dombar .mono{font-size:13px; text-align:right}
+.feed [hidden]{display:none}
+.feed .chip.b{min-height:44px}
+.feed button.vt{min-height:44px}
+.feed .swrow{cursor:default}
+.feed .qcbtn[aria-pressed="true"]{background:var(--sel-ink); border-color:var(--sel-ink); color:var(--sel-on)}
+.feed .lcard .row{gap:6px}
+
 /* ---------- phone: 56px header, 72px bottom bar, 16px gutters ---------- */
 .bbar{display:none}
 .sheet,.sheet-bd{display:none}
@@ -480,6 +504,9 @@ a.scard:hover{border-color:var(--chip-border); color:var(--ink)}
   .hdr-desk{display:none}
   .hdr-phone{display:flex}
   .hdr-in{height:55px; padding:0 16px; gap:10px}
+  .tbtn{height:44px}
+  .hdr-r{gap:10px}
+  .fttl{display:block; font-family:var(--f-display); font-weight:800; font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
   .hdr-phone .ttl{font-family:var(--f-display); font-weight:800; font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
   .hdr-phone .meta{margin-left:auto; font-family:var(--f-mono); font-size:13px; color:var(--ink2); white-space:nowrap}
   .hdr-phone .bar{flex:1 1 auto; width:auto; height:6px; border-radius:3px; min-width:40px}
