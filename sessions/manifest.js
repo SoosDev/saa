@@ -9,7 +9,7 @@ window.SAA_SESSIONS = [
   { id: '06-governance', n: 6, title: 'Multi-account & governance', domains: 'D1 D2 D3 D4', path: 'sessions/06-governance/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '07-ha-dr', n: 7, title: 'HA & disaster recovery', domains: 'D1 D2 D3 D4', path: 'sessions/07-ha-dr/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '08-databases', n: 8, title: 'Databases & caching', domains: 'D1 D2 D3 D4', path: 'sessions/08-databases/', totals: { chapters: 12, drills: 30, cards: 40 } },
-  { id: '09-serverless', n: 9, title: 'Serverless, events, integration & analytics', soon: true, start: 'mixed' },
+  { id: '09-serverless', n: 9, title: 'Serverless, events, integration & analytics', domains: 'D2 D3 D4', path: 'sessions/09-serverless/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '10-compute', n: 10, title: 'Compute & scaling', soon: true, start: 'strong' },
   { id: '11-monitoring', n: 11, title: 'Monitoring & operations', soon: true, start: 'weak' },
   { id: '12-cost', n: 12, title: 'Cost & purchasing', soon: true, start: 'mixed' },

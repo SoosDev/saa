@@ -14,13 +14,13 @@ Commit attribution: end commit messages with `Co-Authored-By: Claude …` as you
    the design rules in §7, the architecture in §8 and the per-session workflow in §9. It is the source of truth.
 2. `design/DESIGN.md` and all six `design/mockups/*.html`. The mockups win over any text.
 3. `docs/SCHEMA.md`, the data format the engine renders.
-4. The most recent complete session: `docs/session-08-databases.md` and all of `sessions/08-databases/*.js`.
-   Copy its structure, depth and tone. `sessions/07-ha-dr/` is the other reference.
+4. The most recent complete session: `docs/session-09-serverless.md` and all of `sessions/09-serverless/*.js`.
+   Copy its structure, depth and tone. `sessions/08-databases/` is the other reference.
 5. `tools/check/README.md`, the Playwright check harness.
 
 Don't ask the user to re-explain context. It's all in those files.
 
-## Current state (2026-10-03)
+## Current state (2026-11-10)
 | # | Session | Status | Totals (chapters / drills / cards) |
 |---|---|---|---|
 | 1 | Storage & data movement | live | 12 / 42 / 52 |
@@ -31,18 +31,22 @@ Don't ask the user to re-explain context. It's all in those files.
 | 6 | Multi-account & governance | live | 12 / 30 / 40 |
 | 7 | HA & disaster recovery | live | 12 / 30 / 40 |
 | 8 | Databases & caching | live (facts via AWS docs web pages; MCP was down) | 12 / 30 / 40 |
-| 9–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
+| 9 | Serverless, events, integration & analytics | live (facts via AWS MCP, 2026-11-10) | 12 / 30 / 40 |
+| 10–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
 
-**Next up: Session 9, Serverless, events, integration & analytics.** SQS (standard vs FIFO, visibility timeout, DLQ,
-long polling), SNS fan-out, EventBridge (rules, buses, Pipes, Scheduler), Kinesis Data Streams vs Firehose (his
-baseline **Q1**: Firehose vs Lambda), Step Functions, Lambda event sources, API Gateway, Glue (his **Q50**: "least ops" →
-Glue), Athena, EMR (his **Q57** half, the Spark side; Session 8 drill B2 covers the Redshift side), Lake Formation,
-QuickSight, MSK. The §5 weight is D1 · D2 ●● D3 ●● D4 ●●. Then 10 … 13.
+**Next up: Session 10, Compute & scaling** (comparison layer only: EC2 families and purchase options, Auto Scaling,
+ELB choices, containers on ECS/EKS/Fargate, Lambda vs containers vs EC2, Elastic Beanstalk, Batch). The §5 weight is
+D1 · D2 ●● D3 ●● D4 ●●, start “strong”. Lambda limits and API Gateway are already in Session 9 ch8 — link, do not
+repeat. Then 11 … 13.
 
 **Open items**
 - Session 2 quiz M1–M6 and S7 has no answers recorded yet. When the learner reports them, set `mine: true` and
   `tag` on the missed drills in `sessions/02-migration/drills.js` and add a `log` entry in `core.js`.
 - Sessions 3, 4, 5, 6, 7 and 8 also have "not taken yet" log entries. Update them the same way when results arrive.
+- Session 9 quiz not taken yet (`sessions/09-serverless/core.js` log). Drills E1–E4 carry his baseline Q1, Q50, Q57
+  and Q40, reconstructed from the CONTEXT §3 summaries; if the original wording turns up, compare and adjust.
+- `.claude/ship-profile.md` still lists eight sessions in its check-gate loop; add `09-serverless` when the profile
+  is next edited (the developer’s file).
 - Three facts rest on web or SDK sources, not the AWS MCP docs: SMS dates, the EKS Anywhere provider removals, and
   OpsWorks EOL. Re-check them if the MCP docs ever cover them.
 

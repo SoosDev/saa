@@ -188,6 +188,16 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | Redshift | Serverless (Jul 2022) base **4–512 RPU** (1,024 in 5 Regions), RPU = 16 GB. RA3/RG managed storage; **DC2 deprecated** (Apr 2025), DS2 gone. Spectrum; concurrency scaling 1 h free/day; Multi-AZ RA3 (Nov 2023). **Zero-ETL** from Aurora MySQL/PG, RDS MySQL/PG/Oracle, DynamoDB. |
 | Purpose-built | **QLDB full shutdown 31 Jul 2025.** **Timestream for LiveAnalytics closed to new customers 20 Jun 2025** → Timestream for InfluxDB. DocumentDB elastic clusters, Serverless (Jul 2025). Neptune Analytics (Nov 2023). Keyspaces serverless CQL. OpenSearch Serverless (search, time series, vector); DynamoDB → OpenSearch zero-ETL (Nov 2023). |
 
+| **Session 9 — serverless, events, integration & analytics** (verified 2026-11-10 via AWS MCP; URLs in `docs/session-09-serverless.md`) | |
+| SQS | Message **1 MiB** (Aug 2025; was 256 KiB), Extended Client Library to 2 GB. Retention 4 d default (60 s–14 d); visibility 30 s default (0 s–12 h); delay ≤ 15 min; long polling ≤ 20 s; batch 10; ~120,000 in flight (standard). FIFO 300 TPS per action per partition (3,000 msg/s batched), high-throughput up to 70,000 TPS in the largest Regions; dedup 5 min; FIFO DLQ must be FIFO; **fair queues** on standard queues. |
+| SNS | Default **256 KiB**; **1 MiB opt-in** via `MaximumMessageSize` (Sep 2026) → only SQS/Firehose/Lambda subscribers, ≤ 100 subscriptions. Filter policies 200 per topic. SNS FIFO → SQS queues only; FIFO topics have an opt-in archive (`ArchivePolicy`, up to 365 d) and per-subscription replay (`ReplayPolicy`) — standard topics store nothing. Subscriptions-per-topic quota not printed (FAQ and quota page disagree). |
+| EventBridge | Events **1 MB** (Jan 2026; was 256 KB). Classic: 300 rules per bus (adjustable), **5 targets per rule** (fixed), retry 24 h / 185. New **Custom Event Bus** (subscribers, 1–365 d retention, FIFO per group, replay, dedup, RAM sharing); rule buses now “Custom Event Bus - Classic”. Pipes, Scheduler (at()/rate/cron, time zones). |
+| Kinesis · MSK · MQ | Shard 1 MB/s or 1,000 rec/s in, 2 MB/s out shared; enhanced fan-out 2 MB/s per consumer (~70 ms). **Records 10 MiB**. Retention 24 h–365 d. On-demand 4 MB/s → 10 GB/s (3 Regions). MSK Express brokers, MSK Serverless (IAM only). Amazon MQ = existing JMS/ActiveMQ/RabbitMQ brokers. |
+| Firehose | **Amazon Data Firehose** (was Kinesis Data Firehose); S3 buffer 1–128 MB / 0–900 s; **zero buffering** (Dec 2023); Parquet/ORC conversion via Glue schema; MSK as a source (destination limits not printed: AWS sources conflict). **Kinesis Data Analytics for SQL deleted from 27 Jan 2026** → Managed Service for Apache Flink. |
+| Lambda · API Gateway | 900 s; 128–10,240 MB; 6 MB sync, **1 MB async** (was 256 KB); 1,000 concurrency default; async 2 retries (0–2), 6 h, destinations preferred over DLQ; SQS ESM batch 10 (≤ 10,000 standard), `ReportBatchItemFailures`; SnapStart not with provisioned concurrency; durable functions, Managed Instances. API GW 10,000 RPS / 5,000 burst; REST timeout 29 s **raisable** (Regional, private); HTTP API 30 s; REST-only keys, usage plans, caching, WAF. |
+| Step Functions · Glue · EMR | Standard 1 year, exactly once, 25,000 events, per transition; Express 5 min, no task token, no Distributed Map; Distributed Map 10,000 parallel. SWF: Step Functions recommended for new apps. Glue crawlers, Data Catalog, bookmarks, DataBrew; EMR on EC2/EKS/Outposts/Serverless, Spot on task nodes. **Data Pipeline closed to new customers** (Jul 2024). |
+| Athena · Lake Formation · Quick Sight | Athena **$5 per TB** scanned (pricing-page example), 10 MB minimum, DDL/failed free; columnar + partitions + compression 30–90% less. Lake Formation column/row/cell filters, LF-tags. **AWS Quick Sight** in **AWS Quick** (9 Nov 2026; banks: Amazon QuickSight). |
+
 **Rule for every new session:** before publishing, check every number and every "is it still available" claim against current AWS docs. Add new changes to this table and to the session's callouts. Never print a limit you did not verify.
 
 ## 7. Design
@@ -226,7 +236,7 @@ Follow `design/DESIGN.md` and the six mockups exactly. Known drift from the firs
   mastery and "My misses" move from the feed too.
 - What it does not train: cross-outs and the stub. Every feed question links to the same drill in its session,
   where they live. The feed is the daily entry point; the sessions stay the lesson.
-- Coverage is stated in the feed: sessions 1 to 8 exist, clusters 9 to 13 are not written yet.
+- Coverage is stated in the feed: sessions 1 to 9 exist, clusters 10 to 13 are not written yet.
 
 ## 8. Architecture (keep or refactor what exists, but end up here)
 
