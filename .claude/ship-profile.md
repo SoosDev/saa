@@ -36,7 +36,7 @@ cd tools/check && node drills-lint.js && node options.js
 # 2. browser checks: serve the repo root, then one run per session (about 70 s each).
 #    Start the server from the REPO ROOT, in the background, and kill it afterwards.
 python3 -m http.server 8765        # from the repo root
-cd tools/check && for s in 01-storage 02-migration 03-networking 04-global 05-security 06-governance 07-ha-dr 08-databases; do node check.js $s | tail -3; done
+cd tools/check && for s in 01-storage 02-migration 03-networking 04-global 05-security 06-governance 07-ha-dr 08-databases 09-serverless; do node check.js $s | tail -3; done
 cd tools/check && node feed.js | tail -3     # the feed at the site root
 ```
 
@@ -45,18 +45,18 @@ Notes:
   line; read that line, never `$?`.
 - The site root `index.html` is the feed (`assets/js/feed.js`); the hub is `hub.html`. `feed.js` covers
   the feed (same output contract as `check.js`: read the last line). A change to `assets/js/feed.js`
-  needs `node feed.js`; a change to `engine.js` or `transit.css` needs it too, alongside all eight sessions.
+  needs `node feed.js`; a change to `engine.js` or `transit.css` needs it too, alongside all nine sessions.
 - `check.js` covers the hub (`hub.html`) for fonts, horizontal scroll and session cards, then one session:
   390x844 and 1440x900, light and dark, console errors, every tab and chapter, one drill
   end to end, one card rated, every checkpoint, every widget (`widgets-<session>.js`).
   A new page (anything that is not the hub or a `sessions/NN-name/` page) has NO coverage
   until the run adds a check script for it. Adding one is part of the change.
 - A change to `assets/js/engine.js`, `assets/css/transit.css` or `index.html` needs all
-  eight sessions run. A change inside one session needs that session plus the lints.
+  nine sessions run. A change inside one session needs that session plus the lints.
 - Needs `tools/check/node_modules` (playwright + its chromium; present on this machine,
   git-ignored, `npm i` in `tools/check` on a fresh clone) and network access for Google
   Fonts, since the font assertion fails offline.
-- Verified working on 2026-11-10: both lints exit 0 (0 flagged of 464), `check.js 01-storage` ALL PASS.
+- Verified working on 2026-11-10: both lints exit 0 (0 flagged of 543), `check.js` ALL PASS for all nine sessions, `feed.js` ALL PASS.
 - `shots*.js` / `sbs.js` write mockup-comparison screenshots to `design/compare/` (git-ignored).
   DESIGN.md requires looking at them for any visual change; they are evidence, not an
   automated pass/fail.
