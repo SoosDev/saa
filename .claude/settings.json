@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push *--force*)",
+      "Bash(git push *-f *)",
+      "Bash(git push * -f)",
+      "Bash(git push *+*)",
+      "Bash(git push *--delete*)",
+      "Bash(git push *--mirror*)",
+      "Bash(git filter-branch*)",
+      "Bash(git filter-repo*)",
+      "Bash(gh repo delete*)",
+      "Bash(gh repo edit*)",
+      "Bash(gh repo rename*)",
+      "Bash(gh repo archive*)",
+      "Bash(gh auth switch*)",
+      "Bash(gh api *-X*)",
+      "Bash(gh api *--method*)",
+      "Bash(gh api * -f *)",
+      "Bash(gh api * -F *)",
+      "Bash(gh api *--field*)",
+      "Bash(gh api *--raw-field*)",
+      "Bash(gh api *--input*)",
+      "Edit(design/mockups/**)",
+      "Write(design/mockups/**)"
+    ]
+  }
+}
