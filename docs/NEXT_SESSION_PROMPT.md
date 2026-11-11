@@ -14,8 +14,8 @@ Commit attribution: end commit messages with `Co-Authored-By: Claude …` as you
    the design rules in §7, the architecture in §8 and the per-session workflow in §9. It is the source of truth.
 2. `design/DESIGN.md` and all six `design/mockups/*.html`. The mockups win over any text.
 3. `docs/SCHEMA.md`, the data format the engine renders.
-4. The most recent complete session: `docs/session-10-compute.md` and all of `sessions/10-compute/*.js`.
-   Copy its structure, depth and tone. `sessions/09-serverless/` is the other reference.
+4. The most recent complete session: `docs/session-11-monitoring.md` and all of `sessions/11-monitoring/*.js`.
+   Copy its structure, depth and tone. `sessions/10-compute/` is the other reference.
 5. `tools/check/README.md`, the Playwright check harness.
 
 Don't ask the user to re-explain context. It's all in those files.
@@ -33,13 +33,12 @@ Don't ask the user to re-explain context. It's all in those files.
 | 8 | Databases & caching | live (facts via AWS docs web pages; MCP was down) | 12 / 30 / 40 |
 | 9 | Serverless, events, integration & analytics | live (facts via AWS MCP, 2026-11-10) | 12 / 30 / 40 |
 | 10 | Compute & scaling | live (facts via AWS MCP, 2026-11-11) | 12 / 30 / 40 |
-| 11–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
+| 11 | Monitoring & operations | live (facts via AWS MCP, 2026-11-11) | 12 / 30 / 40 |
+| 12–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
 
-**Next up: Session 11, Monitoring & operations** (CloudWatch metrics, alarms, Logs and the agent, CloudTrail, Config,
-Systems Manager, X-Ray, Trusted Advisor). The §5 weight is D1 ● D2 ● D3 ● D4 ●, start “weak”. His baseline Q44
-(CloudWatch agent for swap/memory) and Q49 (“config changes” → AWS Config) belong there. AWS Config rules are already
-in Session 6 ch10 — link, do not repeat. Then 12 (cost & purchasing; Session 10 ch5 points there for prices,
-break-even and Database Savings Plans) and 13.
+**Next up: Session 12, Cost & purchasing** (§5: D4 ●●●, start “mixed”). Session 10 ch5 points there for prices,
+break-even and Database Savings Plans; Session 11 ch11 (and ch4) defer Compute Optimizer and rightsizing there, and
+Session 11 prints no monitoring prices. Then 13 (integration drill).
 
 **Open items**
 - Session 2 quiz M1–M6 and S7 has no answers recorded yet. When the learner reports them, set `mine: true` and
@@ -49,8 +48,13 @@ break-even and Database Savings Plans) and 13.
   and Q40, reconstructed from the CONTEXT §3 summaries; if the original wording turns up, compare and adjust.
 - Session 10 quiz not taken yet (`sessions/10-compute/core.js` log). Drill C1 carries his baseline Q43, reconstructed
   from the CONTEXT §3 summary; if the original wording turns up, compare and adjust.
-- `.claude/ship-profile.md` lists nine sessions in its check-gate loop; add `10-compute` (and say “ten sessions”)
-  when the profile is next edited (the developer’s file).
+- Session 11 quiz not taken yet (`sessions/11-monitoring/core.js` log). Drills W1 and W2 carry baseline Q44 and Q49,
+  reconstructed from the CONTEXT §3 summaries; if the original wording turns up, compare and adjust.
+- `.claude/ship-profile.md` lists nine sessions in its check-gate loop; add `10-compute` and `11-monitoring` (and say
+  “eleven sessions”) when the profile is next edited (the developer’s file).
+- Support plans change on 1 Jan 2027 (Developer, Business, Enterprise On-Ramp discontinued). The Shield docs still say
+  the Shield Response Team needs Business or Enterprise Support, so Session 5 (S22, bite `sec-waf-shield-nfw`, card c29)
+  is unchanged; re-check the Shield page after that date.
 - Three facts rest on web or SDK sources, not the AWS MCP docs: SMS dates, the EKS Anywhere provider removals, and
   OpsWorks EOL. Re-check them if the MCP docs ever cover them.
 

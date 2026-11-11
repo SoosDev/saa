@@ -11,7 +11,7 @@ window.SAA_SESSIONS = [
   { id: '08-databases', n: 8, title: 'Databases & caching', domains: 'D1 D2 D3 D4', path: 'sessions/08-databases/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '09-serverless', n: 9, title: 'Serverless, events, integration & analytics', domains: 'D2 D3 D4', path: 'sessions/09-serverless/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '10-compute', n: 10, title: 'Compute & scaling', domains: 'D2 D3 D4', path: 'sessions/10-compute/', totals: { chapters: 12, drills: 30, cards: 40 } },
-  { id: '11-monitoring', n: 11, title: 'Monitoring & operations', soon: true, start: 'weak' },
+  { id: '11-monitoring', n: 11, title: 'Monitoring & operations', domains: 'D1 D2 D3 D4', path: 'sessions/11-monitoring/', totals: { chapters: 12, drills: 30, cards: 40 } },
   { id: '12-cost', n: 12, title: 'Cost & purchasing', soon: true, start: 'mixed' },
   { id: '13-integration', n: 13, title: 'Integration drill', soon: true, start: '—' }
 ];

@@ -67,7 +67,8 @@ const letterRef = /\b(option|options|answer)\s+[A-E]\b|(^|[\s(“"])[A-E] (keeps
 const BADMARK = [[/\{[\w-]+\|[^}]*\}/, '{line|Service}'], [/\[\[/, '[[link]]'], [/==/, '==highlight==']];
 const WATCH = [/\bSnow(?:ball|mobile| Family)?\b/, /FSx File Gateway/, /Migration Hub/, /Application Discovery Service/, /\bQLDB\b/, /Timestream for LiveAnalytics/,
   /\bOAI\b|origin access identity/i, /Kinesis Data Firehose/, /Kinesis Data Analytics/, /Inspector Classic/, /Simple AD/, /Data Pipeline/, /\bAWS SSO\b/, /Audit Manager/, /\bDC2\b/,
-  /App Runner/, /launch configuration/i, /Classic Load Balancer/, /Spot Fleet/, /Spot block/i];
+  /App Runner/, /launch configuration/i, /Classic Load Balancer/, /Spot Fleet/, /Spot block/i,
+  /CloudTrail Lake/, /Performance Insights/, /Incident Manager/, /Change Manager/, /Evidently/, /X-Ray (SDK|daemon)/i];
 const plain = t => String(t).replace(/\*\*|`|==/g, '').replace(/\{[\w-]+\|([^}]+)\}/g, '$1');
 const words = t => plain(t).split(/\s+/).filter(Boolean).length;
 const strings = b => {

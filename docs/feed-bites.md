@@ -13,6 +13,8 @@ Standard spans several AZs). Every bite was re-read against its source chapters 
 
 Extended 2026-11-11: Session 10, 5 bites, 19 questions (every claim restates Session 10’s own chapters; no new facts).
 
+Extended 2026-11-11: Session 11, 5 bites, 16 questions (every claim restates Session 11’s own chapters or `docs/session-11-monitoring.md`; no new facts). The CloudTrail bite carries an `update` for CloudTrail Lake, which the new WATCH entries require.
+
 Revised 2026-11-11 after review: three facts the bites needed were verified against current AWS documentation
 (AWS MCP) and recorded below, in CONTEXT §6 and in the session docs. One of them corrected Session 1 itself: S3
 objects now go up to 50 TB, not the 5 TB its chapter 6 printed. Another corrected Session 4: viewer response functions are
@@ -63,6 +65,11 @@ not invoked when the origin returns 400 or higher, where its chapter 6 table pri
 | cmp-asg-scaling | 10-compute | ch7 Auto Scaling groups | none |
 | cmp-alb-nlb-gwlb | 10-compute | ch8 Load balancers: ALB, NLB, GWLB | none |
 | cmp-ecs-eks-fargate | 10-compute | ch9 Containers: ECS, EKS, Fargate | none |
+| mon-agent-metrics | 11-monitoring | ch3 CloudWatch metrics: what arrives by itself · ch4 The CloudWatch agent: metrics and logs from inside the OS | none |
+| mon-alarm-or-event | 11-monitoring | ch5 Alarms: from a number to an action · ch11 Advice, health and service-specific monitoring | none |
+| mon-logs-routing | 11-monitoring | ch6 CloudWatch Logs: keep, search, react, ship | none |
+| mon-trail-history | 11-monitoring | ch8 CloudTrail: who called which API | none |
+| mon-ssm-fleet | 11-monitoring | ch10 Systems Manager: operating the fleet | none |
 
 ## New facts
 
