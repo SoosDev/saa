@@ -66,7 +66,8 @@ const DOMS = ['D1', 'D2', 'D3', 'D4'];
 const letterRef = /\b(option|options|answer)\s+[A-E]\b|(^|[\s(“"])[A-E] (keeps|breaks|is|fails|loses|violates|misses|needs|adds|uses|would)\b|\b[A-E] and [A-E]\b/;
 const BADMARK = [[/\{[\w-]+\|[^}]*\}/, '{line|Service}'], [/\[\[/, '[[link]]'], [/==/, '==highlight==']];
 const WATCH = [/\bSnow(?:ball|mobile| Family)?\b/, /FSx File Gateway/, /Migration Hub/, /Application Discovery Service/, /\bQLDB\b/, /Timestream for LiveAnalytics/,
-  /\bOAI\b|origin access identity/i, /Kinesis Data Firehose/, /Kinesis Data Analytics/, /Inspector Classic/, /Simple AD/, /Data Pipeline/, /\bAWS SSO\b/, /Audit Manager/, /\bDC2\b/];
+  /\bOAI\b|origin access identity/i, /Kinesis Data Firehose/, /Kinesis Data Analytics/, /Inspector Classic/, /Simple AD/, /Data Pipeline/, /\bAWS SSO\b/, /Audit Manager/, /\bDC2\b/,
+  /App Runner/, /launch configuration/i, /Classic Load Balancer/, /Spot Fleet/, /Spot block/i];
 const plain = t => String(t).replace(/\*\*|`|==/g, '').replace(/\{[\w-]+\|([^}]+)\}/g, '$1');
 const words = t => plain(t).split(/\s+/).filter(Boolean).length;
 const strings = b => {

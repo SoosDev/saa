@@ -11,6 +11,8 @@ session's verified text outside its chapters: its drills (05 `GenerateDataKeyWit
 its cards (03: no security group on a NAT gateway), its compare pairs (06, 09) or its S3 class table (01: S3
 Standard spans several AZs). Every bite was re-read against its source chapters before it was accepted.
 
+Extended 2026-11-11: Session 10, 5 bites, 19 questions (every claim restates Session 10’s own chapters; no new facts).
+
 Revised 2026-11-11 after review: three facts the bites needed were verified against current AWS documentation
 (AWS MCP) and recorded below, in CONTEXT §6 and in the session docs. One of them corrected Session 1 itself: S3
 objects now go up to 50 TB, not the 5 TB its chapter 6 printed. Another corrected Session 4: viewer response functions are
@@ -56,6 +58,11 @@ not invoked when the origin returns 400 or higher, where its chapter 6 table pri
 | sl-kds-firehose | 09-serverless | ch6 Streams: Kinesis Data Streams and MSK · ch7 Firehose: delivery, not processing | none |
 | sl-step-functions | 09-serverless | ch9 Step Functions: orchestrating the steps | none |
 | sl-glue-emr-athena | 09-serverless | ch10 Glue and EMR: transforming data at rest · ch11 Athena, Lake Formation and Quick Sight | none |
+| cmp-ec2-containers-lambda | 10-compute | ch2 Choosing: EC2, containers, Lambda, Beanstalk or Batch · ch10 Lambda vs containers vs EC2 | none |
+| cmp-purchase-options | 10-compute | ch5 Purchase options: which one fits this workload · ch6 Spot without getting hurt | none |
+| cmp-asg-scaling | 10-compute | ch7 Auto Scaling groups | none |
+| cmp-alb-nlb-gwlb | 10-compute | ch8 Load balancers: ALB, NLB, GWLB | none |
+| cmp-ecs-eks-fargate | 10-compute | ch9 Containers: ECS, EKS, Fargate | none |
 
 ## New facts
 

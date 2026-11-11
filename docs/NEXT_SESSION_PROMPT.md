@@ -14,13 +14,13 @@ Commit attribution: end commit messages with `Co-Authored-By: Claude …` as you
    the design rules in §7, the architecture in §8 and the per-session workflow in §9. It is the source of truth.
 2. `design/DESIGN.md` and all six `design/mockups/*.html`. The mockups win over any text.
 3. `docs/SCHEMA.md`, the data format the engine renders.
-4. The most recent complete session: `docs/session-09-serverless.md` and all of `sessions/09-serverless/*.js`.
-   Copy its structure, depth and tone. `sessions/08-databases/` is the other reference.
+4. The most recent complete session: `docs/session-10-compute.md` and all of `sessions/10-compute/*.js`.
+   Copy its structure, depth and tone. `sessions/09-serverless/` is the other reference.
 5. `tools/check/README.md`, the Playwright check harness.
 
 Don't ask the user to re-explain context. It's all in those files.
 
-## Current state (2026-11-10)
+## Current state (2026-11-11)
 | # | Session | Status | Totals (chapters / drills / cards) |
 |---|---|---|---|
 | 1 | Storage & data movement | live | 12 / 42 / 52 |
@@ -32,12 +32,14 @@ Don't ask the user to re-explain context. It's all in those files.
 | 7 | HA & disaster recovery | live | 12 / 30 / 40 |
 | 8 | Databases & caching | live (facts via AWS docs web pages; MCP was down) | 12 / 30 / 40 |
 | 9 | Serverless, events, integration & analytics | live (facts via AWS MCP, 2026-11-10) | 12 / 30 / 40 |
-| 10–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
+| 10 | Compute & scaling | live (facts via AWS MCP, 2026-11-11) | 12 / 30 / 40 |
+| 11–13 | see CONTEXT §5 and `sessions/manifest.js` (`soon: true`) | not built | — |
 
-**Next up: Session 10, Compute & scaling** (comparison layer only: EC2 families and purchase options, Auto Scaling,
-ELB choices, containers on ECS/EKS/Fargate, Lambda vs containers vs EC2, Elastic Beanstalk, Batch). The §5 weight is
-D1 · D2 ●● D3 ●● D4 ●●, start “strong”. Lambda limits and API Gateway are already in Session 9 ch8 — link, do not
-repeat. Then 11 … 13.
+**Next up: Session 11, Monitoring & operations** (CloudWatch metrics, alarms, Logs and the agent, CloudTrail, Config,
+Systems Manager, X-Ray, Trusted Advisor). The §5 weight is D1 ● D2 ● D3 ● D4 ●, start “weak”. His baseline Q44
+(CloudWatch agent for swap/memory) and Q49 (“config changes” → AWS Config) belong there. AWS Config rules are already
+in Session 6 ch10 — link, do not repeat. Then 12 (cost & purchasing; Session 10 ch5 points there for prices,
+break-even and Database Savings Plans) and 13.
 
 **Open items**
 - Session 2 quiz M1–M6 and S7 has no answers recorded yet. When the learner reports them, set `mine: true` and
@@ -45,8 +47,10 @@ repeat. Then 11 … 13.
 - Sessions 3, 4, 5, 6, 7 and 8 also have "not taken yet" log entries. Update them the same way when results arrive.
 - Session 9 quiz not taken yet (`sessions/09-serverless/core.js` log). Drills E1–E4 carry his baseline Q1, Q50, Q57
   and Q40, reconstructed from the CONTEXT §3 summaries; if the original wording turns up, compare and adjust.
-- `.claude/ship-profile.md` still lists eight sessions in its check-gate loop; add `09-serverless` when the profile
-  is next edited (the developer’s file).
+- Session 10 quiz not taken yet (`sessions/10-compute/core.js` log). Drill C1 carries his baseline Q43, reconstructed
+  from the CONTEXT §3 summary; if the original wording turns up, compare and adjust.
+- `.claude/ship-profile.md` lists nine sessions in its check-gate loop; add `10-compute` (and say “ten sessions”)
+  when the profile is next edited (the developer’s file).
 - Three facts rest on web or SDK sources, not the AWS MCP docs: SMS dates, the EKS Anywhere provider removals, and
   OpsWorks EOL. Re-check them if the MCP docs ever cover them.
 
@@ -69,7 +73,9 @@ repeat. Then 11 … 13.
    - `drills.js`: 30 exam-style drills. Every option has a `why`. `words` must be verbatim, case-insensitive
      substrings of `q`. Include 2 "select TWO" drills. His exam misses get `mine: true`, `src: 'Exam Qn'` and a `tag`.
      **Follow "Writing questions" in CONTEXT §4**: same-sized options, every distractor a plausible full architecture
-     wrong in one detail, the qualifier stated in the stem, no letter references. `node tools/check/options.js NN-name`
+     wrong in one detail, the qualifier stated in the stem, no letter references. Every stem — drills, lesson
+     checkpoints, pair quick checks, bite questions — ends in an explicit question with “?” (`drills-lint.js` enforces
+     it for drills of sessions numbered 10 and up; select-TWO stems end “Which TWO … ?”). `node tools/check/options.js NN-name`
      and `node tools/check/drills-lint.js NN-name` must both pass.
    - `cards.js`: 40 cards.
    - `widgets.js`: session widgets.

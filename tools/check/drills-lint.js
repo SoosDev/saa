@@ -17,6 +17,7 @@ for (const dir of dirs) {
     if (ids.has(d.id)) err(dir, d.id, 'duplicate id'); ids.add(d.id);
     const q = d.q.toLowerCase();
     (d.words || []).forEach(w => { if (!q.includes(w.toLowerCase())) err(dir, d.id, 'word not in q: ' + w); });
+    if (+dir.slice(0, 2) >= 10 && !/\?\s*$/.test(d.q)) err(dir, d.id, 'stem does not end with a question');
     if (!d.opts.some(o => o.ok)) err(dir, d.id, 'no correct option');
     if (d.opts.some(o => !o.why)) err(dir, d.id, 'option without why');
     (S.stub || []).forEach(sl => {
