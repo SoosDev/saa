@@ -2,8 +2,8 @@
    One file renders every session from its data (window.SESSION) and the hub from
    sessions/manifest.js. No framework, no build step. DOM is built with
    createElement/textContent only; lesson text uses the tiny inline markup in md().
-   localStorage keys: saa:<sessionId>:{learn,check,drill,cards,ui}, saa:theme and
-   saa:feed:state (the feed at the site root, assets/js/feed.js). */
+   localStorage keys: saa:<sessionId>:{learn,check,drill,cards,ui}, saa:theme, and the feed's own
+   saa:feed:state and saa:feed:bites (the feed at the site root, assets/js/feed.js). */
 (function () {
   'use strict';
   const SAA = (window.SAA = window.SAA || {});

@@ -218,7 +218,7 @@
         ['Viewer request', 'every request, before the cache', 'yes', 'yes'],
         ['Origin request', 'only on a cache miss, before the origin', '—', 'yes'],
         ['Origin response', 'only on a cache miss, after the origin', '—', 'yes'],
-        ['Viewer response', 'every response, before the viewer', 'yes', 'yes']] } },
+        ['Viewer response', 'before the viewer; not invoked when the origin returns 400 or higher', 'yes', 'yes']] } },
       { h: 'The two runtimes' },
       { table: { head: ['', 'CloudFront Functions', 'Lambda@Edge'], key: true, rows: [
         ['Language', 'JavaScript (cloudfront-js 1.0 / 2.0)', 'Node.js, Python'],

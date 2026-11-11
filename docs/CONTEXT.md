@@ -116,6 +116,7 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | EFS | Throughput: Elastic (default, recommended), Provisioned, Bursting. Max I/O performance mode is previous generation. |
 | S3 classes | IA 30 d min; Glacier IR 90 d (ms); Glacier Flexible 90 d (Expedited 1–5 min, Standard 3–5 h, Bulk 5–12 h); Deep Archive 180 d (Standard ≤12 h, Bulk ≤48 h); One Zone-IA 1 AZ; Express One Zone 1 AZ, single-digit ms, **no minimum storage duration** (AWS class table; the earlier "1 h min" was wrong — corrected 2026-09-24). |
 | S3 lifecycle waterfall | Standard → any; Standard-IA → IT, One Zone-IA, Glacier IR/FR/DA; IT → One Zone-IA, Glacier IR/FR/DA; **One Zone-IA → only Glacier Flexible or Deep Archive**; Glacier IR → FR/DA; FR → DA. ≥30 days before any IA transition. |
+| S3 object size | **50 TB** max (Dec 2025; older material and banks say 5 TB). One PUT ≤ 5 GB; multipart required over 5 GB, recommended over 100 MB. Verified 2026-11-11 (AWS MCP): https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html · https://aws.amazon.com/about-aws/whats-new/2025/12/amazon-s3-maximum-object-size-50-tb/ |
 | DataSync | Sources: NFS, SMB, HDFS, self-managed object storage, other clouds (Azure Blob/Files, GCS, …), AWS storage. One task can saturate a 10 Gbps link. Writes directly to any S3 class, including Deep Archive. |
 | AWS Migration Hub & Application Discovery Service | **Closed to new customers since 7 Nov 2025.** Replaced by **AWS Transform** (GA May 2025). MGN docs now say "AWS Transform MGN". The ADS agent records processes + network connections and runs on physical servers. **Nuance:** the AWS Transform discovery tool is agentless (OVA for vCenter, VHD for Hyper-V, CSV import) but collects utilisation *and* server-to-server connections over SSH/WinRM; the old ADS Agentless Collector also gained a network-connections module. Banks still tie dependencies to the agent. re-verified 2026-09-24 (AWS MCP) |
 | Route 53 Resolver | Now called **Route 53 VPC Resolver** in AWS docs (renamed when Route 53 Global Resolver was introduced). Inbound and outbound endpoints and forwarding rules unchanged; rules shared via AWS RAM. re-verified 2026-09-24 (AWS MCP) |
@@ -148,6 +149,8 @@ Show these as "Changed since the exam guide" callouts. Keep the exam-bank answer
 | **Session 4 — global & edge** (verified 2026-09-24 via AWS MCP; URLs in `docs/session-04-global.md`) | |
 | CloudFront origin access | **OAI is legacy; OAC recommended** (SSE-KMS, all Regions, all methods). **VPC origins** (Nov 2024) reach a private ALB/NLB/EC2. Origin failover codes now include **429**. Also: gRPC, anycast static IPs (Nov 2024), flat-rate plans (Nov 2025). |
 | Edge compute | CloudFront Functions: JS, viewer events only, sub-ms, 2 MB memory, 10 KB code. **Lambda@Edge: 30 s and 50 MB code for all four triggers** (older material: viewer 5 s / 1 MB); memory 128 MB viewer / 10,240 MB origin; generated response 40 KB viewer / 1 MB origin; created in us-east-1. |
+| Lambda@Edge bodies | Request body only with the **include body** option (viewer/origin request). An **origin-response** function never sees the body the origin returned: it can replace it with a body it generates (e.g. a 200 page instead of a 5xx) or remove it; untouched, the origin’s body goes to the viewer. Verified 2026-11-11 (AWS MCP): https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-generating-http-responses.html |
+| Edge functions on errors | **Viewer response** functions (CloudFront Functions and Lambda@Edge) are not invoked when the origin returns HTTP status 400 or higher; Lambda@Edge **origin response** functions are invoked for all origin responses, 400 and higher included. Verified 2026-11-11 (AWS MCP): https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-function-restrictions-all.html |
 | S3 static website | Website endpoint is HTTP only; bucket name = domain for a Route 53 alias. For HTTPS the S3 guide now lists **Amplify Hosting first**, CloudFront second. |
 | Global Accelerator | 2 static anycast IPv4 (**4 with dual-stack**); ALB/NLB/EC2/EIP endpoints; **NLB with security groups keeps the client IP**; no caching. |
 | Route 53 | Geoproximity records no longer need Traffic Flow (Jan 2024). Resolver → **VPC Resolver**; **Global Resolver** GA Mar 2026; Profiles (Apr 2024); Accelerated Recovery (Nov 2025). Route 53 ARC is now **Amazon ARC**; readiness checks closed to new customers. |
@@ -220,23 +223,24 @@ Follow `design/DESIGN.md` and the six mockups exactly. Known drift from the firs
 - **Progress tab**: drill accuracy by line, Leitner box distribution, miss-tag counts, chapters done, session log.
 - Mastery in the header = (chapters done + drills solved on last try + cards in box ≥3) / total.
 
-**Feed (2026-11-10)** — the site root (`index.html`) is now a feed; the hub moved to `hub.html`.
+**Feed (2026-11-11)** — the site root (`index.html`) is a feed of **bites**; the hub is `hub.html`. It replaces the
+2026-11-10 feed, which re-served the sessions' drills, cards, traps and lines.
 
-- One interleaved stream over every written session, derived at runtime from the sessions' own data files
-  (`assets/js/feed.js` loads `core.js`, `drills.js`, `cards.js`, `learn.js` of each session in turn). It adds no
-  content and no AWS facts; a new session joins the feed when its manifest entry is added.
-- Items: drill questions and the checkpoints that are not copies of a drill (pick, then Check: two taps, so a
-  scrolling thumb cannot commit an answer), compare quick checks (question first, the two sides after), trigger
-  cards that are due (Leitner intervals respected), and short reads: a line, a trap, a "changed since the exam
-  guide" callout, memory hooks.
-- **Recall first.** Mix serves `read, quiz, card, quiz, read, pair` per six items, so four of six need a commit;
-  after a line or trap the next question prefers an unsolved drill on it. Counters count answers, never scroll
-  distance. A plain stop marker every 10 items; nothing blocks.
-- One progress: answers write the session's own `drill` / `check` / `cards` records, so the hub bars, session
-  mastery and "My misses" move from the feed too.
-- What it does not train: cross-outs and the stub. Every feed question links to the same drill in its session,
-  where they live. The feed is the daily entry point; the sessions stay the lesson.
-- Coverage is stated in the feed: sessions 1 to 9 exist, clusters 10 to 13 are not written yet.
+- A bite is one plain-language read on the basics of a service or a comparison (40–90 words, one picture, what each
+  thing is for and the one difference that decides), followed by 3–4 exam-style questions on the same idea,
+  answered in place (pick, then Check). Read, then apply: at least two questions per bite need the idea applied,
+  not matched; nothing is revealed before Check.
+- Content lives in `bites/NN-name.js`, one pack per session, 4 bites each. Every claim restates the session's
+  verified chapters or a §6 row, except three facts verified for the feed on 2026-11-11 (S3 objects up to 50 TB,
+  which also corrected Session 1; the Lambda@Edge origin-response body; viewer response functions not invoked on
+  an origin status of 400 or higher, which also corrected Session 4); they are in §6, the session docs and
+  the ledger's New facts (`docs/feed-bites.md`). Questions follow §4 and are not copies of session drills.
+- Random order: sessions shuffled and taken in turn, unseen bites first, endless rounds with a plain marker
+  between them; a stop marker every 5 bites; nothing blocks. Domain chips filter by exam domain.
+- Own records: `saa:feed:bites` and `saa:feed:state`. The feed writes no session record, so hub bars, session
+  mastery and "My misses" move only from the sessions; traps, cards and drills live in the sessions.
+- Coverage is stated in the feed: sessions 1 to 9; clusters 10 to 13 have no session and no verified facts yet,
+  so no bites.
 
 ## 8. Architecture (keep or refactor what exists, but end up here)
 
@@ -245,7 +249,8 @@ Follow `design/DESIGN.md` and the six mockups exactly. Known drift from the firs
 /hub.html                    hub
 /assets/css/transit.css      tokens (3-state theme: bare :root light, prefers-color-scheme dark guarded by :root:not([data-theme=light]), [data-theme=dark])
 /assets/js/engine.js         generic: chrome, router (#tab/arg), learn, map, tree, classes, compare, cards, drill, traps, cheat, progress, charts, widgets registry
-/assets/js/feed.js           the feed: sequential session loader, item derivation, ordering, saa:feed:state
+/assets/js/feed.js           the feed: bite renderer, ordering, saa:feed:state, saa:feed:bites
+/bites/NN-name.js            the feed's content: one pack of bites per session (data only, window.SAA_BITES)
 /sessions/manifest.js        sessions list + hub content
 /sessions/NN-name/index.html thin shell
 /sessions/NN-name/*.js       data only (+ session-specific widgets)

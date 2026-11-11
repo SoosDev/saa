@@ -80,7 +80,7 @@ Domains: D1 (encryption and access, deep in Session 5), D2 (replication and back
 
 ### Ch 6 · S3 and its storage classes
 - S3 basics:
-  - objects 0 B–5 TB; multipart recommended over 100 MB, required over 5 GB
+  - objects 0 B–50 TB (5 TB until Dec 2025; corrected 2026-11-11, https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html and https://aws.amazon.com/about-aws/whats-new/2025/12/amazon-s3-maximum-object-size-50-tb/); multipart recommended over 100 MB, required over 5 GB (one PUT ≤ 5 GB)
   - strong read-after-write consistency
   - versioning + MFA Delete
   - Object Lock: governance vs compliance
@@ -149,7 +149,7 @@ Domains: D1 (encryption and access, deep in Session 5), D2 (replication and back
 - ▶ Checkpoints: Quiz Q5 and "existing objects didn't replicate".
 
 ### Ch 11 · What changed since the exam guide
-- The §6 table as cards: Snow → DTT, FSx File Gateway closed, gp3 limits, Migration Hub/ADS → AWS Transform (preview of Session 2), Resolver rename.
+- The §6 table as cards: Snow → DTT, FSx File Gateway closed, gp3 limits, Migration Hub/ADS → AWS Transform (preview of Session 2), Resolver rename, S3 objects up to 50 TB (Dec 2025; was 5 TB; added 2026-11-11, https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html).
 - How to answer when a practice bank uses the old name: answer the **trigger**. "Petabytes + poor network" is the truck line whether the option says Snowball or Data Transfer Terminal. An answer set will contain one or the other.
 
 ### Ch 12 · Triggers, traps, and your record

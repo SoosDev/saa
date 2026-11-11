@@ -13,15 +13,16 @@ anywhere.
 ## Layout
 
 ```
-/index.html                  feed (main page): questions, trigger cards and short reads from every session, answered in place
+/index.html                  feed (main page): short plain-language reads, each followed by exam-style questions answered in place
 /hub.html                    hub: diagnosis, exam, knowledge map, method, sessions (from sessions/manifest.js)
 /assets/css/transit.css      tokens + both themes + every component
 /assets/js/engine.js         generic engine: chrome, router, learn, map, tree, compare, cards, drill, traps, cheat, progress, charts, widgets
-/assets/js/feed.js           the feed: loads each session's data files in turn and derives its items at runtime
+/assets/js/feed.js           the feed: renders the bites, orders them, keeps saa:feed:state and saa:feed:bites
+/bites/NN-name.js            the feed's content, one pack per session ("bites": a read + 3–4 questions)
 /sessions/manifest.js        sessions list + hub content
 /sessions/NN-name/           index.html (thin shell) + core.js, drills.js, cards.js, widgets.js, learn.js
 /design/                     approved mockups + DESIGN.md (compare/ is git-ignored screenshots)
-/docs/                       CONTEXT.md (the brief), SCHEMA.md, session briefs
+/docs/                       CONTEXT.md (the brief), SCHEMA.md, session briefs, feed-bites.md (the bite ledger)
 ```
 
 See `docs/SCHEMA.md` for the data format and `docs/CONTEXT.md` §9 for the per-session workflow.

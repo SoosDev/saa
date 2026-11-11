@@ -473,7 +473,7 @@ a.scard:hover{border-color:var(--chip-border); color:var(--ink)}
 .fcount{font-family:var(--f-mono); font-size:13px; color:var(--ink2); white-space:nowrap}
 .fttl{display:none}
 
-/* ---------- feed (site root): one column of existing components ---------- */
+/* ---------- feed (site root): one column of bites (a read, then its questions) from existing components ---------- */
 .feed{max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
 .flist{display:flex; flex-direction:column; gap:24px}
 .fitem{display:flex; flex-direction:column; gap:8px; min-width:0}
@@ -486,10 +486,7 @@ a.scard:hover{border-color:var(--chip-border); color:var(--ink)}
 .dombar .mono{font-size:13px; text-align:right}
 .feed [hidden]{display:none}
 .feed .chip.b{min-height:44px}
-.feed button.vt{min-height:44px}
-.feed .swrow{cursor:default}
-.feed .qcbtn[aria-pressed="true"]{background:var(--sel-ink); border-color:var(--sel-ink); color:var(--sel-on)}
-.feed .lcard .row{gap:6px}
+.ffoot .fscore{align-self:center}
 
 /* ---------- phone: 56px header, 72px bottom bar, 16px gutters ---------- */
 .bbar{display:none}

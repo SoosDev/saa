@@ -202,7 +202,7 @@
     { id: 'ch6', title: 'S3 and its storage classes', domains: 'D2 · D4', blocks: [
       { h: 'S3 basics' },
       { ul: [
-        'Objects from **0 B to 5 TB**. Multipart upload is recommended over **100 MB** and required over **5 GB**.',
+        'Objects from **0 B to 50 TB** (5 TB until December 2025, the figure older material and practice banks use). Multipart upload is recommended over **100 MB** and required over **5 GB**.',
         '**Strong read-after-write consistency**: a read after a successful write returns the new data.',
         '**Versioning** keeps every version of an object. **MFA Delete** requires MFA to delete a version or change the versioning state.',
         '**Object Lock** (WORM, needs versioning): **governance** mode lets users with special permission bypass it; **compliance** mode lets nobody shorten or remove retention, not even root. Legal holds have no end date.',
@@ -351,6 +351,7 @@
       { callout: 'Both closed to new customers since **7 Nov 2025**; the replacement is **AWS Transform**. MGN’s docs now call it “AWS Transform MGN”. Session 2 covers this in depth.', kind: 'update', title: 'Migration Hub & Application Discovery Service → AWS Transform' },
       { callout: 'Now called **Route 53 VPC Resolver** (renamed when Route 53 Global Resolver was introduced). Inbound and outbound endpoints work as before.', kind: 'update', title: 'Route 53 Resolver renamed' },
       { callout: 'AWS’s class comparison lists **no minimum storage duration** for S3 Express One Zone.', kind: 'update', title: 'Express One Zone minimum' },
+      { callout: 'The largest S3 object is now **50 TB** (December 2025); older material says 5 TB. One PUT still takes at most 5 GB, so anything bigger goes up as a multipart upload.', kind: 'update', title: 'S3 objects up to 50 TB' },
       { h: 'Answering with old names' },
       'Answer the **trigger**, not the product name. “Petabytes, a poor network, one time” is the truck line whether the option says Snowball Edge or Data Transfer Terminal. An answer set will usually contain one of them, rarely both.',
       '“Windows users on SMB with a local cache in front of FSx for Windows” is FSx File Gateway in a question bank. In a current design it is S3 File Gateway with an SMB share (if S3 is the target) or FSx for Windows directly.',

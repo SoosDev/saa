@@ -77,6 +77,11 @@ repeat. Then 11 … 13.
      after each idea.
    - Wrap every data file in an IIFE; no top-level `const`.
 4. **Register it.** Replace the `soon` entry in `sessions/manifest.js` with `path` and `totals`.
+   - **Feed bites.** Also ship `bites/NN-name.js` with at least 4 bites (a plain-language read + 3–4 questions
+     each; shape and authoring rules in `docs/SCHEMA.md` "Feed"), add its `<script src="bites/NN-name.js">` tag
+     to `index.html` after `sessions/manifest.js`, and add one row per bite to `docs/feed-bites.md`. Every claim in
+     a bite restates the session's own chapters; the lints enforce structure, numbers and the 4-bite minimum as
+     soon as the manifest entry loses `soon`. `node tools/check/feed.js` must end ALL PASS.
 5. **Check.** From the repo root run `python3 -m http.server 8765 &`. Then `cd tools/check && npm i`, and write
    `widgets-NN-name.js`, which must interact with every widget once.
    - Run `node check.js NN-name` until ALL PASS, then re-run every earlier session to prove nothing regressed.
